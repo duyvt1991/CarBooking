@@ -1,0 +1,6 @@
+- Truy cập vào link: `[BITRIX_URL]/workgroups/` để thêm nhóm User mới:
+    - **ESUHAI: Đặt phòng (Duyệt phòng ưu tiên)** với name: `Permission [Car_Booking_Priority_Approval]`
+- Gọi API POST `[BITRIX_URL]/datxe/api/?action=setupPriorityApprovalData` với body `secret=[SECRET_INSTALL_KEY]` để khởi tạo data liên quan. Nếu thành công sẽ trả về `{"status": "success"}`. Nếu hiện màn hình đăng nhập thì cần Basic Auth với username và password là account quản trị viên Bitrix.
+    - Thêm cột `isPriority` vào bảng `car_booking_requests` để xác định phòng ưu tiên.
+    - Thêm cột `note` vào bảng `car_booking_requests` để lưu ghi chú của người dùng.
+    - Thêm `config` record `bookingPriorityApprovalGroupId` vào bảng `car_booking_masterdata` để lưu ID của nhóm User ưu tiên.
