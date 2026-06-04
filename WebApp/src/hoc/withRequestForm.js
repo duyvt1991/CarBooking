@@ -51,7 +51,7 @@ const withRequestForm = (WrappedComponent, component, redirectPath, formLabel, i
     const checkValidation = (cloneRequest) => {
       const newErrors = {};
       Object.keys(initForm).forEach((field) => {
-        const errorMessage = initForm[field].validate && initForm[field].validate(cloneRequest[field], t);
+        const errorMessage = initForm[field].validate && initForm[field].validate(cloneRequest[field], t, cloneRequest);
         if (errorMessage) {
           newErrors[field] = errorMessage;
         }
@@ -63,10 +63,11 @@ const withRequestForm = (WrappedComponent, component, redirectPath, formLabel, i
     const submitWithValidation = () => {
       const cloneRequest = { ...request };
       if (checkValidation(cloneRequest)) {
-        if (component === routes.rejectBookingForm.component || component === routes.cancelBookingForm.component) {
+        if (component === routes.rejectBookingForm.component || component === routes.cancelBookingForm.component || component === routes.driverRejectBookingForm.component) {
           const messages = {
-            [routes.rejectBookingForm.component]: t('common.Bạn có chắc chắn muốn từ chối đặt phòng có ID = [id] không?', { id }),
-            [routes.cancelBookingForm.component]: t('common.Bạn có chắc chắn muốn hủy đặt phòng có ID = [id] không?', { id }),
+            [routes.rejectBookingForm.component]: t('common.Bạn có chắc chắn muốn từ chối đặt xe có ID = [id] không?', { id }),
+            [routes.cancelBookingForm.component]: t('common.Bạn có chắc chắn muốn hủy đặt xe có ID = [id] không?', { id }),
+            [routes.driverRejectBookingForm.component]: t('common.Bạn có chắc chắn muốn từ chối đặt xe có ID = [id] không?', { id }),
           };
           showConfirmModal(messages[component], () => {
             handleSubmit();

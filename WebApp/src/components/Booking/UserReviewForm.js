@@ -5,41 +5,23 @@ import { routes } from '../../systems/constant';
 import { useTranslation } from 'react-i18next';
 
 const initForm = {
-  userReviewCleanScore: { 
+  userReviewScore: { 
     value: 0, 
-    label: 'booking.Điểm đánh giá vệ sinh', 
+    label: 'booking.Điểm dịch vụ', 
     type: 'reviewScore',
-    validate: (value, t) => value === 0 ? t('booking.Điểm đánh giá vệ sinh không được để trống') : '' 
+    validate: (value, t) => value <= 0 ? t('booking.Điểm dịch vụ không được để trống') : '' 
   },
-  userReviewCleanComment: { 
+  userReviewCommentMost: { 
     value: '', 
-    label: 'booking.Chi tiết đánh giá vệ sinh', 
+    label: 'booking.Điều hài lòng nhất', 
     type: 'textarea',
-    validate: (value, t) => !value ? t('booking.Chi tiết đánh giá vệ sinh không được để trống') : '' 
+    // validate: (value, t) => !value ? t('booking.Chi tiết đánh giá thiết bị không được để trống') : '' 
   },
-  userReviewEquipmentScore: { 
-    value: 0, 
-    label: 'booking.Điểm đánh giá thiết bị', 
-    type: 'reviewScore',
-    validate: (value, t) => value === 0 ? t('booking.Điểm đánh giá thiết bị không được để trống') : '' 
-  },
-  userReviewEquipmentComment: { 
+  userReviewCommentBad: { 
     value: '', 
-    label: 'booking.Chi tiết đánh giá thiết bị', 
+    label: 'booking.Điều cần cải thiện', 
     type: 'textarea',
-    validate: (value, t) => !value ? t('booking.Chi tiết đánh giá thiết bị không được để trống') : '' 
-  },
-  userReviewFacilityScore: { 
-    value: 0, 
-    label: 'booking.Điểm đánh giá cơ sở vật chất', 
-    type: 'reviewScore',
-    validate: (value, t) => value === 0 ? t('booking.Điểm đánh giá cơ sở vật chất không được để trống') : '' 
-  },
-  userReviewFacilityComment: { 
-    value: '', 
-    label: 'booking.Chi tiết đánh giá cơ sở vật chất', 
-    type: 'textarea',
-    validate: (value, t) => !value ? t('booking.Chi tiết đánh giá cơ sở vật chất không được để trống') : '' 
+    // validate: (value, t) => !value ? t('booking.Chi tiết đánh giá cơ sở vật chất không được để trống') : '' 
   }
 };
 
@@ -49,65 +31,45 @@ function UserReviewForm({ request, errors, handleChange }) {
   const { t } = useTranslation();
   const [initFormState, setInitFormState] = useState(initForm);
 
-  const toggleCleanCommentDisplay = useCallback((value) => {
-    if (value === 0 || value === 5) {
-        initForm.userReviewCleanComment.label = '';
-        initForm.userReviewCleanComment.validate = false;
-    } else {
-        initForm.userReviewCleanComment.label = t('booking.Chi tiết đánh giá vệ sinh');
-        initForm.userReviewCleanComment.validate = (value) => !value ? t('booking.Chi tiết đánh giá vệ sinh không được để trống') : '';
-    }
-    setInitFormState({ ...initForm });
-  }, [t]);
+  // const toggleCleanCommentDisplay = useCallback((value) => {
+  //   if (value === 0 || value === 5) {
+  //       initForm.userReviewCommentMost.label = '';
+  //       initForm.userReviewCommentMost.validate = false;
+  //   } else {
+  //       initForm.userReviewCommentMost.label = t('booking.Chi tiết đánh giá vệ sinh');
+  //       initForm.userReviewCommentMost.validate = (value) => !value ? t('booking.Chi tiết đánh giá vệ sinh không được để trống') : '';
+  //   }
+  //   setInitFormState({ ...initForm });
+  // }, [t]);
 
-  const toggleEquipmentCommentDisplay = useCallback((value) => {
-    if (value === 0 || value === 5) {
-        initForm.userReviewEquipmentComment.label = '';
-        initForm.userReviewEquipmentComment.validate = false;
-    } else {
-        initForm.userReviewEquipmentComment.label = t('booking.Chi tiết đánh giá thiết bị');
-        initForm.userReviewEquipmentComment.validate = (value) => !value ? t('booking.Chi tiết đánh giá thiết bị không được để trống') : '';
-    }
-    setInitFormState({ ...initForm });
-  }, [t]);
 
-  const toggleFacilityCommentDisplay = useCallback((value) => {
-    if (value === 0 || value === 5) {
-        initForm.userReviewFacilityComment.label = '';
-        initForm.userReviewFacilityComment.validate = false;
-    } else {
-        initForm.userReviewFacilityComment.label = t('booking.Chi tiết đánh giá cơ sở vật chất');
-        initForm.userReviewFacilityComment.validate = (value) => !value ? t('booking.Chi tiết đánh giá cơ sở vật chất không được để trống') : '';
-    }
-    setInitFormState({ ...initForm });
-  }, [t]);
 
-  const handleCleanScoreChange = (field, value) => {
-    handleChange(field, value);
-    toggleCleanCommentDisplay(value);
-  }
+  // const handleUserReviewScoreChange = (field, value) => {
+  //   handleChange(field, value);
+  //   toggleCleanCommentDisplay(value);
+  // }
 
-  const handleEquipmentScoreChange = (field, value) => {
-    handleChange(field, value);
-    toggleEquipmentCommentDisplay(value);
-  }
+  // const handleEquipmentScoreChange = (field, value) => {
+  //   handleChange(field, value);
+  //   toggleEquipmentCommentDisplay(value);
+  // }
 
-  const handleFacilityScoreChange = (field, value) => {
-    handleChange(field, value);
-    toggleFacilityCommentDisplay(value);
-  }
+  // const handleFacilityScoreChange = (field, value) => {
+  //   handleChange(field, value);
+  //   toggleFacilityCommentDisplay(value);
+  // }
 
-  useEffect(() => {
-      toggleCleanCommentDisplay(request.userReviewCleanScore);
-  }, [request.userReviewCleanScore, toggleCleanCommentDisplay]);
+  // useEffect(() => {
+  //     toggleCleanCommentDisplay(request.userReviewCleanScore);
+  // }, [request.userReviewCleanScore, toggleCleanCommentDisplay]);
 
-  useEffect(() => {
-      toggleEquipmentCommentDisplay(request.userReviewEquipmentScore);
-  }, [request.userReviewEquipmentScore, toggleEquipmentCommentDisplay]);
+  // useEffect(() => {
+  //     toggleEquipmentCommentDisplay(request.userReviewEquipmentScore);
+  // }, [request.userReviewEquipmentScore, toggleEquipmentCommentDisplay]);
 
-  useEffect(() => {
-      toggleFacilityCommentDisplay(request.userReviewFacilityScore);
-  }, [request.userReviewFacilityScore, toggleFacilityCommentDisplay]);
+  // useEffect(() => {
+  //     toggleFacilityCommentDisplay(request.userReviewFacilityScore);
+  // }, [request.userReviewFacilityScore, toggleFacilityCommentDisplay]);
 
   return (
     Object.keys(initFormState).filter(field => initFormState[field].label).map(field => (
@@ -120,9 +82,9 @@ function UserReviewForm({ request, errors, handleChange }) {
           request={request} 
           errors={errors} 
           handleChange={
-            field === 'userReviewCleanScore' ? handleCleanScoreChange : 
-            field === 'userReviewEquipmentScore' ? handleEquipmentScoreChange : 
-            field === 'userReviewFacilityScore' ? handleFacilityScoreChange :
+            // field === 'userReviewScore' ? handleUserReviewScoreChange : 
+            // field === 'userReviewEquipmentScore' ? handleEquipmentScoreChange : 
+            // field === 'userReviewFacilityScore' ? handleFacilityScoreChange :
             handleChange
           } 
         />

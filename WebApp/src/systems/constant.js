@@ -1,5 +1,5 @@
 export const API_ENDPOINT = window.location.origin.includes('localhost') ? process.env.REACT_APP_URL : `${window.location.origin}/datxe`;
-export const DEBUG_WITH_MOCK_DATA = false;
+export const DEBUG_WITH_MOCK_DATA = true;
 
 export const defaultFilters = {
     id: '',
@@ -45,13 +45,13 @@ export const routes = {
     equipmentTypeForm: { component: 'equipmentTypeForm', path: '/equipment-type-form', label: 'Loại thiết bị', permissions: ['Permission [Car_Booking_Admin]'] },
     equipmentList: { component: 'equipmentList', path: '/equipment-list', label: 'Thiết bị', permissions: ['Permission [Car_Booking_Admin]'] },
     equipmentForm: { component: 'equipmentForm', path: '/equipment-form', label: 'Thiết bị', permissions: ['Permission [Car_Booking_Admin]'] },
-    usagePurposeList: { component: 'usagePurposeList', path: '/usage-purpose-list', label: 'Mục đích sử dụng', permissions: ['Permission [Car_Booking_Admin]'] },
-    usagePurposeForm: { component: 'usagePurposeForm', path: '/usage-purpose-form', label: 'Mục đích sử dụng', permissions: ['Permission [Car_Booking_Admin]'] },
+    usagePurposeList: { component: 'usagePurposeList', path: '/usage-purpose-list', label: 'Phân loại khách', permissions: ['Permission [Car_Booking_Admin]'] },
+    usagePurposeForm: { component: 'usagePurposeForm', path: '/usage-purpose-form', label: 'Phân loại khách', permissions: ['Permission [Car_Booking_Admin]'] },
     roomTypeList: { component: 'roomTypeList', path: '/room-type-list', label: 'Loại xe', permissions: ['Permission [Car_Booking_Admin]'] },
     roomTypeForm: { component: 'roomTypeForm', path: '/room-type-form', label: 'Loại xe', permissions: ['Permission [Car_Booking_Admin]'] },
     roomList: { component: 'roomList', path: '/room-list', label: 'Xe', permissions: ['Permission [Car_Booking_Admin]'] },
     roomForm: { component: 'roomForm', path: '/room-form', label: 'Xe', permissions: ['Permission [Car_Booking_Admin]'] },
-    approveBookingList: { component: 'approveBookingList', path: '/approve-booking-list', label: 'Duyệt đặt phòng', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]'] },
+    approveBookingList: { component: 'approveBookingList', path: '/approve-booking-list', label: 'Duyệt đặt xe', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]'] },
     bookingCalendar: { component: 'bookingCalendar', path: '/booking-calendar', label: 'Đặt xe', permissions: ['*'] },
     searchByDemand: { component: 'searchByDemand', path: '/search-by-demand', label: 'Tìm kiếm xe', permissions: ['*'] },
     bookingList: { component: 'bookingList', path: '/booking-list', label: 'Danh sách đặt xe', permissions: ['*'] },
@@ -68,4 +68,11 @@ export const routes = {
     reportUsageDemand: { component: 'reportUsageDemand', path: '/report-usage-demand', label: 'Nhu cầu sử dụng', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'] },
     reportManagerReview: { component: 'reportManagerReview', path: '/report-manager-review', label: 'Đánh giá người sử dụng', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'] },
     reportUserReview: { component: 'reportUserReview', path: '/report-user-review', label: 'Đánh giá đặt xe', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'] },
+    carLineList: { component: 'carLineList', path: '/car-line-list', label: 'Dòng xe', permissions: ['Permission [Car_Booking_Admin]'] },
+    carLineForm: { component: 'carLineForm', path: '/car-line-form', label: 'Dòng xe', permissions: ['Permission [Car_Booking_Admin]'] },
+    driverList: { component: 'driverList', path: '/driver-list', label: 'Tài xế', permissions: ['Permission [Car_Booking_Admin]'] },
+    driverForm: { component: 'driverForm', path: '/driver-form', label: 'Tài xế', permissions: ['Permission [Car_Booking_Admin]'] },
+    approveAssignBookingForm: { component: 'approveAssignBookingForm', path: '/approve-assign-booking', label: 'Duyệt và phân công', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]'] },
+    driverConfirmBookingList: { component: 'driverConfirmBookingList', path: '/driver-confirm-booking-list', label: 'Tài xế tiếp nhận', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Driver_Confirm]'] },
+    driverRejectBookingForm: { component: 'driverRejectBookingForm', path: '/driver-reject-booking', label: 'Từ chối đặt xe', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Driver_Confirm]'] },
 };

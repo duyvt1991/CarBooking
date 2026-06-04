@@ -45,23 +45,27 @@ class Util {
                 $object["note"] = $options["note"] ?? "";
                 break;
             case "roomTypes":
-                $object["approvers"] = $options["approvers"] ?? [];
-                $object["equipments"] = $options["equipments"] ?? [];
+                // $object["approvers"] = $options["approvers"] ?? [];
+                // $object["equipments"] = $options["equipments"] ?? [];
                 $object["size"] = $options["size"] ?? 0;
                 $object["persons"] = $options["persons"] ?? 0;
                 $object["color"] = $options["color"] ?? "";
-                $object["hasAutoApprove"] = $options["hasAutoApprove"] ?? "0";
+                // $object["hasAutoApprove"] = $options["hasAutoApprove"] ?? "0";
                 break;
             case "rooms":
                 $object["roomType"] = $options["roomType"] ?? "";
-                $object["building"] = $options["building"] ?? "";
-                $object["approvers"] = $options["approvers"] ?? [];
-                $object["priorityApprovers"] = $options["priorityApprovers"] ?? [];
+                // $object["building"] = $options["building"] ?? "";
+                // $object["approvers"] = $options["approvers"] ?? [];
+                // $object["priorityApprovers"] = $options["priorityApprovers"] ?? [];
                 $object["note"] = $options["note"] ?? "";
-                $object["equipments"] = $options["equipments"] ?? [];
+                // $object["equipments"] = $options["equipments"] ?? [];
                 $object["size"] = $options["size"] ?? 0;
                 $object["persons"] = $options["persons"] ?? 0;
                 $object["color"] = $options["color"] ?? "";
+                $object["hasServiceCar"] = $options["hasServiceCar"] ?? "0";
+                break;
+            case "drivers":
+                $object["driverPhoneNumber"] = $options["driverPhoneNumber"] ?? "";
                 break;
         }
 

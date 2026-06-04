@@ -58,6 +58,10 @@ export function suggestionExternalClients(component, keyword, options = {}) {
     return postFormData('suggestionExternalClients', { keyword, component }, options);
 }
 
+export function suggestionDepartureLocations(component, keyword, options = {}) {
+    return postFormData('suggestionDepartureLocations', { keyword, component }, options);
+}
+
 export function deleteItem(component, id, options = {}) {
     return postFormData('deleteItem', { id, component }, options);
 }
@@ -92,4 +96,8 @@ export function getBookings(component, data, options = {}) {
 
 export function getAvailableRooms(component, data, options = {}) {
     return postFormData('getAvailableRooms', { ...data, component }, options);
+}
+
+export function confirmItem(component, id, options = {}) {
+    return postFormData('confirmItem', { id, component }, options);
 }

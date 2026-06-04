@@ -19,13 +19,13 @@ const initForm = {
   room: {
     value: '',
     label: ''
-  },
-  building: { 
+  },    
+  roomType: { 
     value: '', 
-    label: 'booking.Toà nhà', 
+    label: 'booking.Loại xe', 
     type: 'select',
     isValueObject: true,
-    optionsMasterDataKey: "buildings", 
+    optionsMasterDataKey: "roomTypes", 
   },
 };
 
@@ -52,52 +52,56 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
   }, {});
 
   useEffect(() => {
-    if (!request.building) {
-      setFilteredRooms([]);
-      setEvents([]);
-    } else {
-      const rooms = masterData.rooms.filter(room => room.building.toString() === request.building.mkey.toString());
-      setFilteredRooms(rooms);
-      refreshCalendar(request.building);
-    }
-  }, [request.building, myCalendar]);
+  if (!request.roomType) {  // ← Thay building
+    setFilteredRooms([]);
+    setEvents([]);
+  } else {
+    const rooms = masterData.rooms.filter(room => 
+      room.roomType.toString() === request.roomType.mkey.toString()  // ← Thay building
+    );
+    setFilteredRooms(rooms);
+    refreshCalendar(request.roomType);  // ← Thay building
+  }
+}, [request.roomType, myCalendar]);  // ← Thay building
   
     useEffect(() => {
       sessionStorage.removeItem(`${routes.bookingForm.component}_requestContext`);
     }, []);
   
-    useEffect(() => {
-      if (!keepBuildingState() && isHome && masterData.buildings?.length > 0 && !request.building) {
-        handleBuildingChange('building', masterData.config.buildingDefault || masterData.buildings[0]);
-      }
-    }, [masterData.buildings]);
-    useEffect(() => {
-      if (!keepBuildingState() && request.id && !request.building) {
-        handleBuildingChange('building', masterData.config.buildingDefault || masterData.buildings[0]);
-      }
-    }, [request.id]);
+  useEffect(() => {
+  if (!keepRoomTypeState() && isHome && masterData.roomTypes?.length > 0 && !request.roomType) {
+    handleRoomTypeChange('roomType', masterData.roomTypes[0]);  // ← Thay building logic
+  }
+}, [masterData.roomTypes]);  // ← Thay
 
-  const keepBuildingState = () => {
-    let hasBuildingState = false;
-    const buildingState = sessionStorage.getItem('building_state');
-    if (buildingState && masterData.buildings?.length > 0) {
-      const building = masterData.buildings.find(b => b.mkey.toString() === buildingState.toString());
-      if (building) {
-        handleBuildingChange('building', building);
-        hasBuildingState = true;
-      }
+useEffect(() => {
+  if (!keepRoomTypeState() && request.id && !request.roomType) {
+    handleRoomTypeChange('roomType', masterData.roomTypes[0]);  // ← Thay
+  }
+}, [request.id]);
+
+const keepRoomTypeState = () => {
+  let hasRoomTypeState = false;
+  const roomTypeState = sessionStorage.getItem('roomType_state');  // ← Thay building
+  if (roomTypeState && masterData.roomTypes?.length > 0) {        // ← Thay
+    const roomType = masterData.roomTypes.find(rt =>
+      rt.mkey.toString() === roomTypeState.toString()
+    );
+    if (roomType) {
+      handleRoomTypeChange('roomType', roomType);  // ← Thay
+      hasRoomTypeState = true;
     }
-    console.log("hasBuildingState", hasBuildingState);
-    return hasBuildingState;
-  };
+  }
+  return hasRoomTypeState;
+};
 
-  const handleBuildingChange = (field, value) => {
-    handleChange([field, 'room'], [value, '']);
-    const cloneRequest = { ...request };
-    cloneRequest.building = value;
-    sessionStorage.setItem(`${component}_requestContext`, JSON.stringify(cloneRequest));
-    sessionStorage.setItem('building_state', value?.mkey || '');
-  };
+const handleRoomTypeChange = (field, value) => {  // ← Thay
+  handleChange([field, 'room'], [value, '']);
+  const cloneRequest = { ...request };
+  cloneRequest.roomType = value;  // ← Thay
+  sessionStorage.setItem(`${component}_requestContext`, JSON.stringify(cloneRequest));
+  sessionStorage.setItem('roomType_state', value?.mkey || '');  // ← Thay
+};
 
   const handleRoomChange = (field, value) => {
     const cloneRequest = { ...request };
@@ -113,11 +117,11 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
     sessionStorage.setItem(`${component}_requestContext`, JSON.stringify(cloneRequest));
   };
 
-  const refreshCalendar = (building, room) => {
-    onCalendarChange(sessionStorage.getItem('calendar_mode') || 'week', sessionStorage.getItem('calendar_currentDate') ? new Date(sessionStorage.getItem('calendar_currentDate')) : new Date(), building, room);
+  const refreshCalendar = (roomType, room) => {
+    onCalendarChange(sessionStorage.getItem('calendar_mode') || 'week', sessionStorage.getItem('calendar_currentDate') ? new Date(sessionStorage.getItem('calendar_currentDate')) : new Date(), roomType, room);
   };
 
-  const onCalendarChange = (mode, currentDate, building, room) => {
+  const onCalendarChange = (mode, currentDate, roomType, room) => {
     let fromDate = startOfDay(currentDate);
     let endDate = startOfDay(currentDate);
     if (mode === 'week') {
@@ -132,12 +136,15 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
     setLoading(true);
     const fromDateFormatted = format(new Date(`${fromDate}`), 'yyyy-MM-dd HH:mm:ss');
     const endDateFormatted = format(new Date(`${endDate}`), 'yyyy-MM-dd HH:mm:ss');
-    getBookings(mode, { myCalendar: myCalendar ? 1 : 0, fromDate: fromDateFormatted, endDate: endDateFormatted, building: building === undefined ? request?.building?.mkey : building?.mkey, room: room === undefined ? request?.room?.mkey : room?.mkey }).then(data => {
+    getBookings(mode, { myCalendar: myCalendar ? 1 : 0, fromDate: fromDateFormatted, endDate: endDateFormatted, roomType: roomType === undefined ? request?.roomType?.mkey : roomType?.mkey, room: room === undefined ? request?.room?.mkey : room?.mkey }).then(data => {
       setTempRequests(data);
-      const formattedEvents = data.map(booking => ({
+      const formattedEvents = data.filter(booking => booking.room?.mkey)
+      .map(booking => ({
         id: booking.id,
-        room: booking.room.mkey,
-        title: booking.room.mvalue,
+        // room: booking.room.mkey,
+        // title: booking.room.mvalue,
+        room: booking.room?.mkey,
+        title: booking.room?.mvalue,
         startDate: booking.startDate,
         startTime: booking.startTime,
         endTime: booking.endTime,
@@ -148,43 +155,50 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
         tooltip: <table className="w-full text-sm overflow-hidden">
         <tbody className="divide-y divide-gray-200">
           <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Ngày sử dụng')}</td>
-        <td className="px-3 py-2 text-gray-600">{formatDate(booking.startDate)}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Ngày sử dụng')}</td>
+            <td className="px-3 py-2 text-gray-600">{formatDate(booking.startDate)}</td>
           </tr>
           <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Khung giờ sử dụng')}</td>
-        <td className="px-3 py-2 text-gray-600">{`${formatTime(booking.startTime).replace(":00", "")} - ${formatTime(booking.endTime).replace(":00", "")}`}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Khung giờ sử dụng')}</td>
+            <td className="px-3 py-2 text-gray-600">{`${formatTime(booking.startTime).replace(":00", "")} - ${formatTime(booking.endTime).replace(":00", "")}`}</td>
           </tr>
           <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Phòng')}</td>
-        <td className="px-3 py-2 text-gray-600">{booking.room.mvalue}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Loại xe')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.roomType.mvalue}</td>
           </tr>
           <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người đặt')}</td>
-        <td className="px-3 py-2 text-gray-600">{booking.bookingUser?.mvalue || "-"}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Dòng xe đề xuất')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.carLine.mvalue}</td>
           </tr>
           <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người chủ trì')}</td>
-        <td className="px-3 py-2 text-gray-600">{booking.mainUser?.mvalue || "-"}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người đặt')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.bookingUser?.mvalue}</td>
           </tr>
           <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người sử dụng phòng')}</td>
-        <td className="px-3 py-2 text-gray-600">{Array.isArray(booking.users) && booking.users.length > 0 
-          ? booking.users.map(user => user.mvalue).join(', ') 
-          : '-'}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người sử dụng')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.mainUser?.mvalue}</td>
           </tr>
-          <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Mục đích sử dụng')}</td>
-        <td className="px-3 py-2 text-gray-600">{booking.usagePurpose?.mvalue || '-'}</td>
+           <tr>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Mục đích')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.usagePurposeDetail}</td>
           </tr>
           {booking.clients > 0 && <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Số lượng khách')}</td>
-        <td className="px-3 py-2 text-gray-600">{formatPersons(booking.clients, null, t)}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Số lượng khách')}</td>
+            <td className="px-3 py-2 text-gray-600">{formatPersons(booking.clients, null, t)}</td>
           </tr>}
-          {booking.externalClients > 0 && <tr>
-        <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Số lượng khách ngoài')}</td>
-        <td className="px-3 py-2 text-gray-600">{formatPersons(booking.externalClients, null, t)}</td>
-          </tr>}
+          <tr>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Biển số xe')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.licensePlateNumber}</td>
+          </tr>
+          <tr>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Tài xế')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.driverUser?.mvalue}</td>
+          </tr>
+           <tr>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Số điện thoại tài xế')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.driverPhoneNumber}</td>
+          </tr>
+
         </tbody>
       </table>
       }));
@@ -206,7 +220,7 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
   };
 
   const handleApprove = (request) => {
-    showConfirmModal(t('common.Bạn có chắc chắn muốn duyệt đặt phòng có ID = [id] không?', { id: request.id }), () => {
+    showConfirmModal(t('common.Bạn có chắc chắn muốn duyệt đặt xe có ID = [id] không?', { id: request.id }), () => {
       setLoading(true);
       approveItem(routes.approveBookingList.component, request.id)
         .then((response) => {
@@ -234,56 +248,25 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
     const bookingEndTime = new Date(`${request?.startDate} ${request?.endTime}`);
     const isBookingInProgress = currentTime >= bookingStartTime && currentTime <= bookingEndTime;
     const isPastBooking = currentTime > bookingEndTime;
+
     if (routes.approveBookingList.permissions.some(permission => masterData.roles.includes(permission))) {
-      const canPriorityApprove = (request?.room?.priorityApprovers || []).includes(masterData.userId);
-      const canApprove = (request?.room?.approvers || request?.roomType?.approvers || []).includes(masterData.userId);
-      const isApprovedUser = (request?.approvedUsers || []).length === 0 || (request?.approvedUsers || []).map(user => user.mkey).includes(masterData.userId);
+      const canApprove = (masterData?.approvers || []).includes(masterData.userId);
       if (request?.isCancelled) {
         // DO NOTHING
       } else if (request?.isApproved === -1) {
         // DO NOTHING
       } else if (isBookingInProgress) {
-        if (request?.isPriority) {
-          if (canPriorityApprove && isApprovedUser) {
-            actionButtons.push({
-              label: t('booking.Kết thúc'), className: 'bg-blue-500', action: (request) => handleEndBooking(request, routes.bookingForm.path)
-            });
-          }
-        } else {
-          if ((canPriorityApprove || canApprove) && isApprovedUser) {
-            actionButtons.push({
-              label: t('booking.Kết thúc'), className: 'bg-blue-500', action: (request) => handleEndBooking(request, routes.bookingForm.path)
-            });
-          }
-        }
+           // DO NOTHING
       } else if (isPastBooking) {
         // DO NOTHING
-      } else if (request?.isApproved === 1) {
-        if (request?.isPriority) {
-          if (canPriorityApprove && isApprovedUser) {
+      } else if (request?.isApproved === 1) { // Đã duyệt, chờ phân công
+          if (canApprove) {
             actionButtons.push({
               label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
             });
           }
-        } else {
-          if ((canPriorityApprove || canApprove) && isApprovedUser) {
-            actionButtons.push({
-              label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
-            });
-          }
-        }
       } else {
-        if (request?.isPriority) {
-          if (canPriorityApprove) {
-            actionButtons.push({
-              label: t('booking.Duyệt'), className: 'bg-green-500', action: (request) => handleApprove(request)
-            });
-            actionButtons.push({
-              label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
-            });
-          }
-        } else {
-          if (canPriorityApprove || canApprove) {
+          if (canApprove) {
             if (!request?.waitForPriority) {
               actionButtons.push({
                 label: t('booking.Duyệt'), className: 'bg-green-500', action: (request) => handleApprove(request)
@@ -293,7 +276,6 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
               label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
             });
           }
-        }
       }
     }
 
@@ -318,7 +300,7 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
 
     const { fields, fieldLogs } = getFieldsBookingDetail(request, masterData, t);
     setModal(<>
-        <ModalContent title={t("common.Thông tin đặt phòng")} fields={fields} fieldLogs={fieldLogs} tabs={Array.isArray(request.log) && request.log.length > 0 ? [
+        <ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={Array.isArray(request.log) && request.log.length > 0 ? [
             { label: t('common.Thông tin'), isDetail: true },
             { label: t('common.Lịch sử'), isHistory: true },
           ] : []} />
@@ -334,11 +316,13 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
 
   const onPriorityClick = (id) => {
     const request = tempRequests.find(request => request.id === id);
-    const building = masterData.buildings.find(b => b.mkey === request?.building?.mkey);
+    // const building = masterData.buildings.find(b => b.mkey === request?.building?.mkey);
+    const roomType = masterData.roomTypes.find(rt => rt.mkey === request?.roomType?.mkey);
     setRequest({ 
       ...Object.fromEntries(Object.keys(initBookingForm).map(field => [field, initBookingForm[field].value])), 
       ...request, 
-      building,
+      // building,
+      roomType,
       startDate: request?.startDate,
       startTime: request?.startTime,
       endTime: request?.endTime,
@@ -359,11 +343,11 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
   }
 
   const goToBookingForm = (date) => {
-    const building = masterData.buildings.find(b => b.mkey === request?.building?.mkey);
+    const roomType = masterData.roomTypes.find(rt => rt.mkey === request?.roomType?.mkey);
     setRequest({ 
       ...Object.fromEntries(Object.keys(initBookingForm).map(field => [field, initBookingForm[field].value])), 
       ...request, 
-      building,
+      roomType,
       startDate: date ? format(date, 'yyyy-MM-dd') : '',
       startTime: date ? format(date, 'HH:mm:00') : '',
       endTime: date ? format(new Date(date.getTime() + 30 * 60 * 1000), 'HH:mm:00') : '',
@@ -397,10 +381,11 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
             initForm={initForm} 
             request={request} 
             errors={errors} 
-            handleChange={
-              field === 'building' ? handleBuildingChange : 
-              handleChange
-            } 
+            // handleChange={
+            //   field === 'building' ? handleBuildingChange : 
+            //   handleChange
+            // } 
+            handleChange={field === 'roomType' ? handleRoomTypeChange : handleChange}
           />
         </div>
       ))}
@@ -409,7 +394,7 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
           <tbody className="divide-y divide-gray-200">
             {Object.keys(groupedRooms).map(roomType => (
               <tr key={roomType}>
-                <td className="px-6 py-4 w-1/4 whitespace-nowrap text-sm font-medium text-gray-900"> {groupedRooms[roomType]?.[0]?.roomTypeMValue}</td>
+                {/* <td className="px-6 py-4 w-1/4 whitespace-nowrap text-sm font-medium text-gray-900"> {groupedRooms[roomType]?.[0]?.roomTypeMValue}</td> */}
                 <td className="px-6 py-4 text-sm text-gray-800">
                   {groupedRooms[roomType].map(room => (
                     <div 
@@ -434,7 +419,7 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
           </tbody>
         </table>
       </div>
-      {!!request.building && <Calendar 
+      {!!request.roomType && <Calendar 
         myCalendar={myCalendar} 
         onMyCalendarClick={() => setMyCalendar(!myCalendar)} 
         onCellClick={goToBookingForm} 

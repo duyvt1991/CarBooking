@@ -7,69 +7,74 @@ const initForm = {
   id: { value: '' },
   roomType: { 
     value: '', 
-    label: 'room.Loại phòng', 
+    label: 'room.Loại xe', 
     type: 'select', 
     optionsMasterDataKey: 'roomTypes',
-    validate: (value, t) => !value ? t('room.Loại phòng không được để trống') : '',
+    validate: (value, t) => !value ? t('room.Loại xe không được để trống') : '',
     selectMappingField: [
-      ['approvers'],
-      ['equipments'],
+      // ['approvers'],
+      // ['equipments'],
       ['size'],
       ['persons'],
       ['color'],
-      ['hasAutoApprove']
+      // ['hasAutoApprove']
     ]
   },
   mkey: { 
     value: '', 
-    label: 'room.Mã phòng', 
+    label: 'room.Mã xe', 
     readonly: (request) => !!request.id,
-    validate: (value, t) => !value ? t('room.Mã phòng không được để trống') : '' 
+    validate: (value, t) => !value ? t('room.Mã xe không được để trống') : '' 
   },
-  building: { 
-    value: '', 
-    label: 'room.Toà nhà', 
-    type: 'select', 
-    optionsMasterDataKey: 'buildings',
-    validate: (value, t) => !value ? t('room.Toà nhà không được để trống') : '' 
-  },
+  // building: { 
+  //   value: '', 
+  //   label: 'room.Toà nhà', 
+  //   type: 'select', 
+  //   optionsMasterDataKey: 'buildings',
+  //   validate: (value, t) => !value ? t('room.Toà nhà không được để trống') : '' 
+  // },
   mvalue: { 
     value: '', 
-    label: 'room.Tên phòng', 
-    validate: (value, t) => !value ? t('room.Tên phòng không được để trống') : '' 
+    label: 'room.Tên xe', 
+    validate: (value, t) => !value ? t('room.Tên xe không được để trống') : '' 
   },
-  approvers: { 
-    value: [], 
-    label: 'room.Người phê duyệt', 
-    type: 'tags', 
-    optionsMasterDataKey: 'approvers',
-    tagsDisplayField: 'mvalue',
-    tagsMappingField: [['mkey', 'approvers']],
-    formatter: formatApprovers
-  },
-  priorityApprovers: {
-    value: [], 
-    label: 'room.Người phê duyệt ưu tiên', 
-    type: 'tags', 
-    maxItems: 1,
-    optionsMasterDataKey: 'priorityApprovers',
-    tagsDisplayField: 'mvalue',
-    tagsMappingField: [['mkey', 'priorityApprovers']],
-    formatter: formatPriorityApprovers
-  },
-  equipments: { 
-    value: [], 
-    label: 'room.Thiết bị', 
-    type: 'tags', 
-    optionsMasterDataKey: 'equipments',
-    tagsDisplayField: 'mvalue',
-    tagsMappingField: [['mkey', 'equipments']],
-    formatter: formatEquipments
-  },
+  // approvers: { 
+  //   value: [], 
+  //   label: 'room.Người phê duyệt', 
+  //   type: 'tags', 
+  //   optionsMasterDataKey: 'approvers',
+  //   tagsDisplayField: 'mvalue',
+  //   tagsMappingField: [['mkey', 'approvers']],
+  //   formatter: formatApprovers
+  // },
+  // priorityApprovers: {
+  //   value: [], 
+  //   label: 'room.Người phê duyệt ưu tiên', 
+  //   type: 'tags', 
+  //   maxItems: 1,
+  //   optionsMasterDataKey: 'priorityApprovers',
+  //   tagsDisplayField: 'mvalue',
+  //   tagsMappingField: [['mkey', 'priorityApprovers']],
+  //   formatter: formatPriorityApprovers
+  // },
+  // equipments: { 
+  //   value: [], 
+  //   label: 'room.Thiết bị', 
+  //   type: 'tags', 
+  //   optionsMasterDataKey: 'equipments',
+  //   tagsDisplayField: 'mvalue',
+  //   tagsMappingField: [['mkey', 'equipments']],
+  //   formatter: formatEquipments
+  // },
   // size: { 
   //   value: '', 
   //   label: 'room.Diện tích (m²)'
   // },
+  licensePlateNumber: { 
+    value: '', 
+    label: 'room.Biển số',
+    validate: (value, t, request) => request?.hasServiceCar === '1' && !value ? t('room.Biển số không được để trống') : '' 
+  },
   persons: { 
     value: '', 
     label: 'room.Sức chứa (người)'
@@ -83,6 +88,16 @@ const initForm = {
     value: '', 
     label: 'room.Ghi chú', 
     type: 'textarea'
+  },
+  hasServiceCar: { 
+    value: '', 
+    label: 'room.Xe đặt ngoài', 
+    type: 'select', 
+    options: [
+      { mkey: '1', mvalue: ('room.Có') },
+      { mkey: '0', mvalue: ('room.Không') }
+    ],
+    validate: (value, t) => value === '' ? t('room.Xe đặt ngoài không được để trống') : '' 
   }
 };
 

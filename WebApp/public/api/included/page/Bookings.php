@@ -7,7 +7,7 @@ use Bitrix\Main\Web\Json;
 use Bitrix\Main\Context;
 
 class Bookings {
-    public static function getAvailableRooms() {
+    public static function getAvailableRooms1() {
         $request = Context::getCurrent()->getRequest();
         extract($request->getPostList()->toArray());
         $component = $component ?? '';
@@ -69,6 +69,71 @@ class Bookings {
             return $item['mkey'];
         }, $availableRooms));
     }
+
+    public static function getAvailableRooms() {
+        $request = Context::getCurrent()->getRequest();
+        extract($request->getPostList()->toArray());
+        $component = $component ?? '';
+        $fromDate = $fromDate ?? '';
+        $toDate = $toDate ?? '';
+
+        if (!$fromDate || !$toDate || explode(" ", $fromDate)[0] != explode(" ", $toDate)[0]) {
+            return [];
+        }
+
+        $startDateCondition = new \Bitrix\Main\Type\DateTime($fromDate, "Y-m-d H:i:s");
+        $startTimeCondition = $startDateCondition->format('H:i:s');
+        $endDateCondition = new \Bitrix\Main\Type\DateTime($toDate, "Y-m-d H:i:s");
+        $endTimeCondition = $endDateCondition->format('H:i:s');
+
+        $queryBookingFilter = [];
+        $queryBookingFilter = array_merge($queryBookingFilter, ['isApproved' => 1]);
+        // $queryBookingFilter = array_merge($queryBookingFilter, ['%building' => '"mkey":"'.$building.'"']);
+        $queryBookingFilter[] =  [
+            'LOGIC' => 'OR',
+            [
+                '=startDate' => $startDateCondition,
+                '>=startTime' => $startTimeCondition,
+                '<startTime' => $endTimeCondition
+            ],
+            [
+                '=startDate' => $startDateCondition,
+                '>endTime' => $startTimeCondition,
+                '<=endTime' => $endTimeCondition
+            ],
+            [
+                '=startDate' => $startDateCondition,
+                '<=startTime' => $startTimeCondition,
+                '>=endTime' => $endTimeCondition
+            ]
+        ];
+
+        $queryBooking = \Booking\Query::getInstance("car_booking_requests");
+        $queryBooking->setSelect(['room']);
+        $queryBooking->setFilter($queryBookingFilter);
+        $allDuplicatedBookings = $queryBooking->exec()->fetchAll();
+        $allDuplicatedBookings = array_map(function($item) {
+            return $item['room']['mkey'];
+        }, $allDuplicatedBookings);
+
+        // Query all rooms from masterdata
+        $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata");
+        $queryMasterData->setSelect(['mkey']);
+        // $queryMasterData->setFilter([ 'mtype' => 'rooms', '%options' => '"building":"'.$building.'"' ]);
+        $queryMasterData->setFilter([ 'mtype' => 'rooms' ]);
+        $allRooms = $queryMasterData->exec()->fetchAll();
+
+        // Filter out duplicated (booked) rooms
+        $availableRooms = array_filter($allRooms, function($room) use ($allDuplicatedBookings) {
+            return !in_array($room['mkey'], $allDuplicatedBookings);
+        });
+
+        
+        return array_values(array_map(function($item) {
+            return $item['mkey'];
+        }, $availableRooms));
+    }
+
     public static function getBookings() {
         global $USER;
         $request = Context::getCurrent()->getRequest();
@@ -77,7 +142,8 @@ class Bookings {
         $myCalendar = $myCalendar ?? false;
         $fromDate = $fromDate ?? '';
         $endDate = $endDate ?? '';
-        $building = $building ?? '';
+        // $building = $building ?? '';
+        $roomType = $roomType ?? '';
         $room = $room ?? '';
         $userId = $USER->GetID();
 
@@ -120,8 +186,12 @@ class Bookings {
             ]
         ];
 
-        if ($building != "") {
-            $queryFilters = array_merge($queryFilters, ['%building' => '"mkey":"'.$building.'"']);
+        // if ($building != "") {
+        //     $queryFilters = array_merge($queryFilters, ['%building' => '"mkey":"'.$building.'"']);
+        // }
+
+        if ($roomType != "") {
+            $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
         }
 
         if ($room != "") {

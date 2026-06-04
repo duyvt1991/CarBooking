@@ -6,20 +6,20 @@ const initForm = {
   id: { value: '' },
   mkey: { 
     value: '', 
-    label: 'usagePurpose.Mã phân loại khách', 
+    label: 'carLine.Mã dòng xe', 
     readonly: (request) => !!request.id,
-    validate: (value, t) => !value ? t('usagePurpose.Mã phân loại khách không được để trống') : '' 
+    validate: (value, t) => !value ? t('carLine.Mã dòng xe không được để trống') : '' 
   },
   mvalue: { 
     value: '', 
-    label: 'usagePurpose.Tên phân loại khách', 
-    validate: (value, t) => !value ? t('usagePurpose.Tên phân loại khách không được để trống') : '' 
+    label: 'carLine.Tên dòng xe', 
+    validate: (value, t) => !value ? t('carLine.Tên dòng xe không được để trống') : '' 
   }
 };
 
-const component = routes.usagePurposeForm.component;
+const component = routes.carLineForm.component;
 
-function UsagePurposeForm({ request, errors, handleChange }) {
+function CarLineForm({ request, errors, handleChange }) {
 
   return (
         Object.keys(initForm).filter(field => initForm[field].label).map(field => (
@@ -38,9 +38,9 @@ function UsagePurposeForm({ request, errors, handleChange }) {
 }
 
 export default withRequestForm(
-  UsagePurposeForm, 
+  CarLineForm, 
   component, 
-  routes.usagePurposeList.path, 
-  routes.usagePurposeList.label, 
+  routes.carLineList.path, 
+  routes.carLineList.label, 
   initForm
 );

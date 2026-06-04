@@ -451,7 +451,441 @@ class booking_requestsTable extends DataManager {
                         }
                     ];
                 }
-            ])
+            ]),
+            new TextField('departureLocation', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new TextField('carLine', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new TextField('driver', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new TextField('employees', [
+                'default_value' => ''
+            ]),
+            new TextField('flightNumber', [
+                'default_value' => ''
+            ]),
+            new TextField('detailedSchedule', [
+                'default_value' => ''
+            ]),
+            new TextField('serviceType', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+             new TextField('licensePlateNumber', [
+                'default_value' => ''
+            ]),
+            new TextField('driverUser', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+             new TextField('driverPhoneNumber', [
+                'default_value' => ''
+            ]),
+            new DateTimeField('assignmentDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof DateTime) {
+                                return $value->format('Y-m-d H:i:s');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
+            new TextField('assignmentUser', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new DateTimeField('driverConfirmationDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof DateTime) {
+                                return $value->format('Y-m-d H:i:s');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
+            new TextField('driverConfirmationUser', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+             new TextField('driverDeclineReason', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+             new DateTimeField('driverDeclineDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof DateTime) {
+                                return $value->format('Y-m-d H:i:s');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
+            new TextField('driverDeclineUser', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new IntegerField('userReviewScore', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            return is_numeric($value) ? $value * 1 : $value;
+                        }
+                    ];
+                }
+            ]),
+            new TextField('userReviewCommentMost', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new TextField('userReviewCommentBad', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new DateTimeField('userReviewDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof DateTime) {
+                                return $value->format('Y-m-d H:i:s');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
+            new TextField('userReviewUser', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new IntegerField('driverReviewScore', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            return is_numeric($value) ? $value * 1 : $value;
+                        }
+                    ];
+                }
+            ]),
+            new TextField('driverReviewCommentMost', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new TextField('driverReviewCommentBad', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new TextField('driverReviewCommentRequest', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+             new DateTimeField('driverReviewDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof DateTime) {
+                                return $value->format('Y-m-d H:i:s');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
+             new TextField('driverReviewUser', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+         
+            new TextField('managerReviewCommentMost', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new TextField('managerReviewCommentBad', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+             new TextField('managerReviewCommentRequest', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new DateTimeField('managerReviewDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof DateTime) {
+                                return $value->format('Y-m-d H:i:s');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
+            new TextField('managerReviewUser', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+
+
+            new IntegerField('isSyncedThirdParty', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            return is_numeric($value) ? $value * 1 : $value;
+                        }
+                    ];
+                }
+            ], [
+                'default_value' => 0
+            ]), 
+            new DateTimeField('thirdPartySyncDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof DateTime) {
+                                return $value->format('Y-m-d H:i:s');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
+
+
+
         ];
     }
 }

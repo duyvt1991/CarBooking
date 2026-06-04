@@ -80,6 +80,16 @@ function FilterTableLayout({ filterFields, totalItems, handleFilterChange, tempF
               className={`px-2 py-1 border rounded ${!tempFilters[field.name] ? "empty" : ""}`}
               required
             />
+          ) : field.type === 'number' ? (
+            <input
+              id={field.name}
+              type="number"
+              className={`px-2 py-1 border rounded`}
+              name={field.name}
+              placeholder={field.placeholder}
+              onChange={handleFilterChange}
+              value={tempFilters[field.name]}
+            />
           ) : (
             <input
               id={field.name}

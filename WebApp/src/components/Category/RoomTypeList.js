@@ -32,39 +32,39 @@ function RoomTypeList({
 
   const filterFields = [
     { name: 'id', placeholder: t('roomType.ID') },
-    { name: 'mkey', placeholder: t('roomType.Mã loại phòng') },
-    { name: 'mvalue', placeholder: t('roomType.Tên loại phòng') }
+    { name: 'mkey', placeholder: t('roomType.Mã loại xe') },
+    { name: 'mvalue', placeholder: t('roomType.Tên loại xe') }
   ];
 
   const requestFields = [
     { name: 'id', label: t('roomType.ID'), render: (field, request) => request[field] },
-    { name: 'mkey', label: t('roomType.Mã loại phòng'), render: (field, request) => request[field] },
-    { name: 'mvalue', label: t('roomType.Tên loại phòng'), render: (field, request) => request[field] },
-    { name: 'approvers', align: 'right', label: t('roomType.Người phê duyệt'), render: (field, request) => {
-      const approversValue = formatApprovers(request[field], masterData).split(', ') || [];
-      const fields = [
-        { label: t('roomType.Người phê duyệt'), value: approversValue.map(tag => <span key={tag} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{tag}</span>) },
-      ].filter(field => field && field.value);
-      return approversValue.length === 0 ? t('common.[count] người', { count: 0 }) : <button onClick={() => setModal(<ModalContent title={t(`routes.${routes.roomTypeList.label}`)} fields={fields} />)} className="cursor-pointer underline text-blue-700 text-ellipsis overflow-hidden">{t('common.[count] người', { count: approversValue.length })}</button>;
-    } },
-    { name: 'equipments', align: 'right', label: t('roomType.Thiết bị'), render: (field, request) => {
-      const equipmentsValue = request[field].map(equipment => masterData.equipments?.find(e => e.mkey.toString() === equipment.toString())).filter(e => e) || [];
-      const fields = [
-        { label: t('roomType.Thiết bị'), value: formatEquipmentsWithType(equipmentsValue, masterData) },
-      ].filter(field => field && field.value);
-      return equipmentsValue.length === 0 ? t('common.[count] thiết bị', { count: 0 }) : <button onClick={() => setModal(<ModalContent title={t(`routes.${routes.roomTypeList.label}`)} fields={fields} />)} className="cursor-pointer underline text-blue-700 text-ellipsis overflow-hidden">{t('common.[count] thiết bị', { count: equipmentsValue.length })}</button>;
-    } },
+    { name: 'mkey', label: t('roomType.Mã loại xe'), render: (field, request) => request[field] },
+    { name: 'mvalue', label: t('roomType.Tên loại xe'), render: (field, request) => request[field] },
+    // { name: 'approvers', align: 'right', label: t('roomType.Người phê duyệt'), render: (field, request) => {
+    //   const approversValue = formatApprovers(request[field], masterData).split(', ') || [];
+    //   const fields = [
+    //     { label: t('roomType.Người phê duyệt'), value: approversValue.map(tag => <span key={tag} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{tag}</span>) },
+    //   ].filter(field => field && field.value);
+    //   return approversValue.length === 0 ? t('common.[count] người', { count: 0 }) : <button onClick={() => setModal(<ModalContent title={t(`routes.${routes.roomTypeList.label}`)} fields={fields} />)} className="cursor-pointer underline text-blue-700 text-ellipsis overflow-hidden">{t('common.[count] người', { count: approversValue.length })}</button>;
+    // } },
+    // { name: 'equipments', align: 'right', label: t('roomType.Thiết bị'), render: (field, request) => {
+    //   const equipmentsValue = request[field].map(equipment => masterData.equipments?.find(e => e.mkey.toString() === equipment.toString())).filter(e => e) || [];
+    //   const fields = [
+    //     { label: t('roomType.Thiết bị'), value: formatEquipmentsWithType(equipmentsValue, masterData) },
+    //   ].filter(field => field && field.value);
+    //   return equipmentsValue.length === 0 ? t('common.[count] thiết bị', { count: 0 }) : <button onClick={() => setModal(<ModalContent title={t(`routes.${routes.roomTypeList.label}`)} fields={fields} />)} className="cursor-pointer underline text-blue-700 text-ellipsis overflow-hidden">{t('common.[count] thiết bị', { count: equipmentsValue.length })}</button>;
+    // } },
     // { name: 'size', align: 'right', label: t('roomType.Diện tích (m²)'), render: (field, request) => formatSize(request[field]) },
     { name: 'persons',  align: 'right',label: t('roomType.Sức chứa (người)'), render: (field, request) => formatPersons(request[field], null, t) },
     { name: 'color', align: 'center', label: t('roomType.Màu đại diện'), render: (field, request) => formatColor(request[field]) },
-    { name: 'hasAutoApprove', align: 'center', label: t('roomType.Tự động duyệt'), render: (field, request) => {
-      switch (request[field]) {
-        case '1':
-          return <FaCheck className="text-green-500 inline-block" />;
-        default:
-          return "-";
-      }
-    } }
+    // { name: 'hasAutoApprove', align: 'center', label: t('roomType.Tự động duyệt'), render: (field, request) => {
+    //   switch (request[field]) {
+    //     case '1':
+    //       return <FaCheck className="text-green-500 inline-block" />;
+    //     default:
+    //       return "-";
+    //   }
+    // } }
   ];
     
   const actionButtons = (request) => ([

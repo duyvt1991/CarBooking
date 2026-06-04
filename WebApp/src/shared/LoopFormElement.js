@@ -10,9 +10,18 @@ import { useTranslation } from 'react-i18next';
 
 function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm, request, errors, handleChange }) {
     const { t } = useTranslation();
+    const isRequired = typeof initForm[field].required === 'function'
+        ? initForm[field].required(request)
+        : !!initForm[field].validate;
+
     useEffect(() => {
         if (initForm[field].type === 'select' && initForm[field].selectMappingField) {
-            selectMappingField(field, request[field]);
+            const mappingField = typeof initForm[field].selectMappingField === 'function'
+                ? initForm[field].selectMappingField(request)
+                : initForm[field].selectMappingField;
+            if (mappingField?.length) {
+                selectMappingField(field, request[field], mappingField);
+            }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [request[field]]);
@@ -64,11 +73,12 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
         handleChange(field, '');
     };
 
-    const selectMappingField = (field, value) => {
+    const selectMappingField = (field, value, mappingField) => {
         const srcValue = masterData[initForm[field].optionsMasterDataKey ?? "default"]?.find(item => item.mkey?.toString() === value?.toString());
         let dests = [];
         let srcs = [];
-        initForm[field].selectMappingField.forEach(([src, dest]) => {
+        const fieldsToMap = mappingField || initForm[field].selectMappingField;
+        fieldsToMap.forEach(([src, dest]) => {
             dests.push(dest ?? `placeholder.${src}`);
             srcs.push(srcValue ? srcValue[src] : "");
         });
@@ -86,7 +96,7 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
     return (
         <div className="mb-4 flex items-center">
             <label className={`block text-gray-700 ${labelWidth}`} htmlFor={field}>
-                {initForm[field].validate && <span className="text-red-600">*</span>} {t(initForm[field].label)}:
+                {isRequired && <span className="text-red-600">*</span>} {t(initForm[field].label)}:
             </label>
             <div className="w-full relative">
                 {initForm[field].type === 'suggest' ? (<>
