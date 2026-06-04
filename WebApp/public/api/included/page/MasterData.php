@@ -51,7 +51,8 @@ class MasterData {
                 'bookingApprovalGroupId' => 26,
                 'bookingMonitorGroupId' => 27,
                 'bookingPriorityApprovalGroupId' => 48,
-                'buildingDefault' => ''
+                // 'buildingDefault' => '',
+                'bookingDriverGroupId' => 28
             ],
             'admins' => [],
             'approvers' => [],
@@ -65,7 +66,10 @@ class MasterData {
             'equipments' => [],
             'usagePurposes' => [],
             'roomTypes' => [],
-            'rooms' => []
+            'rooms' => [],
+            'carLines' => [],
+            'drivers' => [],
+            'serviceTypes' => []
         ];
 
         foreach ($result as $row) {
@@ -221,5 +225,39 @@ class MasterData {
         }
         $externalClientNames = array_map("unserialize", array_unique(array_map("serialize", $externalClientNames)));
         return array_values($externalClientNames);
+    }
+
+    public static function suggestionDepartureLocations() {
+        $request = Context::getCurrent()->getRequest();
+        extract($request->getPostList()->toArray());
+        $keyword = $keyword ?? '';
+        $keyword = trim($keyword);
+        if (empty($keyword)) {
+            return [];
+        }
+
+        $query = \Booking\Query::getInstance("car_booking_requests");
+        $query->setSelect(['departureLocation']);
+        $query->setFilter(['%departureLocation' => $keyword, '!departureLocation' => '[]']);
+        $query->setLimit(10);
+        $query->setOrder(['departureLocation' => 'ASC']);
+        $result = $query->exec()->fetchAll();
+        $departureLocations = [];
+        foreach ($result as $row) {
+            if (empty($row['departureLocation'])) {
+                continue;
+            }
+            foreach ($row['departureLocation'] as $departureLocation) {
+                if (stripos(iconv('UTF-8', 'ASCII//TRANSLIT', $departureLocation), iconv('UTF-8', 'ASCII//TRANSLIT', $keyword)) === false) {
+                    continue;
+                }
+                $departureLocations[] = [
+                    'mvalue' => $departureLocation,
+                    'mkey' => $departureLocation
+                ];
+            }
+        }
+        $departureLocations = array_map("unserialize", array_unique(array_map("serialize", $departureLocations)));
+        return array_values($departureLocations);
     }
 }

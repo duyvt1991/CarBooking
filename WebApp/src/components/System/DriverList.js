@@ -7,8 +7,9 @@ import FilterTableLayout from '../../shared/FilterTableLayout';
 import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
+import { type } from '@testing-library/user-event/dist/type';
 
-function UsagePurposeList({
+function DriverList({
   handleAction, handleEdit, currentPage, setCurrentPage, requestsPerPage, setRequestsPerPage, requests, totalPages, totalItems, setFilters, loading, tempFilters, setTempFilters
 }) {
   const { t } = useTranslation();
@@ -27,19 +28,21 @@ function UsagePurposeList({
   };
 
   const filterFields = [
-    { name: 'id', placeholder: t('usagePurpose.ID') },
-    { name: 'mkey', placeholder: t('usagePurpose.Mã phân loại khách') },
-    { name: 'mvalue', placeholder: t('usagePurpose.Tên phân loại khách') }
+    { name: 'id', placeholder: t('driver.ID') },
+    { name: 'mkey', placeholder: t('driver.Esuhai User ID') },
+    { name: 'mvalue', placeholder: t('driver.Esuhai User Name') },
+    { name: 'phonenumber', type: 'number', placeholder: t('driver.Số điện thoại') }
   ];
 
   const requestFields = [
-    { name: 'id', label: t('usagePurpose.ID'), render: (field, request) => request[field] },
-    { name: 'mkey', label: t('usagePurpose.Mã phân loại khách'), render: (field, request) => request[field] },
-    { name: 'mvalue', label: t('usagePurpose.Tên phân loại khách'), render: (field, request) => request[field] }
+    { name: 'id', label: t('driver.ID'), render: (field, request) => request[field] },
+    { name: 'mkey', label: t('driver.Esuhai User ID'), render: (field, request) => request[field] },
+    { name: 'mvalue', label: t('driver.Esuhai User Name'), render: (field, request) => request[field] },
+    { name: 'phonenumber', label: t('driver.Số điện thoại'), render: (field, request) => request[field] }
   ];
-    
-  const actionButtons = (request) => ([
-    { label: t('common.Sửa'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.usagePurposeForm.path) },
+
+  const actionButtons = () => ([
+    { label: t('common.Sửa'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverForm.path) },
     { label: t('common.Xoá'), className: 'bg-red-500', action: (id) => handleAction(id, 'delete') }
   ]);
 
@@ -48,8 +51,8 @@ function UsagePurposeList({
       {loading && <Loading />}
       <div className="space-y-2 p-4 mb-4 bg-white shadow-md rounded-lg">
         <HeaderTableLayout 
-          addNewPath={routes.usagePurposeForm.path} 
-          headerLabel={routes.usagePurposeList.label} 
+          addNewPath={routes.driverForm.path} 
+          headerLabel={routes.driverList.label} 
         />
         <FilterTableLayout 
           totalItems={totalItems}
@@ -78,4 +81,4 @@ function UsagePurposeList({
   );
 }
 
-export default withRequestData(UsagePurposeList, routes.usagePurposeList.component);
+export default withRequestData(DriverList, routes.driverList.component);

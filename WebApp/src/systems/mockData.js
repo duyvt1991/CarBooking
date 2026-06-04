@@ -10,6 +10,7 @@ const mockMasterData = {
     "Permission [Car_Booking_Admin]",
     "Permission [Car_Booking_Approval]",
     "Permission [Car_Booking_Monitor]",
+    "Permission [Car_Booking_Driver_Confirm]",
     "*"
   ],
   admins: [
@@ -35,6 +36,7 @@ const mockMasterData = {
     bookingAdminGroupId: 25,
     bookingApprovalGroupId: 26,
     bookingMonitorGroupId: 27,
+    bookingDriverGroupId: 28,
   },
   buildings: [
     { id: '10', mkey: 'B001', mvalue: 'Building 1', address: "123 Lê Lợi", isActive: true },
@@ -73,14 +75,35 @@ const mockMasterData = {
     { id: '3', mkey: 'RT003', mvalue: 'Room Type 3', approvers: [ 105, 106 ], equipments: [ "E007", "E008", "E009" ], size: 30, persons: 36, color: "#ff9500", hasAutoApprove: "0", isActive: false },
   ],
   rooms: [
-    { id: '1', mParentKey: 'RT001', mkey: 'R001', mvalue: 'Room 1', roomType: 'RT001', building: 'B001', approvers: [ 105, 106 ], equipments: [ "E007", "E008", "E009" ], size: "hehe", persons: 36, color: "#0000FF", hasAutoApprove: "1", isActive: true },
-    { id: '2', mParentKey: 'RT002', mkey: 'R002', mvalue: 'Room 2', roomType: 'RT002', building: 'B002', approvers: [ 106, 104 ], equipments: [ "E003", "E005", "E006" ], size: 20, persons: 24, color: "#00FF00", hasAutoApprove: "", isActive: true },
-    { id: '3', mParentKey: 'RT003', mkey: 'R003', mvalue: 'Room 3', roomType: 'RT003', building: 'B003', approvers: [ 104, 105 ], equipments: [ "E001", "E002", "E004" ], size: 10, persons: 12, color: "#FF0000", hasAutoApprove: "", isActive: false },
-    { id: '4', mParentKey: 'RT001', mkey: 'R004', mvalue: 'Room 4', roomType: 'RT001', building: 'B001', approvers: [], equipments: [ "E001", "E002", "E004" ], size: 10, persons: "", color: "", hasAutoApprove: "", isActive: true },
-    { id: '5', mParentKey: 'RT002', mkey: 'R005', mvalue: 'Room 5', roomType: 'RT002', building: 'B002', approvers: [ 104, 105 ], equipments: [], size: "", persons: 20, color: "", hasAutoApprove: "", isActive: true },
-    { id: '6', mParentKey: 'RT003', mkey: 'R006', mvalue: 'Room 6', roomType: 'RT003', building: 'B003', approvers: [ 106, 104 ], equipments: [ "E001", "E002", "E004" ], size: "", persons: "", color: "#FF0000", hasAutoApprove: "0", isActive: false },
-    { id: '7', mParentKey: 'RT002', mkey: 'R007', mvalue: 'Room 7', roomType: 'RT002', building: 'B001', approvers: [ 105, 106 ], equipments: [ "E003", "E005", "E006" ], size: 20, persons: 24, color: "#00FF00", hasAutoApprove: "1", isActive: true },
+    { id: '1', mParentKey: 'RT001', mkey: 'R001', mvalue: 'Room 1', roomType: 'RT001', building: 'B001', approvers: [ 105, 106 ], equipments: [ "E007", "E008", "E009" ], size: "hehe", persons: 36, color: "#0000FF", hasAutoApprove: "1", hasServiceCar: "1", isActive: true, licensePlateNumber: "30A-12345" },
+    { id: '2', mParentKey: 'RT002', mkey: 'R002', mvalue: 'Room 2', roomType: 'RT002', building: 'B002', approvers: [ 106, 104 ], equipments: [ "E003", "E005", "E006" ], size: 20, persons: 24, color: "#00FF00", hasAutoApprove: "", hasServiceCar: "0", isActive: true , licensePlateNumber: "30A-54321"},
+    { id: '3', mParentKey: 'RT003', mkey: 'R003', mvalue: 'Room 3', roomType: 'RT003', building: 'B003', approvers: [ 104, 105 ], equipments: [ "E001", "E002", "E004" ], size: 10, persons: 12, color: "#FF0000", hasAutoApprove: "", hasServiceCar: "1", isActive: false, licensePlateNumber: "30A-67890" },
+    { id: '4', mParentKey: 'RT001', mkey: 'R004', mvalue: 'Room 4', roomType: 'RT001', building: 'B001', approvers: [], equipments: [ "E001", "E002", "E004" ], size: 10, persons: "", color: "", hasAutoApprove: "", hasServiceCar: "0", isActive: true, licensePlateNumber: "30A-11111" },
+    { id: '5', mParentKey: 'RT002', mkey: 'R005', mvalue: 'Room 5', roomType: 'RT002', building: 'B002', approvers: [ 104, 105 ], equipments: [], size: "", persons: 20, color: "", hasAutoApprove: "", hasServiceCar: "1", isActive: true, licensePlateNumber: "30A-22222" },
+    { id: '6', mParentKey: 'RT003', mkey: 'R006', mvalue: 'Room 6', roomType: 'RT003', building: 'B003', approvers: [ 106, 104 ], equipments: [ "E001", "E002", "E004" ], size: "", persons: "", color: "#FF0000", hasAutoApprove: "0", hasServiceCar: "0", isActive: false, licensePlateNumber: "30A-33333" },
+    { id: '7', mParentKey: 'RT002', mkey: 'R007', mvalue: 'Room 7', roomType: 'RT002', building: 'B001', approvers: [ 105, 106 ], equipments: [ "E003", "E005", "E006" ], size: 20, persons: 24, color: "#00FF00", hasAutoApprove: "1", hasServiceCar: "0", isActive: true, licensePlateNumber: "30A-44444" },
+  ],
+  carLines: [
+    { id: '1', mkey: 'CL001', mvalue: 'Car Line 1', isActive: true },
+    { id: '2', mkey: 'CL002', mvalue: 'Car Line 2', isActive: true },
+    { id: '3', mkey: 'CL003', mvalue: 'Car Line 3', isActive: false },
+  ],
+  drivers: [
+    { id: '1', mkey: '107', mvalue: 'Driver 7 (driver7@esuhai.com)', driverPhoneNumber: '0901234567' },
+    { id: '2', mkey: '108', mvalue: 'Driver 8 (driver8@esuhai.com)', driverPhoneNumber: '0901234568' },
+    { id: '3', mkey: '109', mvalue: 'Driver 9 (driver9@esuhai.com)', driverPhoneNumber: '0901234569' },
+  ],
+  departureLocations: [
+    { mkey: 'Location 1', mvalue: 'Location 1' },
+    { mkey: 'Location 2', mvalue: 'Location 2' },
+    { mkey: 'Location 3', mvalue: 'Location 3' }
+  ],
+  serviceTypes : [
+    { id: '1', mkey: 'ST001', mvalue: 'Xe nội bộ', isActive: true },
+    { id: '2', mkey: 'ST002', mvalue: 'Xe dịch vụ', isActive: true },
+    { id: '3', mkey: 'ST003', mvalue: 'Xe Grab', isActive: true },
   ]
+
 };
 
 const users = [
@@ -100,6 +123,10 @@ const clients = [
 const additionalBookings = [];
 const startDateOfWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
 const endDateOfWeek = endOfWeek(new Date(), { weekStartsOn: 1 });
+const isApprovedStatuses = [0, 1, 2, 3, 4, -1, -2]; // 0: chưa duyệt, 1: chờ phân công , 2: chờ tài xế xác nhận, 3: tài xế đã xác nhận, 4: hoàn thành, -1: từ chối, -2: tài xế từ chối
+const randomIsApprovedStatus = isApprovedStatuses[Math.floor(Math.random() * isApprovedStatuses.length)];
+const randomServiceType = mockMasterData.serviceTypes[Math.floor(Math.random() * mockMasterData.serviceTypes.length)];  
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 let additionalBookingIndex = 10;
 eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date, i) => {
@@ -143,20 +170,28 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
     const randomUsagePurposeDetail = `Usage Purpose Detail ${Math.floor(Math.random() * 5) + 1}`;
     const randomUsagePurposeLocale = Math.random() > 0.5 ? 'vn' : 'jp';
 
+    // const randomDepartureLocation = mockMasterData.departureLocations[Math.floor(Math.random() * mockMasterData.departureLocations.length)];
+    const randomDepartureLocation = [
+      mockMasterData.departureLocations[Math.floor(Math.random() * mockMasterData.departureLocations.length)].mvalue
+    ];
+    const randomCarLine = mockMasterData.carLines[Math.floor(Math.random() * mockMasterData.carLines.length)];
+    const randomDriver = mockMasterData.drivers[Math.floor(Math.random() * mockMasterData.drivers.length)];
+    const randomDriverUser = mockMasterData.drivers[Math.floor(Math.random() * mockMasterData.drivers.length)];
+    
+
     additionalBookings.push({
       id: `${additionalBookingIndex++}`,
       bookingUser: users[0],
       mainUser: users[0],
-      users: users,
+      // users: users,
       department: randomDepartment,
-      building: randomBuilding,
-      room: randomRoom,
+      // building: randomBuilding,
       roomType: roomType,
-      createdDate: "2025-07-01 12:00:00",
+      createdDate: "2026-05-26 12:00:00",
       startDate: formattedDate,
       startTime: startTime,
       endTime: endTime,
-      equipments: randomEquipments,
+      // equipments: randomEquipments,
       size: randomSize,
       persons: randomPersons,
       usagePurpose: randomUsagePurpose,
@@ -164,9 +199,9 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
       usagePurposeLocale: randomUsagePurposeLocale,
       clients: randomClients,
       clientNames: randomClientNames,
-      isApproved: 1,
-      approvedUsers: [mockMasterData.approvers[0], mockMasterData.approvers[2]],
-      approvedDate: "2025-09-01 12:30:00",
+      isApproved: randomIsApprovedStatus,
+      approvedUsers: [mockMasterData.approvers[2]],
+      approvedDate: "2026-05-26 12:30:00",
       rejectedUsers: [],
       rejectedDate: "",
       isCancelled: 0,
@@ -178,6 +213,15 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
       userReviewEquipmentComment: "",
       managerReviewScore: 0,
       managerReviewComment: "",
+      departureLocation: randomDepartureLocation,
+      carLine: randomCarLine,
+      driver: randomDriver,
+      driverUser: randomDriverUser, // Tài xế được phân công sẽ là một user có mkey trùng với mkey của drivers
+      room: randomRoom,
+      serviceType: randomServiceType,
+      licensePlateNumber: randomRoom.licensePlateNumber,
+      driverPhoneNumber: randomDriverUser.driverPhoneNumber,
+
     });
   }
 });
@@ -192,8 +236,8 @@ const bookings = [
     building: mockMasterData.buildings[0],
     room: mockMasterData.rooms[0],
     roomType: mockMasterData.roomTypes[0],
-    createdDate: "2025-07-01 12:00:00",
-    startDate: "2025-09-01",
+    createdDate: "2026-05-26 12:00:00",
+    startDate: "2026-05-26",
     startTime: "12:00:00",
     endTime: "18:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -204,9 +248,9 @@ const bookings = [
     usagePurposeLocale: "vn",
     clients: 12,
     clientNames: ["Client 1", "Client 2", "Client 3"],
-    isApproved: 1,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [mockMasterData.approvers[1]],
-    approvedDate: "2025-09-01 12:30:00",
+    approvedDate: "2026-05-26 12:30:00",
     rejectedUsers: [],
     rejectedDate: "",
     isCancelled: 0,
@@ -218,6 +262,24 @@ const bookings = [
     userReviewEquipmentComment: "",
     managerReviewScore: 0,
     managerReviewComment: "",
+    departureLocation: [mockMasterData.departureLocations[0].mkey],
+    carLine: mockMasterData.carLines[0],
+    driver: mockMasterData.drivers[0],
+    serviceType: mockMasterData.serviceTypes[0],
+    driverUser: mockMasterData.drivers[0],
+    licensePlateNumber: mockMasterData.rooms[0].licensePlateNumber,
+    driverPhoneNumber: mockMasterData.drivers[0].driverPhoneNumber,
+    userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   { 
     id: '2',
@@ -228,8 +290,8 @@ const bookings = [
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[1],
     roomType: mockMasterData.roomTypes[1],
-    createdDate: "2025-07-01 12:00:00",
-    startDate: "2025-09-02",
+    createdDate: "2026-05-26 12:00:00",
+    startDate: "2026-05-26",
     startTime: "12:00:00",
     endTime: "18:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -240,9 +302,9 @@ const bookings = [
     usagePurposeLocale: "vn",
     clients: 0,
     clientNames: [],
-    isApproved: 1,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [mockMasterData.approvers[0], mockMasterData.approvers[2]],
-    approvedDate: "2025-09-01 12:30:00",
+    approvedDate: "2026-05-26 12:30:00",
     rejectedUsers: [],
     rejectedDate: "",
     isCancelled: 0,
@@ -254,6 +316,24 @@ const bookings = [
     userReviewEquipmentComment: "",
     managerReviewScore: 0,
     managerReviewComment: "",
+      departureLocation: [mockMasterData.departureLocations[1].mkey],
+      carLine: mockMasterData.carLines[1],
+      driver: mockMasterData.drivers[1],
+      serviceType: mockMasterData.serviceTypes[1],
+      driverUser: mockMasterData.drivers[1],
+      licensePlateNumber: mockMasterData.rooms[1].licensePlateNumber,
+      driverPhoneNumber: mockMasterData.drivers[1].driverPhoneNumber,
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   { 
     id: '3',
@@ -264,8 +344,8 @@ const bookings = [
     building: mockMasterData.buildings[2],
     room: mockMasterData.rooms[2],
     roomType: mockMasterData.roomTypes[2],
-    createdDate: "2025-07-01 12:00:00",
-    startDate: "2025-09-03",
+    createdDate: "2026-05-26 12:00:00",
+    startDate: "2026-05-26",
     startTime: "12:00:00",
     endTime: "18:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -276,11 +356,11 @@ const bookings = [
     usagePurposeLocale: "vn",
     clients: 0,
     clientNames: [],
-    isApproved: -1,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [mockMasterData.approvers[1]],
     approvedDate: "",
     rejectedUsers: [mockMasterData.approvers[0]],
-    rejectedDate: "2025-09-01 12:30:00",
+    rejectedDate: "2026-05-26 12:30:00",
     isCancelled: 0,
     cancelledReason: "",
     cancelledDate: "",
@@ -290,6 +370,24 @@ const bookings = [
     userReviewEquipmentComment: "",
     managerReviewScore: 0,
     managerReviewComment: "",
+      departureLocation: [mockMasterData.departureLocations[2].mkey],
+      carLine: mockMasterData.carLines[2],
+      driver: mockMasterData.drivers[2],
+      serviceType: mockMasterData.serviceTypes[2],
+      driverUser: mockMasterData.drivers[2],
+      licensePlateNumber: mockMasterData.rooms[2].licensePlateNumber,
+      driverPhoneNumber: mockMasterData.drivers[2].driverPhoneNumber,
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   { 
     id: '4',
@@ -300,8 +398,8 @@ const bookings = [
     building: mockMasterData.buildings[0],
     room: mockMasterData.rooms[3],
     roomType: mockMasterData.roomTypes[0],
-    createdDate: "2025-07-01 12:00:00",
-    startDate: "2025-09-04",
+    createdDate: "2026-05-26 12:00:00",
+    startDate: "2026-05-26",
     startTime: "12:00:00",
     endTime: "18:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -312,7 +410,7 @@ const bookings = [
     usagePurposeLocale: "vn",
     clients: 24,
     clientNames: ["Client 3", "Client 4", "Client 5"],
-    isApproved: 0,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [],
     approvedDate: "",
     rejectedUsers: [],
@@ -326,6 +424,24 @@ const bookings = [
     userReviewEquipmentComment: "",
     managerReviewScore: 0,
     managerReviewComment: "",
+      departureLocation: [mockMasterData.departureLocations[0].mkey],
+      carLine: mockMasterData.carLines[0],
+      driver: mockMasterData.drivers[0],   
+      serviceType: mockMasterData.serviceTypes[0],   
+      driverUser: mockMasterData.drivers[0],
+      licensePlateNumber: mockMasterData.rooms[3].licensePlateNumber,
+      driverPhoneNumber: mockMasterData.drivers[0].driverPhoneNumber,
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   { 
     id: '5',
@@ -336,8 +452,8 @@ const bookings = [
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[4],
     roomType: mockMasterData.roomTypes[1],
-    createdDate: "2025-07-01 12:00:00",
-    startDate: "2025-09-05",
+    createdDate: "2026-05-26 12:00:00",
+    startDate: "2026-05-26",
     startTime: "12:00:00",
     endTime: "18:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -348,20 +464,38 @@ const bookings = [
     usagePurposeLocale: "vn",
     clients: 0,
     clientNames: [],
-    isApproved: 1,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [mockMasterData.approvers[1], mockMasterData.approvers[0]],
-    approvedDate: "2025-09-01 12:30:00",
-    rejectedUsers: [],
-    rejectedDate: "",
+    approvedDate: "2026-05-26 12:30:00",
+    rejectedUsers: [mockMasterData.approvers[1], mockMasterData.approvers[0]],
+    rejectedDate: "2026-05-26 12:30:00",
     isCancelled: 1,
     cancelledReason: "Cancel Reason",
-    cancelledDate: "2025-09-01 13:30:00",
+    cancelledDate: "2026-05-26 13:30:00",
     userReviewCleanScore: 0,
     userReviewCleanComment: "",
     userReviewEquipmentScore: 0,
     userReviewEquipmentComment: "",
     managerReviewScore: 0,
     managerReviewComment: "",
+      departureLocation: [mockMasterData.departureLocations[1].mkey],
+      carLine: mockMasterData.carLines[1],
+      driver: mockMasterData.drivers[1],
+      serviceType: mockMasterData.serviceTypes[1],
+      driverUser: mockMasterData.drivers[1],
+      licensePlateNumber: mockMasterData.rooms[4].licensePlateNumber,
+      driverPhoneNumber: mockMasterData.drivers[1].driverPhoneNumber,
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   { 
     id: '6',
@@ -372,8 +506,8 @@ const bookings = [
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[1],
     roomType: mockMasterData.roomTypes[1],
-    createdDate: "2025-07-01 12:00:00",
-    startDate: "2025-09-06",
+    createdDate: "2026-05-26 12:00:00",
+    startDate: "2026-05-26",
     startTime: "12:00:00",
     endTime: "13:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -384,9 +518,9 @@ const bookings = [
     usagePurposeLocale: "vn",
     clients: 0,
     clientNames: [],
-    isApproved: 1,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [],
-    approvedDate: "2025-09-01 12:30:00",
+    approvedDate: "2026-05-26 12:30:00",
     rejectedUsers: [],
     rejectedDate: "",
     isCancelled: 0,
@@ -398,6 +532,24 @@ const bookings = [
     userReviewEquipmentComment: "",
     managerReviewScore: 0,
     managerReviewComment: "",
+      departureLocation: [mockMasterData.departureLocations[1].mkey],
+      carLine: mockMasterData.carLines[1],  
+      driver: mockMasterData.drivers[1],
+      serviceType: mockMasterData.serviceTypes[1],
+      driverUser: mockMasterData.drivers[1],
+      licensePlateNumber: mockMasterData.rooms[1].licensePlateNumber,
+      driverPhoneNumber: mockMasterData.drivers[1].driverPhoneNumber,
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   { 
     id: '7',
@@ -408,8 +560,8 @@ const bookings = [
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[1],
     roomType: mockMasterData.roomTypes[1],
-    createdDate: "2024-07-01 12:00:00",
-    startDate: "2024-09-02",
+    createdDate: "2026-06-01 12:00:00",
+    startDate: "2026-06-01",
     startTime: "12:00:00",
     endTime: "18:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -420,9 +572,9 @@ const bookings = [
     usagePurposeLocale: "jp",
     clients: 0,
     clientNames: [],
-    isApproved: 1,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [mockMasterData.approvers[0], mockMasterData.approvers[2]],
-    approvedDate: "2024-09-01 12:30:00",
+    approvedDate: "2026-06-01 12:30:00",
     rejectedUsers: [],
     rejectedDate: "",
     isCancelled: 0,
@@ -434,6 +586,24 @@ const bookings = [
     userReviewEquipmentComment: "User Review Equipment Comment 2",
     managerReviewScore: 0,
     managerReviewComment: "", 
+      departureLocation: [mockMasterData.departureLocations[1].mkey],
+      carLine: mockMasterData.carLines[1],  
+      driver: mockMasterData.drivers[1],  
+      serviceType: mockMasterData.serviceTypes[1],
+      driverUser: mockMasterData.drivers[1],
+      licensePlateNumber: mockMasterData.rooms[1].licensePlateNumber,
+      driverPhoneNumber: mockMasterData.drivers[1].driverPhoneNumber,
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   { 
     id: '8',
@@ -444,8 +614,8 @@ const bookings = [
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[1],
     roomType: mockMasterData.roomTypes[1],
-    createdDate: "2024-07-01 12:00:00",
-    startDate: "2024-09-06",
+    createdDate: "2026-05-26 12:00:00",
+    startDate: "2026-05-26",
     startTime: "12:00:00",
     endTime: "13:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -456,9 +626,9 @@ const bookings = [
     usagePurposeLocale: "vn",
     clients: 5,
     clientNames: [],
-    isApproved: 1,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [],
-    approvedDate: "2024-09-01 12:30:00",
+    approvedDate: "2026-05-26 12:30:00",
     rejectedUsers: [],
     rejectedDate: "",
     isCancelled: 0,
@@ -470,6 +640,24 @@ const bookings = [
     userReviewEquipmentComment: "",
     managerReviewScore: 4,
     managerReviewComment: "Manager Review Comment 4",
+      departureLocation: [mockMasterData.departureLocations[1].mkey],
+      carLine: mockMasterData.carLines[1],  
+      driver: mockMasterData.drivers[1],
+      serviceType: mockMasterData.serviceTypes[1],
+      driverUser: mockMasterData.drivers[1],
+      licensePlateNumber: mockMasterData.rooms[1].licensePlateNumber,
+      driverPhoneNumber: mockMasterData.drivers[1].driverPhoneNumber,
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   { 
     id: '9',
@@ -480,8 +668,8 @@ const bookings = [
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[4],
     roomType: mockMasterData.roomTypes[1],
-    createdDate: "2024-07-01 12:00:00",
-    startDate: "2024-09-05",
+    createdDate: "2026-05-26 12:00:00",
+    startDate: "2026-05-26",
     startTime: "12:00:00",
     endTime: "18:00:00",
     equipments: [ mockMasterData.equipments[0], mockMasterData.equipments[1], mockMasterData.equipments[3] ],
@@ -492,23 +680,201 @@ const bookings = [
     usagePurposeLocale: "jp",
     clients: 12,
     clientNames: [],
-    isApproved: 1,
+    isApproved: randomIsApprovedStatus,
     approvedUsers: [mockMasterData.approvers[1], mockMasterData.approvers[0]],
-    approvedDate: "2024-09-01 12:30:00",
+    approvedDate: "2026-05-26 12:30:00",
     rejectedUsers: [],
     rejectedDate: "",
     isCancelled: 1,
     cancelledReason: "Cancel Reason",
-    cancelledDate: "2024-09-01 13:30:00",
+    cancelledDate: "2026-05-26 13:30:00",
     userReviewCleanScore: 0,
     userReviewCleanComment: "",
     userReviewEquipmentScore: 0,
     userReviewEquipmentComment: "",
     managerReviewScore: 0,
     managerReviewComment: "", 
+      departureLocation: [mockMasterData.departureLocations[1].mkey],
+      carLine: mockMasterData.carLines[1],  
+      driver: mockMasterData.drivers[1],
+      serviceType: mockMasterData.serviceTypes[1],
+      driverUser: mockMasterData.drivers[1],
+      licensePlateNumber: mockMasterData.rooms[4].licensePlateNumber,
+      driverPhoneNumber: mockMasterData.drivers[1].driverPhoneNumber,
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
   },
   ...additionalBookings
 ];
+
+const normalizeBookingByAssignmentStatus = (booking) => {
+  const status = Number(booking.isApproved ?? 0);
+  const driverRef = booking.driverUser || booking.driver || null;
+  const isExternalCar = booking.room?.hasServiceCar?.toString() === '1';
+
+  const internalServiceType = mockMasterData.serviceTypes.find(s => s.mkey === 'ST001');
+  const externalServiceType = mockMasterData.serviceTypes.find(s => s.mkey === 'ST002');
+
+  const resolvedServiceType = isExternalCar
+    ? externalServiceType
+    : (booking.serviceType?.mkey === 'ST002' ? internalServiceType : (booking.serviceType || internalServiceType));
+
+  const resolvedDriverUser = isExternalCar ? null : booking.driverUser;
+  const resolvedLicensePlateNumber = isExternalCar
+    ? (booking.licensePlateNumber || `51A-${String(10000 + Number(booking.id || 0)).slice(-5)}`)
+    : booking.licensePlateNumber;
+  const resolvedDriverPhoneNumber = isExternalCar
+    ? (booking.driverPhoneNumber || `09${String(10000000 + Number(booking.id || 0)).slice(-8)}`)
+    : booking.driverPhoneNumber;
+
+  if (status === 0) { // Chưa duyệt
+    return {
+      ...booking,
+      room: null,
+       driverUser: null,
+      approvalUser: [],
+      serviceType: null,
+      licensePlateNumber: null,
+      driverPhoneNumber: null,
+      driverConfirmationDate: null,
+      driverConfirmationUser: [],
+      driverDeclineReason: null,
+      driverDeclineDate: null,
+      driverDeclineUser: [],
+      assignmentUser: [],
+    };
+  }
+  if (status === 1) { // Chờ phân công
+    return {
+      ...booking,
+      serviceType: null,
+      driverUser: null,
+      approvalUser: [mockMasterData.approvers[0]],
+      licensePlateNumber: null, 
+      driverPhoneNumber: null,
+      driverConfirmationDate: null,
+      driverConfirmationUser: [],
+      driverDeclineReason: null,
+      driverDeclineDate: null,
+      driverDeclineUser: [],
+      assignmentUser: [],
+      room: null,
+    };
+  }
+
+  if (status === 2) { // Chờ tài xế xác nhận
+    return {
+      ...booking,
+      serviceType: randomServiceType, // Khi ở trạng thái chờ tài xế xác nhận, nếu chưa có serviceType thì mặc định là nội bộ
+      driverUser: resolvedDriverUser,
+      licensePlateNumber: resolvedLicensePlateNumber,
+      driverPhoneNumber: resolvedDriverPhoneNumber,
+      driverConfirmationDate: null,
+      driverConfirmationUser: [],
+      driverDeclineReason: null,
+      driverDeclineDate: null,
+      driverDeclineUser: [],
+      assignmentUser: [mockMasterData.approvers[0]],
+    };
+  }
+
+    if (status === 3) { // Tài xế đã xác nhận
+    return {
+      ...booking,
+      serviceType: randomServiceType,
+      driverUser: resolvedDriverUser,
+      licensePlateNumber: resolvedLicensePlateNumber,
+      driverPhoneNumber: resolvedDriverPhoneNumber,
+      driverConfirmationDate: booking.driverConfirmationDate || booking.approvedDate || booking.createdDate || null,
+      driverConfirmationUser: resolvedDriverUser,
+      driverDeclineReason: null,
+      driverDeclineDate: null,
+      driverDeclineUser: [],
+      assignmentUser: [mockMasterData.approvers[0]],
+      userReviewScore: 0,
+      userReviewCommentMost: "",
+      userReviewCommentBad: "",
+      driverReviewScore: 0,
+      driverReviewCommentMost: "",
+      driverReviewCommentBad: "",
+      driverReviewCommentRequest: "",
+      managerReviewScore: 0,
+      managerReviewCommentMost: "",
+      managerReviewCommentBad: "",
+      managerReviewCommentRequest: "",
+    };
+  }
+
+   if (status === 4) { // Hoàn thành
+    return {
+      ...booking,
+      serviceType: randomServiceType,
+      driverUser: resolvedDriverUser,
+      licensePlateNumber: resolvedLicensePlateNumber,
+      driverPhoneNumber: resolvedDriverPhoneNumber,
+      driverConfirmationDate: booking.driverConfirmationDate || booking.approvedDate || booking.createdDate || null,
+      driverConfirmationUser: resolvedDriverUser,
+      driverDeclineReason: null,
+      driverDeclineDate: null,
+      driverDeclineUser: [],
+      assignmentUser: [mockMasterData.approvers[0]],
+      userReviewScore: randomInt(1, 5),
+      userReviewCommentMost: "heheh",
+      userReviewCommentBad: "hahaha",
+      driverReviewScore: randomInt(1, 5),
+      driverReviewCommentMost: "hyhyhy",
+      driverReviewCommentBad: "huhuhu",
+      driverReviewCommentRequest: "hjhj",
+      managerReviewScore: randomInt(1, 5),
+      managerReviewCommentMost: "123",
+      managerReviewCommentBad: "456",
+      managerReviewCommentRequest: "789",
+    };
+  }
+
+   if (status === -2) { // Tài xế từ chối
+    return {
+      ...booking,
+      serviceType: randomServiceType,
+      driverUser: resolvedDriverUser,
+      licensePlateNumber: resolvedLicensePlateNumber,
+      driverPhoneNumber: resolvedDriverPhoneNumber,
+      driverDeclineReason: booking.driverDeclineReason || "Tài xế từ chối nhận chuyến",
+      driverDeclineDate: booking.driverDeclineDate || booking.rejectedDate || booking.createdDate || null,
+      driverDeclineUser: resolvedDriverUser,
+      driverConfirmationDate: null,
+      driverConfirmationUser: [],
+      assignmentUser: [mockMasterData.approvers[0]],
+    };
+  }
+
+  return { // Trạng thái từ chối (-1) và các trạng thái khác
+     ...booking,
+      serviceType: randomServiceType,
+      driverUser: null,
+      approvalUser: [],
+      licensePlateNumber: null, 
+      driverPhoneNumber: null,
+      driverConfirmationDate: null,
+      driverConfirmationUser: [],
+      driverDeclineReason: null,
+      driverDeclineDate: null,
+      driverDeclineUser: [],
+      assignmentUser: [],
+      rejectedReason: status === -1 ? (booking.rejectedReason || "Đơn bị từ chối") : null,
+  };
+};
+
+const normalizedBookings = bookings.map(normalizeBookingByAssignmentStatus);
 
 const generateMockList = (items, page = 1, limit = 10) => {
   const startIndex = (page - 1) * limit;
@@ -523,12 +889,12 @@ const generateMockList = (items, page = 1, limit = 10) => {
 };
 
 const mockLogList = [
-  { id: '1', ...users[0], action: 'Action 1', createdDate: '2025-09-01 12:00:00' },
-  { id: '2', ...users[1], action: 'Action 2', createdDate: '2025-09-01 12:00:00' },
-  { id: '3', ...users[2], action: 'Action 3', createdDate: '2025-09-01 12:00:00' },
+  { id: '1', ...users[0], action: 'Action 1', createdDate: '2026-05-26 12:00:00' },
+  { id: '2', ...users[1], action: 'Action 2', createdDate: '2026-05-26 12:00:00' },
+  { id: '3', ...users[2], action: 'Action 3', createdDate: '2026-05-26 12:00:00' },
 ];
 
-const mockReviewList = bookings.filter(booking => booking.isCancelled === 0 && new Date() > new Date(`${booking.startDate} ${booking.endTime}`));
+const mockReviewList = normalizedBookings.filter(booking => booking.isCancelled === 0 && ((new Date() > new Date(`${booking.startDate} ${booking.endTime}`)) || booking.isApproved === 4));
 
 
 const calculateGuestCounts = (bookings) => {
@@ -660,23 +1026,26 @@ const calculateManagerReviewScores = (bookings) => {
 
 const mockReportManagerReview = calculateManagerReviewScores(bookings);
 
-const mockBookings = ({ myCalendar, fromDate, endDate, building, room }) => bookings.filter(booking => {
-  const bookingDate = new Date(booking.startDate);
-  let isValid = bookingDate >= fromDate && bookingDate <= endDate;
+const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room }) => 
+  [...normalizedBookings, ...additionalBookings.map(normalizeBookingByAssignmentStatus)].filter(booking => {
+    const bookingDate = new Date(booking.startDate);
+    const fromDateTime = new Date(fromDate);
+    const endDateTime = new Date(endDate);
+    let isValid = bookingDate >= fromDateTime && bookingDate <= endDateTime;
 
-  if (building) {
-    isValid = isValid && booking.building.mkey === building;
-  }
+    if (roomType) {
+      isValid = isValid && booking.roomType.mkey === roomType;
+    }
 
-  if (room) {
-    isValid = isValid && booking.room.mkey === room;
-  }
-  if (myCalendar && booking.room.mkey !== mockMasterData.rooms[0].mkey) {
-    return false;
-  }
+    if (room) {
+      isValid = isValid && booking.room?.mkey === room;
+    }
+    if (myCalendar && booking.room.mkey !== mockMasterData.rooms[0].mkey) {
+      return false;
+    }
 
-  return isValid;
-});
+    return isValid;
+  });
 
 export const mockData = (action, data) => {
   const { page = 1, limit = 20 } = data;
@@ -685,6 +1054,12 @@ export const mockData = (action, data) => {
       return data.keyword
         ? clients.filter(client =>
             client.mvalue.toLowerCase().includes(data.keyword.toLowerCase())
+          )
+        : [];
+    case 'suggestionDepartureLocations':
+      return data.keyword
+        ? mockMasterData.departureLocations.filter(location =>
+            location.mvalue.toLowerCase().includes(data.keyword.toLowerCase())
           )
         : [];
     case 'suggestionUsers':
@@ -711,6 +1086,12 @@ export const mockData = (action, data) => {
           return data.keyword
             ? users.filter(user =>
                 user.mvalue.toLowerCase().includes(data.keyword.toLowerCase())
+              )
+            : [];
+        case 'driverForm':
+          return data.keyword
+            ? mockMasterData.drivers.filter(driver =>
+                driver.mvalue.toLowerCase().includes(data.keyword.toLowerCase())
               )
             : [];
         default:
@@ -743,7 +1124,7 @@ export const mockData = (action, data) => {
         case 'roomList':
           return generateMockList(mockMasterData.rooms, page, limit);
         case 'bookingList':
-          return generateMockList(bookings.filter(booking => {
+          return generateMockList(normalizedBookings.filter(booking => {
             let tab = "";
             try {
               const filters = JSON.parse(data.filters);
@@ -756,14 +1137,18 @@ export const mockData = (action, data) => {
             }
           }), page, limit);
         case 'approveBookingList':
-          return generateMockList(bookings.filter(booking => {
+          return generateMockList(normalizedBookings.filter(booking => {
             let tab = "";
             try {
               const filters = JSON.parse(data.filters);
               tab = filters.tab;
             } catch(e) {}
             if (tab === 'pending') {
-              return booking.isCancelled === 0 && booking.isApproved === 0;
+              return booking.isCancelled === 0 && (booking.isApproved === 0 
+                || (booking.isApproved === 1 )
+                || (booking.isApproved === -2)
+              ) 
+                && new Date() < new Date(`${booking.startDate} ${booking.endTime}`);
             } else {
               return true;
             }
@@ -774,6 +1159,25 @@ export const mockData = (action, data) => {
           return generateMockList(mockReviewList, page, limit);
         case 'log':
           return generateMockList(mockLogList, page, limit);
+        case 'carLineList':
+          return generateMockList(mockMasterData.carLines, page, limit);
+        case 'driverList':
+          return generateMockList(mockMasterData.drivers, page, limit);
+        case 'driverConfirmBookingList':
+          return generateMockList(normalizedBookings.filter(booking => {
+            let tab = "";
+            try {
+              const filters = JSON.parse(data.filters);
+              tab = filters.tab;
+            } catch(e) {}
+            if (tab === 'pending') {
+              return booking.isCancelled === 0 && (booking.isApproved === 2 ) 
+                && new Date() < new Date(`${booking.startDate} ${booking.endTime}`);
+            } else {
+              // return true;
+              return booking.isCancelled === 0 && (booking.isApproved === 3 || booking.isApproved === 4 || booking.isApproved === -2) 
+            }
+          }), page, limit);
         default:
           return {};
       }

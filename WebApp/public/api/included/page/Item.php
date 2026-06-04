@@ -27,6 +27,8 @@ class Item {
             'approveBookingList' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]'],
             'userReviewList' => ['*'],
             'managerReviewList' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'],
+            'carLineList' => ['Permission [Car_Booking_Admin]'],
+            'driverList' => ['Permission [Car_Booking_Admin]'],
             'adminForm' => ['Permission [Car_Booking_Admin]'],
             'approverForm' => ['Permission [Car_Booking_Admin]'],
             'priorityApproverForm' => ['Permission [Car_Booking_Admin]'],
@@ -43,7 +45,13 @@ class Item {
             'rejectBookingForm' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]'],
             'approveBookingForm' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]'],
             'userReviewForm' => ['*'],
-            'managerReviewForm' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]']
+            'managerReviewForm' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'],
+            'carLineForm' => ['Permission [Car_Booking_Admin]'],
+            'driverForm' => ['Permission [Car_Booking_Admin]'],
+            'approveAssignBookingForm' => ['Permission [Car_Booking_Admin', 'Permission [Car_Booking_Approval', 'Permission [Car_Booking_Priority_Approval'],
+            'driverConfirmBookingList' => ['Permission [Car_Booking_Admin', , 'Permission [Car_Booking_Driver_Confirm'],
+            'driverRejectBookingForm' => ['Permission [Car_Booking_Admin', , 'Permission [Car_Booking_Driver_Confirm']
+
         ];
 
         if (isset($permissionsMap[$component])) {
@@ -375,6 +383,16 @@ class Item {
                     $connection = Application::getConnection();
                     $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$bitrixId}' AND GROUP_ID = '{$groupId}'");
                 }
+                 if ($component == "driverList") {
+                    $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                    $queryMasterData->setSelect(['*']);
+                    $queryMasterData->setFilter(['mkey' => 'bookingDriverGroupId']);
+                    $bookingDriverGroupId = $queryMasterData->exec()->fetch();
+                    $bitrixId = str_replace( "BitrixID-", "", $currentItem['mkey'] ?? "");
+                    $groupId = $bookingDriverGroupId['mvalue'] ?? 28;
+                    $connection = Application::getConnection();
+                    $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$bitrixId}' AND GROUP_ID = '{$groupId}'");
+                }
             }
             $query = \Booking\Query::getInstance("car_booking_masterdata", true);
             $query->setSelect(['*']);
@@ -563,7 +581,7 @@ class Item {
             $query = \Booking\Query::getInstance("car_booking_requests");
         } else {
             if (((!$mkey || !$mvalue || !$component) && $component != "config") || 
-                ($component == "config" && (!$maxDayToBooking || !$maxHourToAutoApprove || !$maxDayToReview || !$buildingDefault || !$usagePurposeKeyForClient || !$bookingAdminGroupId || !$bookingApprovalGroupId || !$bookingPriorityApprovalGroupId || !$bookingMonitorGroupId))) {
+                ($component == "config" && (!$maxDayToBooking || !$maxHourToAutoApprove || !$maxDayToReview || !$usagePurposeKeyForClient || !$bookingAdminGroupId || !$bookingApprovalGroupId || !$bookingPriorityApprovalGroupId || !$bookingMonitorGroupId || !$bookingDriverGroupId))) {
                 return ['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin'];
             }
             $query = \Booking\Query::getInstance("car_booking_masterdata");
@@ -696,11 +714,12 @@ class Item {
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'maxDayToBooking'], ['mvalue' => $maxDayToBooking ?? "7"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'maxHourToAutoApprove'], ['mvalue' => $maxHourToAutoApprove ?? "4"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'maxDayToReview'], ['mvalue' => $maxDayToReview ?? "3"]);
-                \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'buildingDefault'], ['mvalue' => $buildingDefault ?? ""]);
+                // \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'buildingDefault'], ['mvalue' => $buildingDefault ?? ""]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingAdminGroupId'], ['mvalue' => $bookingAdminGroupId ?? "25"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingApprovalGroupId'], ['mvalue' => $bookingApprovalGroupId ?? "26"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingPriorityApprovalGroupId'], ['mvalue' => $bookingPriorityApprovalGroupId ?? "48"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingMonitorGroupId'], ['mvalue' => $bookingMonitorGroupId ?? "27"]);
+                \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingDriverGroupId'], ['mvalue' => $bookingDriverGroupId ?? "28"]);
                 $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                 $queryMasterData->setSelect(['*']);
                 $queryMasterData->setFilter(['mtype' => 'config']);
@@ -766,7 +785,14 @@ class Item {
 
             case 'roomTypeForm':
                 try {
-                    $options = ['approvers' => Json::decode($approvers) ?: [], 'equipments' => Json::decode($equipments) ?: [], 'size' => $size ?? 0, 'persons' => $persons ?? 0, 'color' => $color ?? "", 'hasAutoApprove' => $hasAutoApprove ?? 0];
+                    $options = [
+                        // 'approvers' => Json::decode($approvers) ?: []
+                        // , 'equipments' => Json::decode($equipments) ?: []
+                        , 'size' => $size ?? 0
+                        , 'persons' => $persons ?? 0
+                        , 'color' => $color ?? ""
+                        // , 'hasAutoApprove' => $hasAutoApprove ?? 0
+                        ];
                 } catch (\Throwable $th) {
                     return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
                 }
@@ -785,7 +811,7 @@ class Item {
                     foreach($haveToUpdateBookings as $booking) {
                         \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], [
                             'roomType' => Json::encode($newItem),
-                            'equipments' => Json::encode($newItem['equipments'] ?? []),
+                            // 'equipments' => Json::encode($newItem['equipments'] ?? []),
                             'size' => $newItem['size'] ?? 0,
                             'persons' => $newItem['persons'] ?? 0
                         ]);
@@ -795,7 +821,18 @@ class Item {
 
             case 'roomForm':
                 try {
-                    $options = ['roomType' => $roomType ?? "", 'building' => $building ?? "", 'approvers' => Json::decode($approvers) ?: [], 'priorityApprovers' => Json::decode($priorityApprovers ?: '[]') ?: [], 'equipments' => Json::decode($equipments) ?: [], 'size' => $size ?? "", 'persons' => $persons ?? "", 'color' => $color ?? "", 'note' => $note ?? ""];
+                    $options = [
+                        'roomType' => $roomType ?? ""
+                        // , 'building' => $building ?? ""
+                        // , 'approvers' => Json::decode($approvers) ?: []
+                        // , 'priorityApprovers' => Json::decode($priorityApprovers ?: '[]') ?: []
+                        // , 'equipments' => Json::decode($equipments) ?: []
+                        , 'size' => $size ?? ""
+                        , 'persons' => $persons ?? ""
+                        , 'color' => $color ?? ""
+                        , 'note' => $note ?? ""
+                        , 'hasServiceCar' => $hasServiceCar ?? 0
+                    ];
                 } catch (\Throwable $th) {
                     return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
                 }
@@ -822,18 +859,18 @@ class Item {
                     try {
                         $size = $newItem['size'] ?: ($roomType['size'] ?: 0);
                         $persons = $newItem['persons'] ?: ($roomType['persons'] ?: 0);
-                        $equipmentKeys = $newItem['equipments'] ?: [];
-                        if (empty($equipmentKeys)) {
-                            $equipmentKeys = $roomType['equipments'] ?: [];
-                        }
+                        // $equipmentKeys = $newItem['equipments'] ?: [];
+                        // if (empty($equipmentKeys)) {
+                        //     $equipmentKeys = $roomType['equipments'] ?: [];
+                        // }
                         $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                         $queryMasterData->setSelect(['*']);
-                        $queryMasterData->setFilter(['mkey' => $equipmentKeys, 'mtype' => 'equipments']);
+                        // $queryMasterData->setFilter(['mkey' => $equipmentKeys, 'mtype' => 'equipments']);
                         $equipments = $queryMasterData->exec()->fetchAll();
                         foreach($haveToUpdateBookings as $booking) {
                             \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], [
                                 'room' => Json::encode($newItem),
-                                'equipments' => Json::encode($equipments ?? []),
+                                // 'equipments' => Json::encode($equipments ?? []),
                                 'size' => $size ?? 0,
                                 'persons' => $persons ?? 0
                             ]);
@@ -1112,6 +1149,38 @@ class Item {
                     }
                 }
                 break;
+            case 'carLineForm':
+                $options = [];
+                if ($id != "") {
+                    \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $id], ['mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => Json::encode($options)]);
+                } else {
+                    $id = \Booking\Query::insertRecord('car_booking_masterdata', ['mtype' => 'carLines', 'mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => Json::encode($options)]);
+                }
+                self::logMasterDataSubmit($id, $currentItem, $userId);
+                break;
+
+            case 'driverForm':
+                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                $queryMasterData->setSelect(['*']);
+                $queryMasterData->setFilter(['mkey' => 'bookingDriverGroupId']);
+                $bookingDriverGroupId = $queryMasterData->exec()->fetch();
+                $groupId = $bookingDriverGroupId['mvalue'] ?? 28;
+                $bitrixId = str_replace( "BitrixID-", "", $mkey ?? "");
+                $connection = Application::getConnection();
+                if ($id != "") {
+                    $currentBitrixId = str_replace( "BitrixID-", "", $currentItem['mkey'] ?? "");
+                    $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$currentBitrixId}' AND GROUP_ID = '{$groupId}'");
+                    \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $id], ['mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? ""]);
+                } else {
+                    $id = \Booking\Query::insertRecord('car_booking_masterdata', ['mtype' => 'managers', 'mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => '[]']);
+                }
+                self::logMasterDataSubmit($id, $currentItem, $userId);
+                if ($bitrixId != "") {
+                    $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$bitrixId}' AND GROUP_ID = '{$groupId}'");
+                    $connection->queryExecute("INSERT INTO b_sonet_user2group (USER_ID, GROUP_ID, ROLE, AUTO_MEMBER, DATE_CREATE, DATE_UPDATE, INITIATED_BY_TYPE, INITIATED_BY_USER_ID) VALUES ('{$bitrixId}', '{$groupId}', 'K', 'N', NOW(), NOW(), 'U', '{$userId}')");
+                } 
+                break;
+
         }
         return ['status' => 'success', 'message' => $id ? 'Chỉnh sửa thành công' : 'Thêm mới thành công'];
     }

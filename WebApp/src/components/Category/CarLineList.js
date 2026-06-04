@@ -8,7 +8,7 @@ import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
 
-function UsagePurposeList({
+function CarLineList({
   handleAction, handleEdit, currentPage, setCurrentPage, requestsPerPage, setRequestsPerPage, requests, totalPages, totalItems, setFilters, loading, tempFilters, setTempFilters
 }) {
   const { t } = useTranslation();
@@ -27,19 +27,19 @@ function UsagePurposeList({
   };
 
   const filterFields = [
-    { name: 'id', placeholder: t('usagePurpose.ID') },
-    { name: 'mkey', placeholder: t('usagePurpose.Mã phân loại khách') },
-    { name: 'mvalue', placeholder: t('usagePurpose.Tên phân loại khách') }
+    { name: 'id', placeholder: t('carLine.ID') },
+    { name: 'mkey', placeholder: t('carLine.Mã dòng xe') },
+    { name: 'mvalue', placeholder: t('carLine.Tên dòng xe') }
   ];
 
   const requestFields = [
-    { name: 'id', label: t('usagePurpose.ID'), render: (field, request) => request[field] },
-    { name: 'mkey', label: t('usagePurpose.Mã phân loại khách'), render: (field, request) => request[field] },
-    { name: 'mvalue', label: t('usagePurpose.Tên phân loại khách'), render: (field, request) => request[field] }
+    { name: 'id', label: t('carLine.ID'), render: (field, request) => request[field] },
+    { name: 'mkey', label: t('carLine.Mã dòng xe'), render: (field, request) => request[field] },
+    { name: 'mvalue', label: t('carLine.Tên dòng xe'), render: (field, request) => request[field] }
   ];
     
   const actionButtons = (request) => ([
-    { label: t('common.Sửa'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.usagePurposeForm.path) },
+    { label: t('common.Sửa'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.carLineForm.path) },
     { label: t('common.Xoá'), className: 'bg-red-500', action: (id) => handleAction(id, 'delete') }
   ]);
 
@@ -48,8 +48,8 @@ function UsagePurposeList({
       {loading && <Loading />}
       <div className="space-y-2 p-4 mb-4 bg-white shadow-md rounded-lg">
         <HeaderTableLayout 
-          addNewPath={routes.usagePurposeForm.path} 
-          headerLabel={routes.usagePurposeList.label} 
+          addNewPath={routes.carLineForm.path} 
+          headerLabel={routes.carLineList.label} 
         />
         <FilterTableLayout 
           totalItems={totalItems}
@@ -78,4 +78,4 @@ function UsagePurposeList({
   );
 }
 
-export default withRequestData(UsagePurposeList, routes.usagePurposeList.component);
+export default withRequestData(CarLineList, routes.carLineList.component);

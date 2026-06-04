@@ -7,35 +7,35 @@ const initForm = {
   id: { value: '' },
   mkey: { 
     value: '', 
-    label: 'roomType.Mã loại phòng', 
+    label: 'roomType.Mã loại xe', 
     readonly: (request) => !!request.id,
-    validate: (value, t) => !value ? t('roomType.Mã loại phòng không được để trống') : '' 
+    validate: (value, t) => !value ? t('roomType.Mã loại xe không được để trống') : '' 
   },
   mvalue: { 
     value: '', 
-    label: 'roomType.Tên loại phòng', 
-    validate: (value, t) => !value ? t('roomType.Tên loại phòng không được để trống') : '' 
+    label: 'roomType.Tên loại xe', 
+    validate: (value, t) => !value ? t('roomType.Tên loại xe không được để trống') : '' 
   },
-  approvers: { 
-    value: [], 
-    label: 'roomType.Người phê duyệt', 
-    type: 'tags', 
-    optionsMasterDataKey: 'approvers',
-    tagsDisplayField: 'mvalue',
-    tagsMappingField: [['mkey', 'approvers']],
-    formatter: formatApprovers,
-    validate: (value, t) => !value.length ? t('roomType.Người phê duyệt không được để trống') : '' 
-  },
-  equipments: { 
-    value: [], 
-    label: 'roomType.Thiết bị', 
-    type: 'tags', 
-    optionsMasterDataKey: 'equipments',
-    tagsDisplayField: 'mvalue',
-    tagsMappingField: [['mkey', 'equipments']],
-    formatter: formatEquipments,
-    // validate: (value, t) => !value.length ? t('roomType.Thiết bị không được để trống') : '' 
-  },
+  // approvers: { 
+  //   value: [], 
+  //   label: 'roomType.Người phê duyệt', 
+  //   type: 'tags', 
+  //   optionsMasterDataKey: 'approvers',
+  //   tagsDisplayField: 'mvalue',
+  //   tagsMappingField: [['mkey', 'approvers']],
+  //   formatter: formatApprovers,
+  //   validate: (value, t) => !value.length ? t('roomType.Người phê duyệt không được để trống') : '' 
+  // },
+  // equipments: { 
+  //   value: [], 
+  //   label: 'roomType.Thiết bị', 
+  //   type: 'tags', 
+  //   optionsMasterDataKey: 'equipments',
+  //   tagsDisplayField: 'mvalue',
+  //   tagsMappingField: [['mkey', 'equipments']],
+  //   formatter: formatEquipments,
+  //   // validate: (value, t) => !value.length ? t('roomType.Thiết bị không được để trống') : '' 
+  // },
   // size: { 
   //   value: '', 
   //   label: 'roomType.Diện tích (m²)', 
@@ -52,16 +52,16 @@ const initForm = {
     type: 'color', 
     validate: (value, t) => !value ? t('roomType.Màu đại diện không được để trống') : '' 
   },
-  hasAutoApprove: { 
-    value: '', 
-    label: 'roomType.Tự động duyệt', 
-    type: 'select', 
-    options: [
-      { mkey: '1', mvalue: ('roomType.Có') },
-      { mkey: '0', mvalue: ('roomType.Không') }
-    ],
-    validate: (value, t) => value === '' ? t('roomType.Tự động duyệt không được để trống') : '' 
-  }
+  // hasAutoApprove: { 
+  //   value: '', 
+  //   label: 'roomType.Tự động duyệt', 
+  //   type: 'select', 
+  //   options: [
+  //     { mkey: '1', mvalue: ('roomType.Có') },
+  //     { mkey: '0', mvalue: ('roomType.Không') }
+  //   ],
+  //   validate: (value, t) => value === '' ? t('roomType.Tự động duyệt không được để trống') : '' 
+  // }
 };
 
 const component = routes.roomTypeForm.component;

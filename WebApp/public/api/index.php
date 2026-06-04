@@ -15,6 +15,8 @@ function handleResponse($action) {
             return \Booking\Page\MasterData::suggestionClients();
         case 'suggestionExternalClients':
             return \Booking\Page\MasterData::suggestionExternalClients();
+         case 'suggestionDepartureLocations':
+            return \Booking\Page\MasterData::suggestionDepartureLocations();
         case 'getBookings':
             return \Booking\Page\Bookings::getBookings();
         case 'getAvailableRooms':

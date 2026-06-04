@@ -32,9 +32,9 @@ function ManagerReviewList({
 
   const filterFields = [
     { name: 'id', placeholder: 'ID' },
-    { name: 'building', placeholder: t('booking.Toà nhà'), type: 'select', options: masterData.buildings.map(type => ({ value: type.mkey, label: type.mvalue })) },
-    { name: 'roomType', placeholder: t('booking.Loại phòng'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
-    { name: 'room', placeholder: t('booking.Phòng'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
+    // { name: 'building', placeholder: t('booking.Toà nhà'), type: 'select', options: masterData.buildings.map(type => ({ value: type.mkey, label: type.mvalue })) },
+    { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
+    { name: 'room', placeholder: t('booking.Xe'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
     { name: 'managerReviewScore', placeholder: t('booking.Điểm đánh giá'), type: 'select', options: [
         { value: '1', label: t('booking.Đánh giá: 1 sao') },
         { value: '2', label: t('booking.Đánh giá: 2 sao') },
@@ -49,13 +49,18 @@ function ManagerReviewList({
     { name: 'id', label: 'ID', render: (field, request) => formatIdDetail(request, masterData, setModal, t) },
     { name: 'managerReviewScore', align: 'center',  label: t('booking.Điểm đánh giá'), render: (field, request) => formatManagerReviewScore(request, setModal, t) },
     { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
-    { name: 'building', label: t('booking.Toà nhà'), render: (field, request) => request[field].mvalue },
-    { name: 'roomType', label: t('booking.Loại phòng'), render: (field, request) => request[field].mvalue },
-    { name: 'room', label: t('booking.Phòng'), render: (field, request) => request[field].mvalue },
+    // { name: 'building', label: t('booking.Toà nhà'), render: (field, request) => request[field].mvalue },
     { name: 'startDate', align: 'center',  label: t('booking.Ngày sử dụng'), render: (field, request) => formatDate(request[field]) },
     { name: 'endTime', align: 'center',  label: t('booking.Khung giờ sử dụng'), render: (field, request) => `${formatTime(request['startTime']).replace(":00", "")} - ${formatTime(request[field]).replace(":00", "")}` },
+    { name: 'departureLocation', label: t('booking.Điểm xuất phát'), render: (field, request) => (request[field] || []).join(', ') || '-'},
     { name: 'department', label: t('booking.Phòng ban'), render: (field, request) => request[field].mvalue },
-    { name: 'usagePurpose', label: t('booking.Mục đích sử dụng'), render: (field, request) => request[field].mvalue },
+    { name: 'usagePurpose', label: t('booking.Phân loại khách'), render: (field, request) => request[field].mvalue },
+    { name: 'roomType', label: t('booking.Loại xe'), render: (field, request) => request[field].mvalue },
+    { name: 'serviceType', label: t('booking.Loại dịch vụ'), render: (field, request) => request[field]?.mvalue || '-' },
+    { name: 'room', label: t('booking.Xe'), render: (field, request) => request[field]?.mvalue },
+    { name: 'licensePlateNumber', label: t('common.Biển số xe'), render: (field, request) => request[field] || '-' },
+    { name: 'driverUser', label: t('common.Tài xế'), render: (field, request) => request[field]?.mvalue || '-' },
+    { name: 'driverPhoneNumber', label: t('common.Số điện thoại tài xế'), render: (field, request) => request[field] || '-' },
   ];
 
   const actionButtons = (request) => { 

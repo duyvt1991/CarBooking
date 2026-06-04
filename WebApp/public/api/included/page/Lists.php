@@ -28,13 +28,13 @@ class Lists {
         }
         $query->setSelect(['*']);
         $queryFilters = [];
-        if (in_array($component, ['adminList', 'approverList', 'priorityApproverList', 'managerList', 'buildingList', 'departmentList', 'equipmentTypeList', 'equipmentList', 'usagePurposeList', 'roomTypeList', 'roomList', 'bookingList', 'approveBookingList', 'userReviewList', 'managerReviewList', 'log'])) {
+        if (in_array($component, ['adminList', 'approverList', 'priorityApproverList', 'managerList', 'buildingList', 'departmentList', 'equipmentTypeList', 'equipmentList', 'usagePurposeList', 'roomTypeList', 'roomList', 'bookingList', 'approveBookingList', 'userReviewList', 'managerReviewList', 'carLineList', 'driverList', 'log'])) {
             $id = $filters['id'] ?? '';
             if ($id != "") {
                 $queryFilters = array_merge($queryFilters, ['id' => $id]);
             }
         }
-        if (in_array($component, ['adminList', 'approverList', 'priorityApproverList', 'managerList', 'buildingList', 'departmentList', 'equipmentTypeList', 'equipmentList', 'usagePurposeList', 'roomTypeList', 'roomList'])) {
+        if (in_array($component, ['adminList', 'approverList', 'priorityApproverList', 'managerList', 'buildingList', 'departmentList', 'equipmentTypeList', 'equipmentList', 'usagePurposeList', 'roomTypeList', 'roomList', 'carLineList', 'driverList'])) {
             $mkey = $filters['mkey'] ?? '';
             if ($mkey != "") {
                 $queryFilters = array_merge($queryFilters, ['mkey' => $mkey]);
@@ -82,10 +82,10 @@ class Lists {
                 break;
             case 'roomList':
                 $queryFilters = array_merge($queryFilters, ['mtype' => 'rooms']);
-                $building = $filters['building'] ?? '';
-                if ($building != "") {
-                    $queryFilters = array_merge($queryFilters, ['%options' => '"building":"'.$building.'"']);
-                }
+                // $building = $filters['building'] ?? '';
+                // if ($building != "") {
+                //     $queryFilters = array_merge($queryFilters, ['%options' => '"building":"'.$building.'"']);
+                // }
                 $roomType = $filters['roomType'] ?? '';
                 if ($roomType != "") {
                     $queryFilters = array_merge($queryFilters, ['%options' => '"roomType":"'.$roomType.'"']);
@@ -228,10 +228,10 @@ class Lists {
                 if ($room != "") {
                     $queryFilters = array_merge($queryFilters, ['%room' => '"mkey":"'.$room.'"']);
                 }
-                $building = $filters['building'] ?? '';
-                if ($building != "") {
-                    $queryFilters = array_merge($queryFilters, ['%building' => '"mkey":"'.$building.'"']);
-                }
+                // $building = $filters['building'] ?? '';
+                // if ($building != "") {
+                //     $queryFilters = array_merge($queryFilters, ['%building' => '"mkey":"'.$building.'"']);
+                // }
                 $managerReviewScore = $filters['managerReviewScore'] ?? '';
                 if ($managerReviewScore != "") {
                     $queryFilters = array_merge($queryFilters, ['managerReviewScore' => $managerReviewScore]);
@@ -303,6 +303,13 @@ class Lists {
                     $endDateTime = new \Bitrix\Main\Type\DateTime(str_replace("T", " ", $toDate).":00", "Y-m-d H:i:s");
                     $queryFilters = array_merge($queryFilters, ['<=logDate' => $endDateTime]);
                 }
+                break;
+                
+            case 'carLineList':
+                $queryFilters = array_merge($queryFilters, ['mtype' => 'carLines']);
+                break;
+            case 'driverList':
+                $queryFilters = array_merge($queryFilters, ['mtype' => 'drivers']);
                 break;
         }
 

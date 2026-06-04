@@ -236,7 +236,7 @@ const Calendar = ({ events, myCalendar = false, onMyCalendarClick, onCalendarCha
     const dayEvents = events.filter(event => isSameDay(new Date(event.startDate), day));
     return (
       <div className="month-events">
-        {dayEvents.length > 0 && <span onClick={() => handleDayEvent(day)}>{t('common.[count] đặt phòng', { count: dayEvents.length })}</span>}
+        {dayEvents.length > 0 && <span onClick={() => handleDayEvent(day)}>{t('common.[count] đặt xe', { count: dayEvents.length })}</span>}
       </div>
     );
   };

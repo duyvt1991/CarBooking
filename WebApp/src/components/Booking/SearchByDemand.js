@@ -38,13 +38,13 @@ const initForm = {
     value: '',
     label: ''
   },
-  building: { 
-    value: '', 
-    label: 'booking.Toà nhà', 
-    type: 'select',
-    isValueObject: true,
-    optionsMasterDataKey: "buildings", 
-  },
+  // building: { 
+  //   value: '', 
+  //   label: 'booking.Toà nhà', 
+  //   type: 'select',
+  //   isValueObject: true,
+  //   optionsMasterDataKey: "buildings", 
+  // },
   date: { 
     value: '', 
     label: 'booking.Ngày', 
@@ -81,7 +81,8 @@ function SearchByDemand({ request, errors, handleChange }) {
     const fromDate = `${request.date || '1900-01-01'} ${request.startTime || '00:00:00'}`;
     const toDate = `${request.date || '2100-01-01'} ${request.endTime || '23:59:59'}`;
     setLoading(true);
-    getAvailableRooms(component, { fromDate, toDate, building: request?.building?.mkey }, { signal }).then(data => {
+    // getAvailableRooms(component, { fromDate, toDate, building: request?.building?.mkey }, { signal }).then(data => {
+    getAvailableRooms(component, { fromDate, toDate}, { signal }).then(data => {
       setAvailableRooms(data);
       handleChange('room', '');
         }).catch(error => console.error('Lỗi khi lấy dữ liệu đặt xe:', error))
@@ -90,7 +91,7 @@ function SearchByDemand({ request, errors, handleChange }) {
     return () => {
       controller.abort();
     };
-  }, [request.building, request.date, request.startTime, request.endTime]);
+  }, [request.date, request.startTime, request.endTime]);
 
   const groupedRooms = filteredRooms.reduce((acc, room) => {
     const roomType = masterData.roomTypes.find(type => type.mkey === room.roomType);
@@ -213,7 +214,7 @@ function SearchByDemand({ request, errors, handleChange }) {
           disabled={availableRooms.length === 0 || !request.room?.mkey}
           onClick={() => goToBookingForm()}
         >
-          {t('booking.Đặt phòng')}
+          {t('booking.Đặt xe')}
         </button>
       </div>
     </div>

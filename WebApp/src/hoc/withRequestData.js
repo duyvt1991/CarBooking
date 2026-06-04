@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { RequestContext } from '../App';
-import { activeItem, approveItem, deactiveItem, deleteItem, getList } from '../systems/api';
+import { activeItem, approveItem, deactiveItem, deleteItem, getList, confirmItem } from '../systems/api';
 import { defaultFilters } from '../systems/constant';
 import { useTranslation } from 'react-i18next';
 
@@ -77,12 +77,13 @@ const withRequestData = (WrappedComponent, component) => {
   
     const handleAction = (id, actionType) => {
       const messages = {
-        deleteRoom: t('common.Khi xoá phòng, các đặt phòng liên quan sẽ tự động bị huỷ. Bạn có chắc chắn muốn xoá dữ liệu có ID = [id] không?', { id }),
-        deactivateRoom: t('common.Khi tạm khoá phòng, các đặt phòng liên quan sẽ tự động bị huỷ. Bạn có chắc chắn muốn tạm khoá dữ liệu có ID = [id] không?', { id }),
+        deleteRoom: t('common.Khi xoá xe, các đặt xe liên quan sẽ tự động bị huỷ. Bạn có chắc chắn muốn xoá dữ liệu có ID = [id] không?', { id }),
+        deactivateRoom: t('common.Khi tạm khoá xe, các đặt xe liên quan sẽ tự động bị huỷ. Bạn có chắc chắn muốn tạm khoá dữ liệu có ID = [id] không?', { id }),
         delete: t('common.Bạn có chắc chắn muốn xoá dữ liệu có ID = [id] không?', { id }),
         deactivate: t('common.Bạn có chắc chắn muốn tạm khoá dữ liệu có ID = [id] không?', { id }),
         activate: t('common.Bạn có chắc chắn muốn mở khoá dữ liệu có ID = [id] không?', { id }),
-        approve: t('common.Bạn có chắc chắn muốn duyệt đặt phòng có ID = [id] không?', { id }),
+        approve: t('common.Bạn có chắc chắn muốn duyệt đặt xe có ID = [id] không?', { id }),
+        confirm: t('common.Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?', { id }),
       };
   
       const actions = {
@@ -92,6 +93,7 @@ const withRequestData = (WrappedComponent, component) => {
         deactivate: () => deactiveItem(component, id),
         activate: () => activeItem(component, id),
         approve: () => approveItem(component, id),
+        confirm: () => confirmItem(component, id),
       };
   
       showConfirmModal(messages[actionType], () => {

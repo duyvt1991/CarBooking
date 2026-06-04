@@ -11,7 +11,9 @@ export const logMasterDataTypeMapping = {
     equipments: routes.equipmentList.label,
     usagePurposes: routes.usagePurposeList.label,
     roomTypes: routes.roomTypeList.label,
-    rooms: routes.roomList.label
+    rooms: routes.roomList.label,
+    carLines: routes.carLineList.label,
+    drivers: routes.driverList.label,
 }
 
 export const logMasterDataKeyMapping = (mtype, key) => {
@@ -63,13 +65,13 @@ export const logMasterDataKeyMapping = (mtype, key) => {
         case "config":
             switch (key) {
                 case "maxDayToBooking":
-                    return "Không được đặt phòng quá (ngày)";
+                    return "Không được đặt xe quá (ngày)";
                 case "maxHourToAutoApprove":
                     return "Tự động duyệt khi dưới (giờ)";
                 case "maxDayToReview":
                     return "Thời gian đánh giá không quá (ngày)";
                 case "usagePurposeKeyForClient":
-                    return "Mã mục đích sử dụng cho tiếp khách";
+                    return "Mã phân loại cho tiếp khách";
                 case "buildingDefault":
                     return "Tòa nhà mặc định";
                 case "bookingAdminGroupId":
@@ -77,9 +79,11 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                 case "bookingApprovalGroupId":
                     return "Workgroup ID của người duyệt";
                 case "bookingMonitorGroupId":
-                    return "Workgroup ID của người quản lý phòng";
+                    return "Workgroup ID của người quản lý xe";
                 case "isDeleted":
                     return "Đã xoá";
+                 case "bookingDriverGroupId":
+                    return "Workgroup ID của tài xế";
                 default:
                     return key.toUpperCase();
             }
@@ -138,9 +142,9 @@ export const logMasterDataKeyMapping = (mtype, key) => {
         case "usagePurposes":
             switch (key) {
                 case "mkey":
-                    return "Mã mục đích sử dụng";
+                    return "Mã phân loại khách";
                 case "mvalue":
-                    return "Tên mục đích sử dụng";
+                    return "Tên phân loại khách";
                 case "isDeleted":
                     return "Đã xoá";
                 default:
@@ -232,9 +236,9 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                 case "department":
                     return "Phòng ban";
                 case "mainUser":
-                    return "Người chủ trì";
-                case "users":
                     return "Người sử dụng";
+                case "users":
+                    return "Tên nhân viên tham gia";
                 case "startDate":
                     return "Ngày sử dụng";
                 case "startTime":
@@ -242,11 +246,11 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                 case "endTime":
                     return "Kết thúc lúc";
                 case "usagePurpose":
-                    return "Mục đích sử dụng";
+                    return "Phân loại khách";
                 case "usagePurposeLocale":
                     return "Quốc gia";
                 case "usagePurposeDetail":
-                    return "Chi tiết MĐSD";
+                    return "Mục đích chuyến đi";
                 case "clients":
                     return "Số lượng khách";
                 case "clientNames":
@@ -264,9 +268,33 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                 case "rejectedReason":
                     return "Lý do từ chối";
                 case "isApproved":
-                    return "Duyệt (0: chưa duyệt, 1: đã duyệt, -1: từ chối)";
+                    return "Duyệt & phân công (0: chưa duyệt, 1: đã duyệt , 2: chờ tài xế xác nhận, 3: tài xế đã xác nhận, -1: từ chối, -2: tài xế từ chối)";
                 case "equipments":
                     return "Thiết bị";
+                default:
+                    return key.toUpperCase();
+            }
+         case "carLines":
+            switch (key) {
+                case "mkey":
+                    return "Mã dòng xe";
+                case "mvalue":
+                    return "Tên dòng xe";
+                case "isDeleted":
+                    return "Đã xoá";
+                default:
+                    return key.toUpperCase();
+            }
+         case "drivers":
+            switch (key) {
+                case "mkey":
+                    return "Esuhai User ID";
+                case "mvalue":
+                    return "Esuhai User Name";
+                case "phonenumber":
+                    return "Số điện thoại";
+                case "isDeleted":
+                    return "Đã xoá";
                 default:
                     return key.toUpperCase();
             }

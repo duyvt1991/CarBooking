@@ -39,7 +39,7 @@ function ReportGuestCount() {
       return acc;
     }, {}),
     (key) => formatUsagePurpose(key, masterData),
-    t('report.Mục đích sử dụng')
+    t('report.Phân loại khách')
   );
 
   const handleUsagePurposeSelect = (chartWrapper) => {

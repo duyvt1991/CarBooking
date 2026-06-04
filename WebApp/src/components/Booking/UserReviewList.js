@@ -6,7 +6,7 @@ import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
 import { FaCheck } from 'react-icons/fa';
-import { formatDateTime, formatDate, formatTime, formatUserReviewCleanScore, formatUserReviewEquipmentScore, formatUserReviewFacilityScore, formatIdDetail } from '../../systems/util';
+import { formatDateTime, formatDate, formatTime, formatUserReviewScore, formatIdDetail } from '../../systems/util';
 import { RequestContext } from '../../App';
 import FilterTableLayout from '../../shared/FilterTableLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -41,10 +41,10 @@ function UserReviewList({
 
   const filterFields = [
     { name: 'id', placeholder: 'ID' },
-    { name: 'building', placeholder: t('booking.Toà nhà'), type: 'select', options: masterData.buildings.map(type => ({ value: type.mkey, label: type.mvalue })) },
-    { name: 'roomType', placeholder: t('booking.Loại phòng'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
-    { name: 'room', placeholder: t('booking.Phòng'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
-    { name: 'userReviewCleanScore', placeholder: t('booking.Đánh giá vệ sinh'), type: 'select', options: [
+    // { name: 'building', placeholder: t('booking.Toà nhà'), type: 'select', options: masterData.buildings.map(type => ({ value: type.mkey, label: type.mvalue })) },
+    { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
+    { name: 'room', placeholder: t('booking.Xe'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
+    { name: 'userReviewScore', placeholder: t('booking.Người sử dụng đánh giá'), type: 'select', options: [
         { value: '1', label: t('booking.Vệ sinh: 1 sao') },
         { value: '2', label: t('booking.Vệ sinh: 2 sao') },
         { value: '3', label: t('booking.Vệ sinh: 3 sao') },
@@ -52,41 +52,29 @@ function UserReviewList({
         { value: '5', label: t('booking.Vệ sinh: 5 sao') }
       ] 
     },
-    { name: 'userReviewEquipmentScore', placeholder: t('booking.Đánh giá thiết bị'), type: 'select', options: [
-        { value: '1', label: t('booking.Thiết bị: 1 sao') },
-        { value: '2', label: t('booking.Thiết bị: 2 sao') },
-        { value: '3', label: t('booking.Thiết bị: 3 sao') },
-        { value: '4', label: t('booking.Thiết bị: 4 sao') },
-        { value: '5', label: t('booking.Thiết bị: 5 sao') }
-      ] 
-    },
-    { name: 'userReviewFacilityScore', placeholder: t('booking.Đánh giá cơ sở vật chất'), type: 'select', options: [
-        { value: '1', label: t('booking.Cơ sở vật chất: 1 sao') },
-        { value: '2', label: t('booking.Cơ sở vật chất: 2 sao') },
-        { value: '3', label: t('booking.Cơ sở vật chất: 3 sao') },
-        { value: '4', label: t('booking.Cơ sở vật chất: 4 sao') },
-        { value: '5', label: t('booking.Cơ sở vật chất: 5 sao') }
-      ] 
-    }
   ];
 
   const requestFields = [
     { name: 'id', label: 'ID', render: (field, request) => formatIdDetail(request, masterData, setModal, t) },
-    { name: 'userReviewCleanScore', align: 'center',  label: t('booking.Đánh giá vệ sinh'), render: (field, request) => formatUserReviewCleanScore(request, setModal, t) },
-    { name: 'userReviewEquipmentScore', align: 'center',  label: t('booking.Đánh giá thiết bị'), render: (field, request) => formatUserReviewEquipmentScore(request, setModal, t) },
-    { name: 'userReviewFacilityScore', align: 'center',  label: t('booking.Đánh giá cơ sở vật chất'), render: (field, request) => formatUserReviewFacilityScore(request, setModal, t) },
+    { name: 'userReviewScore', align: 'center',  label: t('booking.Điểm dịch vụ'), render: (field, request) => formatUserReviewScore(request, setModal, t) },
+    // { name: 'userReviewEquipmentScore', align: 'center',  label: t('booking.Đánh giá thiết bị'), render: (field, request) => formatUserReviewEquipmentScore(request, setModal, t) },
+    // { name: 'userReviewFacilityScore', align: 'center',  label: t('booking.Đánh giá cơ sở vật chất'), render: (field, request) => formatUserReviewFacilityScore(request, setModal, t) },
     { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
-    { name: 'building', label: t('booking.Toà nhà'), render: (field, request) => request[field].mvalue },
-    { name: 'roomType', label: t('booking.Loại phòng'), render: (field, request) => request[field].mvalue },
-    { name: 'room', label: t('booking.Phòng'), render: (field, request) => request[field].mvalue },
     { name: 'startDate', align: 'center',  label: t('booking.Ngày sử dụng'), render: (field, request) => formatDate(request[field]) },
     { name: 'endTime', align: 'center',  label: t('booking.Khung giờ sử dụng'), render: (field, request) => `${formatTime(request['startTime']).replace(":00", "")} - ${formatTime(request[field]).replace(":00", "")}` },
+    { name: 'departureLocation', label: t('booking.Điểm xuất phát'), render: (field, request) => (request[field] || []).join(', ') || '-'},
     { name: 'department', label: t('booking.Phòng ban'), render: (field, request) => request[field].mvalue },
-    { name: 'usagePurpose', label: t('booking.Mục đích sử dụng'), render: (field, request) => request[field].mvalue },
+    { name: 'usagePurpose', label: t('booking.Phân loại khách'), render: (field, request) => request[field].mvalue },
+    { name: 'roomType', label: t('booking.Loại xe'), render: (field, request) => request[field].mvalue },
+    { name: 'room', label: t('booking.Xe'), render: (field, request) => request[field]?.mvalue },
+    { name: 'licensePlateNumber', label: t('common.Biển số xe'), render: (field, request) => request[field] || '-' },
+    { name: 'driverUser', label: t('common.Tài xế'), render: (field, request) => request[field]?.mvalue || '-' },
+    { name: 'driverPhoneNumber', label: t('common.Số điện thoại tài xế'), render: (field, request) => request[field] || '-' },
+
   ];
 
   const actionButtons = (request) => { 
-    return request?.userReviewCleanScore > 0 || request?.userReviewEquipmentScore > 0 || request?.userReviewFacilityScore > 0 ? 
+    return request?.userReviewScore > 0 ? 
       [{ component: <span className="flex items-center justify-center gap-1"><FaCheck className="text-green-500" /></span> }]
       : [
           { label: t('booking.Đánh giá'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.userReviewForm.path) }
@@ -112,7 +100,7 @@ function UserReviewList({
       </div>
       <div className="w-full overflow-x-auto">
         {!showAll && <div className="mb-0 ml-[1px] flex sticky left-0 space-x-2 text-sm">
-          <button className={`p-2 rounded-t transition-colors duration-300 bg-gray-200 hover:bg-gray-300`} onClick={() => navigate(routes.bookingList.path)}>{t('booking.Đặt phòng')}</button>
+          <button className={`p-2 rounded-t transition-colors duration-300 bg-gray-200 hover:bg-gray-300`} onClick={() => navigate(routes.bookingList.path)}>{t('booking.Đặt xe')}</button>
           <button className={`p-2 rounded-t transition-colors duration-300 bg-green-600 text-white`} onClick={() => navigate(`${routes.userReviewList.path}?tab=review`)}>{t('booking.Đánh giá')}</button>
           <button className={`p-2 rounded-t transition-colors duration-300 bg-gray-200 hover:bg-gray-300`} onClick={() => navigate(`${routes.bookingList.path}?tab=cancelled`)}>{t('booking.Huỷ')}</button>
         </div>}

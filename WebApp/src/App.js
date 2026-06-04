@@ -57,6 +57,14 @@ import ReportUsageDemand from './components/Report/ReportUsageDemand.js';
 import ReportManagerReview from './components/Report/ReportManagerReview.js';
 import ReportUserReview from './components/Report/ReportUserReview.js';
 import BookingCalendar from './components/Booking/BookingCalendar.js';
+import CarLineList from './components/Category/CarLineList.js';
+import CarLineForm from './components/Category/CarLineForm.js';
+import DriverList from './components/System/DriverList.js';
+import DriverForm from './components/System/DriverForm.js';
+import ApproveAssignBookingForm from './components/Booking/ApproveAssignBookingForm.js';
+import DriverConfirmBookingList from './components/Booking/DriverConfirmBookingList.js';
+import DriverRejectBookingForm from './components/Booking/DriverRejectBookingForm.js';
+
 import jpFlag from './i18n/flags/jp.svg';
 import vnFlag from './i18n/flags/vn.svg';
 
@@ -83,13 +91,16 @@ const App = () => {
       bookingApprovalGroupId: 0,
       bookingMonitorGroupId: 0,
       bookingPriorityApprovalGroupId: 0,
-      buildingDefault: 0
+      // buildingDefault: 0,
+      bookingDriverGroupId: 0
     },
     buildings: [],
     departments: [],
     equipmentTypes: [],
     equipments: [],
-    usagePurposes: []
+    usagePurposes: [],
+    carLines: [],
+    drivers: [],
   });
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -179,6 +190,14 @@ const App = () => {
     { path: routes.reportManagerReview.path, permissions: routes.reportManagerReview.permissions, component: <ReportManagerReview /> },
     { path: routes.reportUserReview.path, permissions: routes.reportUserReview.permissions, component: <ReportUserReview /> },
     { path: `${routes.bookingCalendar.path}/:id`, permissions: routes.bookingCalendar.permissions, component: <BookingCalendar /> },
+    { path: routes.carLineList.path, permissions: routes.carLineList.permissions, component: <CarLineList /> },
+    { path: `${routes.carLineForm.path}/:id`, permissions: routes.carLineForm.permissions, component: <CarLineForm /> },
+    { path: routes.driverList.path, permissions: routes.driverList.permissions, component: <DriverList /> },
+    { path: `${routes.driverForm.path}/:id`, permissions: routes.driverForm.permissions, component: <DriverForm /> },
+    { path: `${routes.approveAssignBookingForm.path}/:id`, permissions: routes.approveAssignBookingForm.permissions, component: <ApproveAssignBookingForm /> },
+    { path: routes.driverConfirmBookingList.path, permissions: routes.driverConfirmBookingList.permissions, component: <DriverConfirmBookingList /> },
+    { path: `${routes.driverRejectBookingForm.path}/:id`, permissions: routes.driverRejectBookingForm.permissions, component: <DriverRejectBookingForm /> },
+
   ]
 
   const changeLanguage = (language) => {
