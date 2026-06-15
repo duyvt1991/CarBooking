@@ -31,14 +31,14 @@ function DriverList({
     { name: 'id', placeholder: t('driver.ID') },
     { name: 'mkey', placeholder: t('driver.Esuhai User ID') },
     { name: 'mvalue', placeholder: t('driver.Esuhai User Name') },
-    { name: 'phonenumber', type: 'number', placeholder: t('driver.Số điện thoại') }
+    { name: 'driverPhoneNumber', type: 'number', placeholder: t('driver.Số điện thoại') }
   ];
 
   const requestFields = [
     { name: 'id', label: t('driver.ID'), render: (field, request) => request[field] },
     { name: 'mkey', label: t('driver.Esuhai User ID'), render: (field, request) => request[field] },
     { name: 'mvalue', label: t('driver.Esuhai User Name'), render: (field, request) => request[field] },
-    { name: 'phonenumber', label: t('driver.Số điện thoại'), render: (field, request) => request[field] }
+    { name: 'driverPhoneNumber', label: t('driver.Số điện thoại'), render: (field, request) => request[field] }
   ];
 
   const actionButtons = () => ([

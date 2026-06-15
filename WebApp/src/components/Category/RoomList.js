@@ -75,11 +75,6 @@ function RoomList({
     //     ].filter(field => field && field.value);
     //     return equipmentsValue.length === 0 ? t('common.[count] thiết bị', { count: 0 }) : <button onClick={() => setModal(<ModalContent title={t(`routes.${routes.roomList.label}`)} fields={fields} />)} className={`${request[field]?.length ? "font-bold" : ""} cursor-pointer underline text-blue-700 text-ellipsis overflow-hidden`}>{t('common.[count] thiết bị', { count: equipmentsValue.length })}</button>;
     // } },
-    // { name: 'size', align: 'right',  label: t('room.Diện tích'), render: (field, request) => {
-    //     const roomType = masterData.roomTypes.find(type => type.mkey.toString() === request.roomType.toString());
-    //     const values = request[field] ? request[field] : (roomType?.size || "0");
-    //     return <span className={request[field] ? "font-bold" : ""}>{formatSize(values)}</span>
-    // } },
     { name: 'persons', align: 'right',  label: t('room.Sức chứa'), render: (field, request) => {
         const roomType = masterData.roomTypes.find(type => type.mkey.toString() === request.roomType.toString());
         const values = request[field] ? request[field] : (roomType?.persons || "0");

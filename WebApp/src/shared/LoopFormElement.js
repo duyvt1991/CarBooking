@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm, request, errors, handleChange }) {
     const { t } = useTranslation();
+    const colorValue = /^#[0-9A-F]{6}$/i.test(request[field] ?? '') ? request[field] : '#000000';
     const isRequired = typeof initForm[field].required === 'function'
         ? initForm[field].required(request)
         : !!initForm[field].validate;
@@ -146,7 +147,7 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
                         <input 
                             type="color" 
                             className={`box-content px-2 py-1 bg-transparent border rounded-lg ${errors[field] ? 'border-red-500' : ''}`} 
-                            value={request[field]} 
+                            value={colorValue} 
                             onChange={(e) => handleChange(field, e.target.value)} 
                         />
                         {!request[field] && request[`placeholder.${field}`] && <span className="absolute -bottom-2 -right-2">{formatColor(request[`placeholder.${field}`])}</span>}

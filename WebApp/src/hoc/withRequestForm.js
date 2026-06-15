@@ -21,16 +21,16 @@ const withRequestForm = (WrappedComponent, component, redirectPath, formLabel, i
         if (!cachedRequest || (cachedRequest.id?.toString() !== id?.toString() && cachedRequest.id?.toString() !== "*")) {
           navigate(redirectPath);
         } else {
-          if (component === routes.roomTypeForm.component || component === routes.roomForm.component) {
-            const newRequest = { 
-              ...cachedRequest, 
-              equipments: cachedRequest.equipments.filter(e => masterData.equipments?.find(md => md.mkey === e)) || [],
-              approvers: cachedRequest.approvers.filter(e => masterData.approvers?.find(md => md.mkey === e)) || [],
-            };
-            setRequest(newRequest);
-          } else {
+          // if (component === routes.roomTypeForm.component || component === routes.roomForm.component) {
+          //   const newRequest = { 
+          //     ...cachedRequest, 
+          //     equipments: cachedRequest.equipments.filter(e => masterData.equipments?.find(md => md.mkey === e)) || [],
+          //     approvers: cachedRequest.approvers.filter(e => masterData.approvers?.find(md => md.mkey === e)) || [],
+          //   };
+          //   setRequest(newRequest);
+          // } else {
             setRequest(cachedRequest);
-          }
+          // }
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps

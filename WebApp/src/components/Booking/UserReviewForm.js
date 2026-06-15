@@ -31,46 +31,6 @@ function UserReviewForm({ request, errors, handleChange }) {
   const { t } = useTranslation();
   const [initFormState, setInitFormState] = useState(initForm);
 
-  // const toggleCleanCommentDisplay = useCallback((value) => {
-  //   if (value === 0 || value === 5) {
-  //       initForm.userReviewCommentMost.label = '';
-  //       initForm.userReviewCommentMost.validate = false;
-  //   } else {
-  //       initForm.userReviewCommentMost.label = t('booking.Chi tiết đánh giá vệ sinh');
-  //       initForm.userReviewCommentMost.validate = (value) => !value ? t('booking.Chi tiết đánh giá vệ sinh không được để trống') : '';
-  //   }
-  //   setInitFormState({ ...initForm });
-  // }, [t]);
-
-
-
-  // const handleUserReviewScoreChange = (field, value) => {
-  //   handleChange(field, value);
-  //   toggleCleanCommentDisplay(value);
-  // }
-
-  // const handleEquipmentScoreChange = (field, value) => {
-  //   handleChange(field, value);
-  //   toggleEquipmentCommentDisplay(value);
-  // }
-
-  // const handleFacilityScoreChange = (field, value) => {
-  //   handleChange(field, value);
-  //   toggleFacilityCommentDisplay(value);
-  // }
-
-  // useEffect(() => {
-  //     toggleCleanCommentDisplay(request.userReviewCleanScore);
-  // }, [request.userReviewCleanScore, toggleCleanCommentDisplay]);
-
-  // useEffect(() => {
-  //     toggleEquipmentCommentDisplay(request.userReviewEquipmentScore);
-  // }, [request.userReviewEquipmentScore, toggleEquipmentCommentDisplay]);
-
-  // useEffect(() => {
-  //     toggleFacilityCommentDisplay(request.userReviewFacilityScore);
-  // }, [request.userReviewFacilityScore, toggleFacilityCommentDisplay]);
-
   return (
     Object.keys(initFormState).filter(field => initFormState[field].label).map(field => (
         <LoopFormElement 
@@ -82,9 +42,7 @@ function UserReviewForm({ request, errors, handleChange }) {
           request={request} 
           errors={errors} 
           handleChange={
-            // field === 'userReviewScore' ? handleUserReviewScoreChange : 
-            // field === 'userReviewEquipmentScore' ? handleEquipmentScoreChange : 
-            // field === 'userReviewFacilityScore' ? handleFacilityScoreChange :
+           
             handleChange
           } 
         />

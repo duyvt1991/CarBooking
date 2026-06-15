@@ -26,12 +26,16 @@ const initForm = {
     readonly: () => true,
     validate: (value, t) => !value ? t('driver.Esuhai User Name không được để trống') : '' 
   },
-  phonenumber: { 
+  driverPhoneNumber: { 
     value: '', 
     label: 'driver.Số điện thoại', 
     type: 'number',
     validate: (value, t) => !value ? t('driver.Số điện thoại không được để trống') : '' 
   },
+  isSync: {
+    value: 0,
+    type: 'hidden'
+  }
 };
 
 const component = routes.driverForm.component;

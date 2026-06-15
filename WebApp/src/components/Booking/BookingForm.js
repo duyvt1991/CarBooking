@@ -169,17 +169,6 @@ export const initForm = {
     optionsMasterDataKey: "departments",
     validate: (value, t) => !value ? t('booking.Phòng ban không được để trống') : '' 
   },
-  // users: { 
-  //   column: 2,
-  //   value: [], 
-  //   label: 'booking.Tên nhân viên tham gia', 
-  //   type: 'tags', 
-  //   tagsApi: suggestionUsers,
-  //   tagsDisplayField: 'mvalue',
-  //   tagsMappingField: [['*', 'users']],
-  //   tagsSchema: { key: 'mkey', value: 'mvalue' },
-  //   validate: (value, t) => !value.length ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
-  // },
   usagePurpose: { 
     column: 2,
     value: '', 

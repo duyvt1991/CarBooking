@@ -12,12 +12,8 @@ const initForm = {
     optionsMasterDataKey: 'roomTypes',
     validate: (value, t) => !value ? t('room.Loại xe không được để trống') : '',
     selectMappingField: [
-      // ['approvers'],
-      // ['equipments'],
-      ['size'],
       ['persons'],
-      ['color'],
-      // ['hasAutoApprove']
+      ['color']
     ]
   },
   mkey: { 
@@ -26,13 +22,6 @@ const initForm = {
     readonly: (request) => !!request.id,
     validate: (value, t) => !value ? t('room.Mã xe không được để trống') : '' 
   },
-  // building: { 
-  //   value: '', 
-  //   label: 'room.Toà nhà', 
-  //   type: 'select', 
-  //   optionsMasterDataKey: 'buildings',
-  //   validate: (value, t) => !value ? t('room.Toà nhà không được để trống') : '' 
-  // },
   mvalue: { 
     value: '', 
     label: 'room.Tên xe', 
@@ -66,14 +55,10 @@ const initForm = {
   //   tagsMappingField: [['mkey', 'equipments']],
   //   formatter: formatEquipments
   // },
-  // size: { 
-  //   value: '', 
-  //   label: 'room.Diện tích (m²)'
-  // },
   licensePlateNumber: { 
     value: '', 
     label: 'room.Biển số',
-    validate: (value, t, request) => request?.hasServiceCar === '1' && !value ? t('room.Biển số không được để trống') : '' 
+    validate: (value, t, request) => String(request?.hasServiceCar) === '1' && !value ? t('room.Biển số không được để trống') : '' 
   },
   persons: { 
     value: '', 
@@ -98,6 +83,10 @@ const initForm = {
       { mkey: '0', mvalue: ('room.Không') }
     ],
     validate: (value, t) => value === '' ? t('room.Xe đặt ngoài không được để trống') : '' 
+  },
+  isSync: {
+    value: 0,
+    type: 'hidden'
   }
 };
 

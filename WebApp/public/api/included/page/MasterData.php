@@ -51,7 +51,6 @@ class MasterData {
                 'bookingApprovalGroupId' => 26,
                 'bookingMonitorGroupId' => 27,
                 'bookingPriorityApprovalGroupId' => 48,
-                // 'buildingDefault' => '',
                 'bookingDriverGroupId' => 28
             ],
             'admins' => [],

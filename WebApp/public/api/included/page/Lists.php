@@ -21,14 +21,14 @@ class Lists {
     
         if ($component === "log") {
             $query = \Booking\Query::getInstance("car_booking_log");
-        } else if (in_array($component, ["bookingList", "approveBookingList", "userReviewList", "managerReviewList"])) {
+        } else if (in_array($component, ["bookingList", "approveBookingList", "userReviewList", "managerReviewList", "driverConfirmBookingList"])) {
             $query = \Booking\Query::getInstance("car_booking_requests");
         } else {
             $query = \Booking\Query::getInstance("car_booking_masterdata");
         }
         $query->setSelect(['*']);
         $queryFilters = [];
-        if (in_array($component, ['adminList', 'approverList', 'priorityApproverList', 'managerList', 'buildingList', 'departmentList', 'equipmentTypeList', 'equipmentList', 'usagePurposeList', 'roomTypeList', 'roomList', 'bookingList', 'approveBookingList', 'userReviewList', 'managerReviewList', 'carLineList', 'driverList', 'log'])) {
+        if (in_array($component, ['adminList', 'approverList', 'priorityApproverList', 'managerList', 'buildingList', 'departmentList', 'equipmentTypeList', 'equipmentList', 'usagePurposeList', 'roomTypeList', 'roomList', 'bookingList', 'approveBookingList', 'userReviewList', 'managerReviewList', 'carLineList', 'driverList', 'log', 'driverConfirmBookingList'])) {
             $id = $filters['id'] ?? '';
             if ($id != "") {
                 $queryFilters = array_merge($queryFilters, ['id' => $id]);
@@ -82,10 +82,6 @@ class Lists {
                 break;
             case 'roomList':
                 $queryFilters = array_merge($queryFilters, ['mtype' => 'rooms']);
-                // $building = $filters['building'] ?? '';
-                // if ($building != "") {
-                //     $queryFilters = array_merge($queryFilters, ['%options' => '"building":"'.$building.'"']);
-                // }
                 $roomType = $filters['roomType'] ?? '';
                 if ($roomType != "") {
                     $queryFilters = array_merge($queryFilters, ['%options' => '"roomType":"'.$roomType.'"']);
@@ -140,47 +136,47 @@ class Lists {
                     ];
                 }
                 if ($userRoles && is_array($userRoles)) {
-                    $query->registerRuntimeField(
-                        new ExpressionField(
-                            'HAS_PRIORITY_APPROVER',
-                            'JSON_CONTAINS(%s->\'$.priorityApprovers\', \'["BitrixID-'.$userId.'"]\')',
-                            ['room']
-                        )
-                    );
-                    $query->registerRuntimeField(
-                        new ExpressionField(
-                            'HAS_APPROVER',
-                            'JSON_CONTAINS(%s->\'$.approvers\', \'["BitrixID-'.$userId.'"]\')',
-                            ['room']
-                        )
-                    );
+                    // $query->registerRuntimeField(
+                    //     new ExpressionField(
+                    //         'HAS_PRIORITY_APPROVER',
+                    //         'JSON_CONTAINS(%s->\'$.priorityApprovers\', \'["BitrixID-'.$userId.'"]\')',
+                    //         ['room']
+                    //     )
+                    // );
+                    // $query->registerRuntimeField(
+                    //     new ExpressionField(
+                    //         'HAS_APPROVER',
+                    //         'JSON_CONTAINS(%s->\'$.approvers\', \'["BitrixID-'.$userId.'"]\')',
+                    //         ['room']
+                    //     )
+                    // );
 
                     if (!in_array("Permission [Car_Booking_Priority_Approval]", $userRoles) && !in_array("Permission [Car_Booking_Approval]", $userRoles)) {
                         return [ 'currentItems' => [], 'totalPages' => 0, 'totalItems' => 0 ];
                     }
                     if ($tab != "pending" && $tab != "priority") {
-                        if (in_array("Permission [Car_Booking_Priority_Approval]", $userRoles) && !in_array("Permission [Car_Booking_Approval]", $userRoles)) {
-                            $queryFilters = array_merge($queryFilters, ['=HAS_PRIORITY_APPROVER' => 1]);
-                        } else if (!in_array("Permission [Car_Booking_Priority_Approval]", $userRoles) && in_array("Permission [Car_Booking_Approval]", $userRoles)) {
-                            $queryFilters[] =  [
-                                'LOGIC' => 'OR',
-                                [
-                                    '%room' => '"approvers":[]',
-                                    '%roomType' => '"BitrixID-'.$userId.'"'
-                                ],
-                                ['=HAS_APPROVER' => 1]
-                            ];
-                        } else if (in_array("Permission [Car_Booking_Priority_Approval]", $userRoles) && in_array("Permission [Car_Booking_Approval]", $userRoles)) {
-                            $queryFilters[] =  [
-                                'LOGIC' => 'OR',
-                                [
-                                    '%room' => '"approvers":[]',
-                                    '%roomType' => '"BitrixID-'.$userId.'"'
-                                ],
-                                ['=HAS_APPROVER' => 1],
-                                ['=HAS_PRIORITY_APPROVER' => 1]
-                            ];
-                        }
+                        // if (in_array("Permission [Car_Booking_Priority_Approval]", $userRoles) && !in_array("Permission [Car_Booking_Approval]", $userRoles)) {
+                        //     $queryFilters = array_merge($queryFilters, ['=HAS_PRIORITY_APPROVER' => 1]);
+                        // } else if (!in_array("Permission [Car_Booking_Priority_Approval]", $userRoles) && in_array("Permission [Car_Booking_Approval]", $userRoles)) {
+                        //     $queryFilters[] =  [
+                        //         'LOGIC' => 'OR',
+                        //         [
+                        //             '%room' => '"approvers":[]',
+                        //             '%roomType' => '"BitrixID-'.$userId.'"'
+                        //         ],
+                        //         ['=HAS_APPROVER' => 1]
+                        //     ];
+                        // } else if (in_array("Permission [Car_Booking_Priority_Approval]", $userRoles) && in_array("Permission [Car_Booking_Approval]", $userRoles)) {
+                        //     $queryFilters[] =  [
+                        //         'LOGIC' => 'OR',
+                        //         [
+                        //             '%room' => '"approvers":[]',
+                        //             '%roomType' => '"BitrixID-'.$userId.'"'
+                        //         ],
+                        //         ['=HAS_APPROVER' => 1],
+                        //         ['=HAS_PRIORITY_APPROVER' => 1]
+                        //     ];
+                        // }
                     }
                 } else {
                     return [ 'currentItems' => [], 'totalPages' => 0, 'totalItems' => 0 ];
@@ -200,25 +196,84 @@ class Lists {
                 $tab = $filters['tab'] ?? '';
                 if ($tab == "pending") {
                     $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
-                    $queryFilters = array_merge($queryFilters, ['isApproved' => 0]);
-                    $queryFilters = array_merge($queryFilters, ['isPriority' => 0]);
+                    // $queryFilters = array_merge($queryFilters, ['isApproved' => 0]);
+                    $queryFilters = array_merge($queryFilters, ['@isApproved' => [0, 1, -2]]);
+
+                    // $queryFilters = array_merge($queryFilters, ['isPriority' => 0]);
+                    // $queryFilters[] =  [
+                    //         'LOGIC' => 'OR',
+                    //         [
+                    //             '%room' => '"approvers":[]',
+                    //             '%roomType' => '"BitrixID-'.$userId.'"'
+                    //         ],
+                    //         ['=HAS_APPROVER' => 1]
+                    //     ];
+                }
+                //  else if ($tab === 'priority') {
+                //     $queryFilters = array_merge($queryFilters, ['=HAS_PRIORITY_APPROVER' => 1]);
+                //     $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
+                //     $queryFilters = array_merge($queryFilters, ['isApproved' => 0]);
+                //     $queryFilters = array_merge($queryFilters, ['isPriority' => 1]);
+                // }
+                break;
+            case 'driverConfirmBookingList':
+                $startDate = $filters['startDate'] ?? '';
+                if ($startDate != "") {
+                    $startDateTime = new \Bitrix\Main\Type\DateTime($startDate . " 00:00:00", "Y-m-d H:i:s");
+                    $startTime = $startDateTime->format('H:i:s');
                     $queryFilters[] =  [
-                            'LOGIC' => 'OR',
-                            [
-                                '%room' => '"approvers":[]',
-                                '%roomType' => '"BitrixID-'.$userId.'"'
-                            ],
-                            ['=HAS_APPROVER' => 1]
-                        ];
-                } else if ($tab === 'priority') {
-                    $queryFilters = array_merge($queryFilters, ['=HAS_PRIORITY_APPROVER' => 1]);
+                        'LOGIC' => 'OR',
+                        [
+                            '>startDate' => $startDateTime
+                        ],
+                        [
+                            '=startDate' => $startDateTime,
+                            '>=startTime' => $startTime
+                        ]
+                    ];
+    
+                    $endDateTime = new \Bitrix\Main\Type\DateTime($startDate . " 23:59:59", "Y-m-d H:i:s");
+                    $endTime = $endDateTime->format('H:i:s');
+                    $queryFilters[] =  [
+                        'LOGIC' => 'OR',
+                        [
+                            '<startDate' => $endDateTime
+                        ],
+                        [
+                            '=startDate' => $endDateTime,
+                            '<=endTime' => $endTime
+                        ]
+                    ];
+                }
+                if ($userRoles && is_array($userRoles)) {
+                    if (!in_array("Permission [Car_Booking_Driver_Confirm]", $userRoles) && !in_array("Permission [Car_Booking_Approval]", $userRoles)) {
+                        return [ 'currentItems' => [], 'totalPages' => 0, 'totalItems' => 0 ];
+                    }
+                } else {
+                    return [ 'currentItems' => [], 'totalPages' => 0, 'totalItems' => 0 ];
+                }
+                $roomType = $filters['roomType'] ?? '';
+                if ($roomType != "") {
+                    $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
+                }
+                $room = $filters['room'] ?? '';
+                if ($room != "") {
+                    $queryFilters = array_merge($queryFilters, ['%room' => '"mkey":"'.$room.'"']);
+                }
+                // $isApproved = $filters['isApproved'] ?? '';
+                // if ($isApproved != "") {
+                //     $queryFilters = array_merge($queryFilters, ['isApproved' => $isApproved * 1]);
+                // }
+                $tab = $filters['tab'] ?? '';
+                if ($tab == "pending") {
                     $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
-                    $queryFilters = array_merge($queryFilters, ['isApproved' => 0]);
-                    $queryFilters = array_merge($queryFilters, ['isPriority' => 1]);
+                    $queryFilters = array_merge($queryFilters, ['@isApproved' => [3]]);
+
                 }
                 break;
             case 'userReviewList':
                 $queryFilters = array_merge($queryFilters, ['%bookingUser' => '"mkey":"BitrixID-'.$userId.'"']);
+                $queryFilters = array_merge($queryFilters, ['@isApproved' => [3, 4]]); // Chỉ lấy: Tài xế đã xác nhận và đã hoàn thành
             case 'managerReviewList':
                 $roomType = $filters['roomType'] ?? '';
                 if ($roomType != "") {
@@ -228,29 +283,16 @@ class Lists {
                 if ($room != "") {
                     $queryFilters = array_merge($queryFilters, ['%room' => '"mkey":"'.$room.'"']);
                 }
-                // $building = $filters['building'] ?? '';
-                // if ($building != "") {
-                //     $queryFilters = array_merge($queryFilters, ['%building' => '"mkey":"'.$building.'"']);
-                // }
+            
                 $managerReviewScore = $filters['managerReviewScore'] ?? '';
                 if ($managerReviewScore != "") {
                     $queryFilters = array_merge($queryFilters, ['managerReviewScore' => $managerReviewScore]);
                 }
-                $userReviewCleanScore = $filters['userReviewCleanScore'] ?? '';
-                if ($userReviewCleanScore != "") {
-                    $queryFilters = array_merge($queryFilters, ['userReviewCleanScore' => $userReviewCleanScore]);
-                }
-                $userReviewEquipmentScore = $filters['userReviewEquipmentScore'] ?? '';
-                if ($userReviewEquipmentScore != "") {
-                    $queryFilters = array_merge($queryFilters, ['userReviewEquipmentScore' => $userReviewEquipmentScore]);
-                }
-                $userReviewFacilityScore = $filters['userReviewFacilityScore'] ?? '';
-                if ($userReviewFacilityScore != "") {
-                    $queryFilters = array_merge($queryFilters, ['userReviewFacilityScore' => $userReviewFacilityScore]);
-                }
+             
 
                 $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
-                $queryFilters = array_merge($queryFilters, ['isApproved' => 1]);
+                // $queryFilters = array_merge($queryFilters, ['isApproved' => 1]);
+                $queryFilters = array_merge($queryFilters, ['@isApproved' => [3, 4]]); // Chỉ lấy: Tài xế đã xác nhận và đã hoàn thành
                 $currentDateTime = new \Bitrix\Main\Type\DateTime();
                 $currentTime = $currentDateTime->format('H:i:s');
                 $queryFilters[] =  [
@@ -326,28 +368,28 @@ class Lists {
                 $item = array_merge($item, $item['options']);
                 unset($item['options']);
             }
-            if ($component == 'approveBookingList' && !$item['isPriority']) {
-                $roomKey = '';
-                if ($item['room']) {
-                    $roomKey = $item['room']['mkey'] ?? '';
-                }
-                $startDate = $item['startDate'] ?? '';
-                $startTime = $item['startTime'] ?? '';
-                $endTime = $item['endTime'] ?? '';
-                $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
-                $startTimeCondition = $startDateCondition->format('H:i:s');
-                $endDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $endTime, "Y-m-d H:i:s");
-                $endTimeCondition = $endDateCondition->format('H:i:s');
-                $overlappingBookings = \Booking\Page\Item::getDuplicatedBooking($item['id'], $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 0, 1);
-                $item['waitForPriority'] = 0;
-                foreach($overlappingBookings as $booking) {
-                    if ($booking['isPriority'] == 1 && $booking['isCancelled'] == 0 && $booking['isApproved'] != -1) {
-                        // Has any priority booking pending or approved
-                        $item['waitForPriority'] = 1;
-                        break;
-                    }
-                }
-            }
+            // if ($component == 'approveBookingList' && !$item['isPriority']) {
+                // $roomKey = '';
+                // if ($item['room']) {
+                //     $roomKey = $item['room']['mkey'] ?? '';
+                // }
+                // $startDate = $item['startDate'] ?? '';
+                // $startTime = $item['startTime'] ?? '';
+                // $endTime = $item['endTime'] ?? '';
+                // $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
+                // $startTimeCondition = $startDateCondition->format('H:i:s');
+                // $endDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $endTime, "Y-m-d H:i:s");
+                // $endTimeCondition = $endDateCondition->format('H:i:s');
+                // $overlappingBookings = \Booking\Page\Item::getDuplicatedBooking($item['id'], $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 0, 1);
+                // $item['waitForPriority'] = 0;
+                // foreach($overlappingBookings as $booking) {
+                //     if ($booking['isPriority'] == 1 && $booking['isCancelled'] == 0 && $booking['isApproved'] != -1) {
+                //         // Has any priority booking pending or approved
+                //         $item['waitForPriority'] = 1;
+                //         break;
+                //     }
+                // }
+            // }
         }
     
         return [

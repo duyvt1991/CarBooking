@@ -9,11 +9,11 @@ const initForm = {
     label: 'config.Không được đặt xe quá (ngày)', 
     validate: (value, t) => !value ? t('config.Không được đặt xe quá (ngày) không được để trống') : '' 
   },
-  maxHourToAutoApprove: { 
-    value: '', 
-    label: 'config.Tự động duyệt khi dưới (giờ)', 
-    validate: (value, t) => !value ? t('config.Tự động duyệt khi dưới (giờ) không được để trống') : '' 
-  },
+  // maxHourToAutoApprove: { 
+  //   value: '', 
+  //   label: 'config.Tự động duyệt khi dưới (giờ)', 
+  //   validate: (value, t) => !value ? t('config.Tự động duyệt khi dưới (giờ) không được để trống') : '' 
+  // },
   maxDayToReview: { 
     value: '', 
     label: 'config.Thời gian đánh giá không quá (ngày)', 
@@ -48,11 +48,11 @@ const initForm = {
     label: 'config.Workgroup ID của người duyệt', 
     validate: (value, t) => !value ? t('config.Workgroup ID của người duyệt không được để trống') : '' 
   },
-  bookingPriorityApprovalGroupId: { 
-    value: '', 
-    label: 'config.Workgroup ID của người duyệt ưu tiên', 
-    validate: (value, t) => !value ? t('config.Workgroup ID của người duyệt ưu tiên không được để trống') : '' 
-  },
+  // bookingPriorityApprovalGroupId: { 
+  //   value: '', 
+  //   label: 'config.Workgroup ID của người duyệt ưu tiên', 
+  //   validate: (value, t) => !value ? t('config.Workgroup ID của người duyệt ưu tiên không được để trống') : '' 
+  // },
   bookingMonitorGroupId: { 
     value: '', 
     label: 'config.Workgroup ID của người quản lý xe', 

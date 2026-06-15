@@ -142,7 +142,8 @@
     "Tài xế": "運転手",
     "Duyệt và phân công": "承認と割り当て",
     "Tài xế tiếp nhận": "運転手の受け入れ",
-    "Xác nhận":"確認"
+    "Xác nhận":"確認",
+    "Tài xế đánh giá":"Tài xế đánh giá"
   },
   "home": {
     "Hệ thống": "システム",
@@ -453,7 +454,9 @@
     "Điểm dịch vụ": "サービス評価点",
     "Điểm dịch vụ không được để trống": "サービス評価点は必須です",
     "Số điện thoại tài xế không được để trống": "運転手の電話番号は必須です",
-    "Biển số xe không được để trống": "車両番号は必須です"
+    "Biển số xe không được để trống": "車両番号は必須です",
+    "Đã duyệt": "承認済み",
+    "Đã phân công": "割り当て済み"
 
   },
   "report": {

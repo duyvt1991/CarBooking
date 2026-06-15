@@ -142,7 +142,8 @@
     "Dòng xe": "Dòng xe",
     "Tài xế": "Tài xế",
     "Duyệt và phân công": "Duyệt và phân công",
-    "Tài xế tiếp nhận": "Tài xế tiếp nhận"
+    "Tài xế tiếp nhận": "Tài xế tiếp nhận",
+    "Tài xế đánh giá": "Tài xế đánh giá"
   },
   "home": {
     "Hệ thống": "Hệ thống",
@@ -454,7 +455,9 @@
     "Điểm dịch vụ không được để trống": "Điểm dịch vụ không được để trống",
     "Xác nhận":"Xác nhận",
     "Số điện thoại tài xế không được để trống": "Số điện thoại tài xế không được để trống",
-    "Biển số xe không được để trống": "Biển số xe không được để trống"
+    "Biển số xe không được để trống": "Biển số xe không được để trống",
+    "Đã duyệt": "Đã duyệt",
+    "Đã phân công": "Đã phân công"
 
   },
   "report": {
