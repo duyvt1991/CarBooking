@@ -59,12 +59,21 @@ export const formatLogType = (logType, t) => {
   }
 }
 
+// export const formatLogPage = (log) => {
+//   const oldValue = log.logOldValue;
+//   const newValue = log.logNewValue;
+//   const id = oldValue.id ?? newValue.id;
+//   return logMasterDataTypeMapping[oldValue.mtype ?? newValue.mtype] + (id ? (" - ID: " + id) : "");
+// }
+
 export const formatLogPage = (log) => {
-  const oldValue = log.logOldValue;
-  const newValue = log.logNewValue;
+  const oldValue = log?.logOldValue || {};
+  const newValue = log?.logNewValue || {};
   const id = oldValue.id ?? newValue.id;
-  return logMasterDataTypeMapping[oldValue.mtype ?? newValue.mtype] + (id ? (" - ID: " + id) : "");
-}
+  const mtype = oldValue.mtype ?? newValue.mtype;
+
+  return (logMasterDataTypeMapping[mtype] || '-') + (id ? ` - ID: ${id}` : '');
+};
 
 export const formatLogValue = (value, type) => {
   return formatLogData(value, type)
@@ -238,77 +247,85 @@ export const formatColor = (color, masterData) => {
 export const getFieldsBookingDetail = (request, masterData, t) => {
   const safeApprovedUsers = Array.isArray(request.approvedUsers) ? request.approvedUsers : [];
   const safeRejectedUsers = Array.isArray(request.rejectedUsers) ? request.rejectedUsers : [];
-  const safeAssimentUser = Array.isArray(request.assignmentUser) ? request.assignmentUser : [];
+  const safeAssimentUser = Array.isArray(request.assignmentUser) ? request.assignmentUser : (request.assignmentUser?.mkey ? [request.assignmentUser] : []);
   const safeDriverConfirmationUser = Array.isArray(request.driverConfirmationUser) ? request.driverConfirmationUser : [];
   const safeDriverDeclineUser = Array.isArray(request.driverDeclineUser) ? request.driverDeclineUser : [];
 
-
   const safeClientNames = Array.isArray(request.clientNames) ? request.clientNames : [];
   const safeDepartureLocations = Array.isArray(request.departureLocation) ? request.departureLocation : [request.departureLocation].filter(Boolean);
-
-  const roomMkey = request.room?.mkey;
-  const roomTypeMkey = request.roomType?.mkey;
-  const room = roomMkey
-    ? (masterData.rooms?.find(r => r.mkey?.toString() === roomMkey.toString()) || { ...request.room, approvers: request.options?.approvers || [] })
-    : null;
-  const roomType = roomTypeMkey
-    ? (masterData.roomTypes?.find(rt => rt.mkey?.toString() === roomTypeMkey.toString()) || { ...request.roomType, approvers: request.options?.approvers || [] })
-    : null;
   const rejectedCount = safeRejectedUsers.length;
-  
-  const approvers = [
-    ...(safeApprovedUsers.map(user => user?.mkey?.toString()).filter(Boolean) || []),
-    ...(safeRejectedUsers.map(user => user?.mkey?.toString()).filter(Boolean) || []),
-    ...(safeAssimentUser.map(user => user?.mkey?.toString()).filter(Boolean) || []),
-    ...(safeDriverConfirmationUser.map(user => user?.mkey?.toString()).filter(Boolean) || []),
-    ...(safeDriverDeclineUser.map(user => user?.mkey?.toString()).filter(Boolean) || []),
-  ].filter((value, index, self) => self.indexOf(value) === index);
+
+  // 1. Xác định Trạng thái tổng thể của booking dựa vào isApproved
+  let statusIcon, statusText, statusBgColor, statusUser = [];
+  const approvedStatus = Number(request?.isApproved);
+
+   if (request?.isCancelled) {
+    statusIcon = <FaMinusCircle />;
+    statusText = t('booking.Đã huỷ');
+    statusBgColor = 'bg-red-100 text-red-500';
+  } else if (approvedStatus === -1 && rejectedCount === 0) {
+    statusIcon = <FaBan />;
+    statusText = t('common.Hệ thống từ chối');
+    statusBgColor = 'bg-red-100 text-red-500';
+  } else if (approvedStatus === -1) {
+    statusIcon = <FaTimes />;
+    statusText = t('common.Từ chối');
+    statusBgColor = 'bg-red-100 text-red-500';
+    statusUser = safeRejectedUsers.length > 0 ? [safeRejectedUsers[safeRejectedUsers.length - 1].mvalue] : [];
+  } else if (approvedStatus === 4) {
+    statusIcon = <FaCheck />;
+    statusText = t('booking.Hoàn thành');
+    statusBgColor = 'bg-green-100 text-green-500';
+  } else if (approvedStatus === 3) {
+    statusIcon = <FaCar />;
+    statusText = t('booking.Tài xế đã xác nhận');
+    statusBgColor = 'bg-green-100 text-green-500';
+    statusUser = safeDriverConfirmationUser.length > 0 ? [safeDriverConfirmationUser[safeDriverConfirmationUser.length - 1].mvalue] : [];
+  } else if (approvedStatus === 2) {
+    statusIcon = <FaClock />;
+    statusText = t('booking.Đã phân công');
+    statusBgColor = 'bg-blue-100 text-blue-500';
+    statusUser = safeAssimentUser.length > 0 ? [safeAssimentUser[safeAssimentUser.length - 1].mvalue] : [];
+  } else if (approvedStatus === 1) {
+    statusIcon = <FaClock />;
+    statusText = t('booking.Đã duyệt');
+    statusBgColor = 'bg-yellow-100 text-yellow-600';
+    statusUser = safeApprovedUsers.length > 0 ? [safeApprovedUsers[safeApprovedUsers.length - 1].mvalue] : [];
+  } else if (approvedStatus === -2) {
+    statusIcon = <FaTimes />;
+    statusText = t('booking.Tài xế từ chối');
+    statusBgColor = 'bg-red-100 text-red-500';
+    statusUser = safeDriverDeclineUser.length > 0 ? [safeDriverDeclineUser[safeDriverDeclineUser.length - 1].mvalue] : [];
+  } else {
+    statusIcon = <FaClock />;
+    statusText = t('common.Chờ duyệt');
+    statusBgColor = 'bg-gray-100 text-gray-500';
+    
+    // Logic tìm danh sách người duyệt đang chờ (Pending) từ masterData.approvers
+    const approverGroup = request?.isPriority ? (masterData.priorityApprovers || []) : (masterData.approvers || []);
+    statusUser = approverGroup.map(u => u.mvalue).filter(Boolean);
+  }
+
 
   const fields = [
     { label: 'ID', value: request.id },
     { label: t('common.Thời điểm đặt'), value: formatDateTime(request.createdDate) },
     {
-      label: t('common.Trạng thái'), value:
-        request?.isCancelled ? (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs mr-1 mb-1 rounded-full bg-red-100 text-red-500"><FaMinusCircle /> {t('booking.Đã huỷ')}</span>
-        ) 
-        : ((request.isApproved === -1 && rejectedCount === 0) ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs mr-1 mb-1 rounded-full bg-red-100 text-red-500"><FaBan /> {t('common.Hệ thống từ chối')}</span>
-          )
-        : approvers.map((approver, index) => {
-          const user = masterData.approvers?.find(user => user.mkey.toString() === approver.toString()) 
-          || masterData.drivers?.find(user => user.mkey.toString() === approver.toString())
-          ;
-          if (!user) return null;
-          if (safeRejectedUsers.some(row => row?.mkey?.toString() === approver.toString())) {
-              return (
-                <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs mr-1 mb-1 rounded-full bg-red-100 text-red-500"><FaTimes /> {user.mvalue}</span>
-              );
-            }
-             else if (safeApprovedUsers.some(row => row?.mkey?.toString() === approver.toString())) {
-              return (
-                <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs mr-1 mb-1 rounded-full bg-yellow-100 text-yellow-600"><FaClock /> {user.mvalue}</span>
-              );
-            } 
-            else if (safeAssimentUser.some(row => row?.mkey?.toString() === approver.toString())) {
-              return (
-                <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs mr-1 mb-1 rounded-full bg-blue-100 text-blue-500"><FaClock /> {user.mvalue}</span>
-              );
-            } 
-            else if (safeDriverConfirmationUser.some(row => row?.mkey?.toString() === approver.toString())) {
-              return (
-                <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs mr-1 mb-1 rounded-full bg-green-100 text-green-500"><FaCar /> {user.mvalue}</span>
-              );
-            } 
-             else if (safeDriverDeclineUser.some(row => row?.mkey?.toString() === approver.toString())) {
-              return (
-                <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs mr-1 mb-1 rounded-full bg-red-100 text-red-500"><FaTimes /> {user.mvalue}</span>
-              );
-            } 
-          return (
-            <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs mr-1 mb-1 rounded-full bg-gray-100 text-gray-500"><FaClock /> {user.mvalue}</span>
-          );
-        }))
+      label: t('common.Trạng thái'), 
+      value: (
+        <div className="flex flex-col items-start gap-1">
+          <span className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 text-xs rounded-full ${statusBgColor}`}>
+            {statusIcon} {statusText}
+          </span>
+          {statusUser.length > 0 && (
+            <div className="flex flex-col gap-0.5">
+              {statusUser.map((user, idx) => (
+                <span key={idx} className="text-xs text-gray-500">{user}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )
     },
 
     !!request.rejectedReason && { label: t('booking.Lý do từ chối duyệt'), value: request.rejectedReason },
@@ -384,7 +401,7 @@ export const formatBookingStatus = (request, masterData, setModal, t) => {
   
     const rejectedCount = safeRejectedUsers.length;
 
-  let icon, text, bgColor;
+  let icon, text, bgColor, statusUser = [];
 
    // 1) Da huy uu tien cao nhat
   if (request?.isCancelled) {
@@ -410,11 +427,11 @@ export const formatBookingStatus = (request, masterData, setModal, t) => {
       bgColor = 'bg-green-100 text-green-500';
     } else if (request.isApproved === 2) {
       icon = <FaClock />;
-      text = t('booking.Chờ tài xế xác nhận');
+      text = t('booking.Đã phân công');
       bgColor = 'bg-blue-100 text-blue-500';
     } else if (request.isApproved === 1) {
       icon = <FaClock />;
-      text = t('booking.Chờ phân công');
+      text = t('booking.Đã duyệt');
       bgColor = 'bg-yellow-100 text-yellow-600';
     
     } else if (request.isApproved === -2) {
@@ -460,57 +477,6 @@ export const formatUserReviewScore = (request, setModal, t) => {
 }
 
 
-export const formatUserReviewCleanScore = (request, setModal, t) => {
-  const fields = [
-    { label: t('common.Chi tiết đánh giá'), value: request.userReviewCleanComment || '-' },
-  ];
-
-  return request.userReviewCleanScore > 0 ? (
-    <span
-      className="cursor-pointer flex gap-1 justify-center"
-      onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
-    >
-      {Array.from({ length: 5 }, (_, i) => (
-        <FaStar key={i} className={i < request.userReviewCleanScore ? 'text-yellow-500' : 'text-gray-300'} />
-      ))}
-    </span>
-  ) : <span className="flex justify-center">-</span>;
-}
-
-export const formatUserReviewEquipmentScore = (request, setModal, t) => {
-  const fields = [
-    { label: t('common.Chi tiết đánh giá'), value: request.userReviewEquipmentComment || '-' },
-  ];
-
-  return request.userReviewEquipmentScore > 0 ? (
-    <span
-      className="cursor-pointer flex gap-1 justify-center"
-      onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
-    >
-      {Array.from({ length: 5 }, (_, i) => (
-        <FaStar key={i} className={i < request.userReviewEquipmentScore ? 'text-yellow-500' : 'text-gray-300'} />
-      ))}
-    </span>
-  ) : <span className="flex justify-center">-</span>;
-}
-
-export const formatUserReviewFacilityScore = (request, setModal, t) => {
-  const fields = [
-    { label: t('common.Chi tiết đánh giá'), value: request.userReviewFacilityComment || '-' },
-  ];
-
-  return request.userReviewFacilityScore > 0 ? (
-    <span
-      className="cursor-pointer flex gap-1 justify-center"
-      onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
-    >
-      {Array.from({ length: 5 }, (_, i) => (
-        <FaStar key={i} className={i < request.userReviewFacilityScore ? 'text-yellow-500' : 'text-gray-300'} />
-      ))}
-    </span>
-  ) : <span className="flex justify-center">-</span>;
-}
-
 export const formatManagerReviewScore = (request, setModal, t) => {
   const fields = [
     { label: t('booking.Điểm mạnh nổi bật'), value: request.managerReviewCommentMost || '-' },
@@ -525,6 +491,25 @@ export const formatManagerReviewScore = (request, setModal, t) => {
     >
       {Array.from({ length: 5 }, (_, i) => (
         <FaStar key={i} className={i < request.managerReviewScore ? 'text-yellow-500' : 'text-gray-300'} />
+      ))}
+    </span>
+  ) : <span className="flex justify-center">-</span>;
+};
+
+export const formatDriverReviewScore = (request, setModal, t) => {
+  const fields = [
+    { label: t('booking.Việc làm tốt hôm nay'), value: request.driverReviewCommentMost || '-' },
+    { label: t('booking.Việc chưa tốt cần cải thiện'), value: request.driverReviewCommentBad || '-' },
+    { label: t('booking.Đề xuất hỗ trợ từ quản lý'), value: request.driverReviewCommentRequest || '-' },
+  ];
+
+  return request.driverReviewScore > 0 ? (
+    <span
+      className="cursor-pointer flex gap-1 justify-center"
+      onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
+    >
+      {Array.from({ length: 5 }, (_, i) => (
+        <FaStar key={i} className={i < request.driverReviewScore ? 'text-yellow-500' : 'text-gray-300'} />
       ))}
     </span>
   ) : <span className="flex justify-center">-</span>;

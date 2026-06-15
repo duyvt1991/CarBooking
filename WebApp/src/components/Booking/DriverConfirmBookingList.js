@@ -6,7 +6,7 @@ import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
 import { FaBan, FaCheck, FaClock, FaInfoCircle, FaTimes, FaRegHourglass, FaMinusCircle } from 'react-icons/fa';
-import { formatDateTime, formatDate, formatTime, formatUser, formatBookingStatus } from '../../systems/util';
+import { formatDateTime, formatDate, formatTime, formatUser, formatBookingStatus, formatDriverReviewScore } from '../../systems/util';
 import { RequestContext } from '../../App';
 import FilterTableLayout from '../../shared/FilterTableLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -61,6 +61,9 @@ function DriverConfirmBookingList({
   const requestFields = [
     { name: 'id', label: 'ID', render: (field, request) => request[field] },
     { name: 'status', align: 'center',  label: t('common.Trạng thái'), render: (field, request) => formatBookingStatus(request, masterData, setModal, t) },
+    ...(tempFilters?.tab === 'review' ? [
+      { name: 'driverReviewScore', align: 'center', label: t('booking.Đánh giá'), render: (field, request) => formatDriverReviewScore(request, setModal, t) },
+    ] : []),
     // { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
     // { name: 'bookingUser', label: t('booking.Người đặt'), render: (field, request) => formatUser(request[field]) },
     { name: 'mainUser', label: t('booking.Người sử dụng'), render: (field, request) => formatUser(request[field]) },
@@ -97,6 +100,15 @@ function DriverConfirmBookingList({
       approve: { label: t('booking.Xác nhận'), className: 'bg-green-500', action: (id) => handleAction(id, 'confirm') },
       reject: { label: t('booking.Từ chối'), className: 'bg-red-500', action: (id) => handleEdit(id, routes.driverRejectBookingForm.path) },
     };
+
+    if (tempFilters?.tab === 'review')
+    {
+       return request?.driverReviewScore > 0 ? 
+            [{ component: <span className="flex items-center justify-center gap-1"><FaCheck className="text-green-500" /></span> }]
+            : [
+                { label: t('booking.Đánh giá'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverReviewForm.path) }
+            ]
+    }
 
     if (isBookingInProgress) return [statusButtons.inProgress];
     if (isPastBooking) return [statusButtons.done];
@@ -144,6 +156,7 @@ function DriverConfirmBookingList({
         <div className="mb-0 ml-[1px] flex sticky left-0 space-x-2 text-sm">
           <button className={`p-2 rounded-t transition-colors duration-300 ${tempFilters.tab === "" ? "bg-green-600 text-white" : "bg-gray-200 hover:bg-gray-300"}`} onClick={() => navigate(routes.driverConfirmBookingList.path)}>{t('booking.Tất cả')}</button>
           <button className={`p-2 rounded-t transition-colors duration-300 ${tempFilters.tab === "pending" ? "bg-green-600 text-white" : "bg-gray-200 hover:bg-gray-300"}`} onClick={() => navigate(`${routes.driverConfirmBookingList.path}?tab=pending`)}>{t('booking.Chờ tài xế xác nhận')}</button>
+          <button className={`p-2 rounded-t transition-colors duration-300 ${tempFilters.tab === "review" ? "bg-green-600 text-white" : "bg-gray-200 hover:bg-gray-300"}`} onClick={() => navigate(`${routes.driverConfirmBookingList.path}?tab=review`)}>{t('booking.Đánh giá')}</button>
         </div>
         <TableLayout 
           requestFields={requestFields} 

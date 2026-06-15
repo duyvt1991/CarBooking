@@ -91,37 +91,7 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
-            new TextField('users', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
-            ]),
             new TextField('department', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
-            ]),
-            new TextField('building', [
                 'default_value' => [],
                 'fetch_data_modification' => function() {
                     return [
@@ -192,21 +162,6 @@ class booking_requestsTable extends DataManager {
             ]),
             new StringField('startTime'),
             new StringField('endTime'),
-            new TextField('equipments', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
-            ]),
             new IntegerField('size', [
                 'fetch_data_modification' => function() {
                     return [
@@ -386,45 +341,6 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
-            new IntegerField('userReviewCleanScore', [
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            return is_numeric($value) ? $value * 1 : $value;
-                        }
-                    ];
-                }
-            ]),
-            new TextField('userReviewCleanComment', [
-                'default_value' => ''
-            ]),
-            new IntegerField('userReviewEquipmentScore', [
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            return is_numeric($value) ? $value * 1 : $value;
-                        }
-                    ];
-                }
-            ]),
-            new TextField('userReviewEquipmentComment', [
-                'default_value' => ''
-            ]),
-            new TextField('userReviewCleanComment', [
-                'default_value' => ''
-            ]),
-            new IntegerField('userReviewFacilityScore', [
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            return is_numeric($value) ? $value * 1 : $value;
-                        }
-                    ];
-                }
-            ]),
-            new TextField('userReviewFacilityComment', [
-                'default_value' => ''
-            ]),
             new IntegerField('managerReviewScore', [
                 'fetch_data_modification' => function() {
                     return [
@@ -596,22 +512,10 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
-             new TextField('driverDeclineReason', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+            new TextField('driverDeclineReason', [
+                'default_value' => ''
             ]),
-             new DateTimeField('driverDeclineDate', [
+            new DateTimeField('driverDeclineDate', [
                 'fetch_data_modification' => function() {
                     return [
                         function ($value) {
@@ -648,34 +552,10 @@ class booking_requestsTable extends DataManager {
                 }
             ]),
             new TextField('userReviewCommentMost', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+                'default_value' => ''
             ]),
             new TextField('userReviewCommentBad', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+               'default_value' => ''
             ]),
             new DateTimeField('userReviewDate', [
                 'fetch_data_modification' => function() {
@@ -714,49 +594,13 @@ class booking_requestsTable extends DataManager {
                 }
             ]),
             new TextField('driverReviewCommentMost', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+                'default_value' => ''
             ]),
             new TextField('driverReviewCommentBad', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+                'default_value' => ''
             ]),
             new TextField('driverReviewCommentRequest', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+                'default_value' => ''
             ]),
              new DateTimeField('driverReviewDate', [
                 'fetch_data_modification' => function() {
@@ -785,51 +629,14 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
-         
             new TextField('managerReviewCommentMost', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+                'default_value' => ''
             ]),
             new TextField('managerReviewCommentBad', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+                'default_value' => ''
             ]),
              new TextField('managerReviewCommentRequest', [
-                'default_value' => [],
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if (empty($value)) return [];
-                            try {
-                                return json_decode($value, true) ?: [];
-                            } catch (\Throwable $th) {
-                                return [];
-                            }
-                        }
-                    ];
-                }
+                'default_value' => ''
             ]),
             new DateTimeField('managerReviewDate', [
                 'fetch_data_modification' => function() {
@@ -858,7 +665,27 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
-
+            new IntegerField('notificationDriverCount', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            return is_numeric($value) ? $value * 1 : $value;
+                        }
+                    ];
+                }
+            ]),
+            new DateTimeField('notificationDriverDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof DateTime) {
+                                return $value->format('Y-m-d H:i:s');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
 
             new IntegerField('isSyncedThirdParty', [
                 'fetch_data_modification' => function() {

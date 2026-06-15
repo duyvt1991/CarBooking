@@ -54,7 +54,6 @@ function RoomTypeList({
     //   ].filter(field => field && field.value);
     //   return equipmentsValue.length === 0 ? t('common.[count] thiết bị', { count: 0 }) : <button onClick={() => setModal(<ModalContent title={t(`routes.${routes.roomTypeList.label}`)} fields={fields} />)} className="cursor-pointer underline text-blue-700 text-ellipsis overflow-hidden">{t('common.[count] thiết bị', { count: equipmentsValue.length })}</button>;
     // } },
-    // { name: 'size', align: 'right', label: t('roomType.Diện tích (m²)'), render: (field, request) => formatSize(request[field]) },
     { name: 'persons',  align: 'right',label: t('roomType.Sức chứa (người)'), render: (field, request) => formatPersons(request[field], null, t) },
     { name: 'color', align: 'center', label: t('roomType.Màu đại diện'), render: (field, request) => formatColor(request[field]) },
     // { name: 'hasAutoApprove', align: 'center', label: t('roomType.Tự động duyệt'), render: (field, request) => {

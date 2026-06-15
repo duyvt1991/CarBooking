@@ -207,10 +207,6 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
       isCancelled: 0,
       cancelledReason: "",
       cancelledDate: "",
-      userReviewCleanScore: 0,
-      userReviewCleanComment: "",
-      userReviewEquipmentScore: 0,
-      userReviewEquipmentComment: "",
       managerReviewScore: 0,
       managerReviewComment: "",
       departureLocation: randomDepartureLocation,
@@ -256,10 +252,7 @@ const bookings = [
     isCancelled: 0,
     cancelledReason: "",
     cancelledDate: "",
-    userReviewCleanScore: 0,
-    userReviewCleanComment: "",
-    userReviewEquipmentScore: 0,
-    userReviewEquipmentComment: "",
+   
     managerReviewScore: 0,
     managerReviewComment: "",
     departureLocation: [mockMasterData.departureLocations[0].mkey],
@@ -310,10 +303,7 @@ const bookings = [
     isCancelled: 0,
     cancelledReason: "",
     cancelledDate: "",
-    userReviewCleanScore: 0,
-    userReviewCleanComment: "",
-    userReviewEquipmentScore: 0,
-    userReviewEquipmentComment: "",
+   
     managerReviewScore: 0,
     managerReviewComment: "",
       departureLocation: [mockMasterData.departureLocations[1].mkey],
@@ -364,10 +354,7 @@ const bookings = [
     isCancelled: 0,
     cancelledReason: "",
     cancelledDate: "",
-    userReviewCleanScore: 0,
-    userReviewCleanComment: "",
-    userReviewEquipmentScore: 0,
-    userReviewEquipmentComment: "",
+   
     managerReviewScore: 0,
     managerReviewComment: "",
       departureLocation: [mockMasterData.departureLocations[2].mkey],
@@ -418,10 +405,7 @@ const bookings = [
     isCancelled: 0,
     cancelledReason: "",
     cancelledDate: "",
-    userReviewCleanScore: 0,
-    userReviewCleanComment: "",
-    userReviewEquipmentScore: 0,
-    userReviewEquipmentComment: "",
+    
     managerReviewScore: 0,
     managerReviewComment: "",
       departureLocation: [mockMasterData.departureLocations[0].mkey],
@@ -472,10 +456,7 @@ const bookings = [
     isCancelled: 1,
     cancelledReason: "Cancel Reason",
     cancelledDate: "2026-05-26 13:30:00",
-    userReviewCleanScore: 0,
-    userReviewCleanComment: "",
-    userReviewEquipmentScore: 0,
-    userReviewEquipmentComment: "",
+    
     managerReviewScore: 0,
     managerReviewComment: "",
       departureLocation: [mockMasterData.departureLocations[1].mkey],
@@ -526,10 +507,7 @@ const bookings = [
     isCancelled: 0,
     cancelledReason: "",
     cancelledDate: "",
-    userReviewCleanScore: 0,
-    userReviewCleanComment: "",
-    userReviewEquipmentScore: 0,
-    userReviewEquipmentComment: "",
+    
     managerReviewScore: 0,
     managerReviewComment: "",
       departureLocation: [mockMasterData.departureLocations[1].mkey],
@@ -580,10 +558,7 @@ const bookings = [
     isCancelled: 0,
     cancelledReason: "",
     cancelledDate: "",
-    userReviewCleanScore: 2,
-    userReviewCleanComment: "User Review Clean Comment 2",
-    userReviewEquipmentScore: 4,
-    userReviewEquipmentComment: "User Review Equipment Comment 2",
+    
     managerReviewScore: 0,
     managerReviewComment: "", 
       departureLocation: [mockMasterData.departureLocations[1].mkey],
@@ -634,10 +609,7 @@ const bookings = [
     isCancelled: 0,
     cancelledReason: "",
     cancelledDate: "",
-    userReviewCleanScore: 0,
-    userReviewCleanComment: "",
-    userReviewEquipmentScore: 0,
-    userReviewEquipmentComment: "",
+    
     managerReviewScore: 4,
     managerReviewComment: "Manager Review Comment 4",
       departureLocation: [mockMasterData.departureLocations[1].mkey],
@@ -688,10 +660,7 @@ const bookings = [
     isCancelled: 1,
     cancelledReason: "Cancel Reason",
     cancelledDate: "2026-05-26 13:30:00",
-    userReviewCleanScore: 0,
-    userReviewCleanComment: "",
-    userReviewEquipmentScore: 0,
-    userReviewEquipmentComment: "",
+    
     managerReviewScore: 0,
     managerReviewComment: "", 
       departureLocation: [mockMasterData.departureLocations[1].mkey],
@@ -989,26 +958,7 @@ const calculateUsageDemand = (bookings) => {
 
 const mockReportUsageDemand = calculateUsageDemand(bookings);
 
-const calculateUserReviewScores = (bookings) => {
-  const cleanScore = { score1: 0, score2: 0, score3: 0, score4: 0, score5: 0 };
-  const equipmentScore = { score1: 0, score2: 0, score3: 0, score4: 0, score5: 0 };
 
-  bookings.forEach(booking => {
-    const { userReviewCleanScore, userReviewEquipmentScore } = booking;
-
-    if (userReviewCleanScore >= 1 && userReviewCleanScore <= 5) {
-      cleanScore[`score${userReviewCleanScore}`]++;
-    }
-
-    if (userReviewEquipmentScore >= 1 && userReviewEquipmentScore <= 5) {
-      equipmentScore[`score${userReviewEquipmentScore}`]++;
-    }
-  });
-
-  return { cleanScore, equipmentScore };
-};
-
-const mockReportUserReview = calculateUserReviewScores(bookings);
 
 const calculateManagerReviewScores = (bookings) => {
   const managerReviewScores = { score1: 0, score2: 0, score3: 0, score4: 0, score5: 0 };
@@ -1173,7 +1123,9 @@ export const mockData = (action, data) => {
             if (tab === 'pending') {
               return booking.isCancelled === 0 && (booking.isApproved === 2 ) 
                 && new Date() < new Date(`${booking.startDate} ${booking.endTime}`);
-            } else {
+            } else if (tab === 'review') {
+              return booking.isCancelled === 0 && (booking.isApproved === 4 );
+            }  else {
               // return true;
               return booking.isCancelled === 0 && (booking.isApproved === 3 || booking.isApproved === 4 || booking.isApproved === -2) 
             }
@@ -1191,8 +1143,8 @@ export const mockData = (action, data) => {
           return mockReportCapacity;
         case 'reportUsageDemand':
           return mockReportUsageDemand;
-        case 'reportUserReview':
-          return mockReportUserReview;
+        // case 'reportUserReview':
+        //   return mockReportUserReview;
         case 'reportManagerReview':
           return mockReportManagerReview;
         default:

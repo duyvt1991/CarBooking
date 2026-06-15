@@ -64,6 +64,7 @@ import DriverForm from './components/System/DriverForm.js';
 import ApproveAssignBookingForm from './components/Booking/ApproveAssignBookingForm.js';
 import DriverConfirmBookingList from './components/Booking/DriverConfirmBookingList.js';
 import DriverRejectBookingForm from './components/Booking/DriverRejectBookingForm.js';
+import DriverReviewForm from './components/Booking/DriverReviewForm.js';
 
 import jpFlag from './i18n/flags/jp.svg';
 import vnFlag from './i18n/flags/vn.svg';
@@ -197,7 +198,7 @@ const App = () => {
     { path: `${routes.approveAssignBookingForm.path}/:id`, permissions: routes.approveAssignBookingForm.permissions, component: <ApproveAssignBookingForm /> },
     { path: routes.driverConfirmBookingList.path, permissions: routes.driverConfirmBookingList.permissions, component: <DriverConfirmBookingList /> },
     { path: `${routes.driverRejectBookingForm.path}/:id`, permissions: routes.driverRejectBookingForm.permissions, component: <DriverRejectBookingForm /> },
-
+    { path: `${routes.driverReviewForm.path}/:id`, permissions: routes.driverReviewForm.permissions, component: <DriverReviewForm /> }
   ]
 
   const changeLanguage = (language) => {

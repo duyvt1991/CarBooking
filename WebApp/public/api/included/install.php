@@ -13,7 +13,7 @@ class Install {
         }
         $connection = Application::getConnection("car_booking_connection");
 
-        $RESET_DATA = false;
+        $RESET_DATA = true;
         if ($request->getPost("dropTable") && $RESET_DATA) { // TODO: Add false to prevent accidental deletion
             $connection->queryExecute("DROP TABLE IF EXISTS car_booking_masterdata");
             $connection->queryExecute("DROP TABLE IF EXISTS car_booking_requests");
@@ -53,16 +53,13 @@ class Install {
                 notificationDate DATETIME,
                 bookingUser TEXT NULL,
                 mainUser TEXT NULL,
-                users TEXT NULL,
                 department TEXT NULL,
-                building TEXT NULL,
                 room TEXT NULL,
                 roomType TEXT NULL,
                 createdDate DATETIME,
                 startDate DATE,
                 startTime TIME,
                 endTime TIME,
-                equipments TEXT NULL,
                 size INT DEFAULT 0,
                 persons INT DEFAULT 0,
                 usagePurpose TEXT NULL,
@@ -79,14 +76,6 @@ class Install {
                 isCancelled BOOLEAN DEFAULT 0,
                 cancelledReason TEXT NULL,
                 cancelledDate DATETIME,
-                userReviewCleanScore INT DEFAULT 0,
-                userReviewCleanComment TEXT NULL,
-                userReviewEquipmentScore INT DEFAULT 0,
-                userReviewEquipmentComment TEXT NULL,
-                userReviewFacilityScore INT DEFAULT 0,
-                userReviewFacilityComment TEXT NULL,
-                managerReviewScore INT DEFAULT 0,
-                managerReviewComment TEXT NULL,
                 log TEXT NULL,
                 isPriority INT DEFAULT 0,
                 note TEXT NULL,
@@ -120,11 +109,15 @@ class Install {
                 driverReviewCommentRequest TEXT NULL,
                 driverReviewDate DATETIME,
                 driverReviewUser TEXT NULL,
+                managerReviewScore INT DEFAULT 0,
+                managerReviewComment TEXT NULL,
                 managerReviewCommentMost TEXT NULL,
                 managerReviewCommentBad TEXT NULL,
                 managerReviewCommentRequest TEXT NULL,
                 managerReviewDate DATETIME,
-                managerReviewUser TEXT NULL,                
+                managerReviewUser TEXT NULL,     
+                notificationDriverCount INT DEFAULT 0,
+                notificationDriverDate DATETIME,           
                 isSyncedThirdParty INT DEFAULT 0,
                 thirdPartySyncDate DATETIME
 
@@ -136,22 +129,6 @@ class Install {
         $columns = $connection->query("SHOW COLUMNS FROM car_booking_requests")->fetchAll();
         $existingColumns = array_column($columns, 'Field');
 
-        // Add column
-        $newColumns = [];
-        foreach ($newColumns as $column => $type) {
-            if (!in_array($column, $existingColumns)) {
-                $connection->queryExecute("ALTER TABLE car_booking_requests ADD COLUMN $column $type AFTER clientNames");
-            }
-        }
-
-        // Modify columns
-        $modifyColumns = [];
-        foreach ($modifyColumns as $column => $type) {
-            if (in_array($column, $existingColumns)) {
-                $connection->queryExecute("ALTER TABLE car_booking_requests MODIFY COLUMN $column $type");
-            }
-        }
-
         if ($request->getPost("dropTable") && $RESET_DATA) { // TODO: Add false to prevent accidental insertion dummy data
             $masterData = [
                 "version" => [ ["", "version", "1", true, Json::encode([])] ],
@@ -160,11 +137,11 @@ class Install {
                     ["", "maxHourToAutoApprove", "4", true, Json::encode([])],
                     ["", "maxDayToReview", "3", true, Json::encode([])],
                     ["", "usagePurposeKeyForClient", Json::encode(["UP001", "UP002"]), true, Json::encode([])],
-                    ["", "bookingAdminGroupId", "25", true, Json::encode([])],
-                    ["", "bookingApprovalGroupId", "26", true, Json::encode([])],
-                    ["", "bookingMonitorGroupId", "27", true, Json::encode([])],
+                    ["", "bookingAdminGroupId", "260", true, Json::encode([])],
+                    ["", "bookingApprovalGroupId", "261", true, Json::encode([])],
+                    ["", "bookingMonitorGroupId", "262", true, Json::encode([])],
                     ["", "bookingPriorityApprovalGroupId", "48", true, Json::encode([])],
-                    ["", "bookingDriverGroupId", "28", true, Json::encode([])],
+                    ["", "bookingDriverGroupId", "266", true, Json::encode([])],
                     // ["", "buildingDefault", "", true, Json::encode([])],
 
                 ],
@@ -180,32 +157,11 @@ class Install {
                     ["", "BitrixID-468", "Võ Thanh Duy (duyvt@esuhai.com)", true, Json::encode([])],
                     ["", "BitrixID-490", "Bùi Lê Minh Anh (anhblm@esuhai.com)", true, Json::encode([])]
                 ],
-                // "buildings" => [
-                //     ["", "B001", "Building 1", true, Json::encode(["address" => "123 Lê Lợi"])],
-                //     ["", "B002", "Building 2", true, Json::encode(["address" => "345 Lê Lợi"])],
-                //     ["", "B003", "Building 3", true, Json::encode(["address" => "678 Lê Lợi"])]
-                // ],
                 "departments" => [
                     ["", "D001", "Department 1", true, Json::encode([])],
                     ["", "D002", "Department 2", true, Json::encode([])],
                     ["", "D003", "Department 3", true, Json::encode([])]
                 ],
-                // "equipmentTypes" => [
-                //     // ["", "ET001", "Equipment Type 1", true, Json::encode([])],
-                //     // ["", "ET002", "Equipment Type 2", true, Json::encode([])],
-                //     // ["", "ET003", "Equipment Type 3", true, Json::encode([])]
-                // ],
-                // "equipments" => [
-                //     // ["ET001", "E001", "Equipment 1", true, Json::encode(["quantity" => "5", "note" => "Đang sửa 2 cái"])],
-                //     // ["ET001", "E002", "Equipment 2", true, Json::encode(["quantity" => "", "note" => ""])],
-                //     // ["ET001", "E003", "Equipment 3", true, Json::encode(["quantity" => "5", "note" => "Đang sửa 2 cái"])],
-                //     // ["ET002", "E004", "Equipment 4", true, Json::encode(["quantity" => "5", "note" => "Đang sửa 2 cái"])],
-                //     // ["ET002", "E005", "Equipment 5", true, Json::encode(["quantity" => "5", "note" => "Đang sửa 2 cái"])],
-                //     // ["ET002", "E006", "Equipment 6", true, Json::encode(["quantity" => "5", "note" => "Đang sửa 2 cái"])],
-                //     // ["ET001", "E007", "Equipment 7", true, Json::encode(["quantity" => "5", "note" => "Đang sửa 2 cái"])],
-                //     // ["ET001", "E008", "Equipment 8", true, Json::encode(["quantity" => "5", "note" => "Đang sửa 2 cái"])],
-                //     // ["ET003", "E009", "Equipment 9", true, Json::encode(["quantity" => "5", "note" => "Đang sửa 2 cái"])]
-                // ],
                 "usagePurposes" => [
                     ["", "UP001", "Usage Purpose 1", true, Json::encode([])],
                     ["", "UP002", "Usage Purpose 2", true, Json::encode([])],
@@ -226,12 +182,13 @@ class Install {
                 //     // ["RT002", "R007", "Room 7", true, Json::encode(["roomType" => "RT002", "building" => 'B001', "approvers" => ["BitrixID-471", "BitrixID-491"], "equipments" => ["E003", "E005", "E006"], "size" => 20, "persons" => 24, "color" => "#00FF00"])]
                 // ],
                 "drivers" => [
-                    ["", "BitrixID-468", "Võ Thanh Duy (duyvt@esuhai.com)", true, Json::encode(["driverPhoneNumber" => "0909090909"])],
-                    ["", "BitrixID-490", "Bùi Lê Minh Anh (anhblm@esuhai.com)", true, Json::encode(["driverPhoneNumber" => "0909090901"])]
+                    ["", "BitrixID-468", "Võ Thanh Duy (duyvt@esuhai.com)", true, Json::encode(["driverPhoneNumber" => "0909090909", "isSync" => 0])],
+                    ["", "BitrixID-490", "Bùi Lê Minh Anh (anhblm@esuhai.com)", true, Json::encode(["driverPhoneNumber" => "0909090901", "isSync" => 0])]
                 ],
                 "serviceTypes" => [
-                    ["", "ST001", "Xe nội bộ", true, Json::encode([])],
-                    ["", "ST002", "Xe ngoài", true, Json::encode([])]
+                    ["", "ST001", "Xe nội bộ", true, Json::encode(["isServiceCar" => "0"])],
+                    ["", "ST002", "Xe dịch vụ", true, Json::encode(["isServiceCar" => "1"])],
+                    ["", "ST003", "Xe Grab", true, Json::encode(["isServiceCar" => "1"])]
                 ]
             ];
             

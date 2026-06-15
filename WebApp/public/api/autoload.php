@@ -40,3 +40,4 @@ require_all_files(dirname(__FILE__) . '/included');
 \Booking\Query::initialize();
 \Booking\Notification::initialize();
 \Booking\MailTemplate::initialize();
+\Booking\ThirdPartyApi::initialize();

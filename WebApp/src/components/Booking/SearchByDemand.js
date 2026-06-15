@@ -38,13 +38,13 @@ const initForm = {
     value: '',
     label: ''
   },
-  // building: { 
-  //   value: '', 
-  //   label: 'booking.Toà nhà', 
-  //   type: 'select',
-  //   isValueObject: true,
-  //   optionsMasterDataKey: "buildings", 
-  // },
+  roomType: { 
+    value: '', 
+    label: 'booking.Loại xe', 
+    type: 'select',
+    isValueObject: true,
+    optionsMasterDataKey: "roomTypes", 
+  },
   date: { 
     value: '', 
     label: 'booking.Ngày', 
@@ -81,8 +81,7 @@ function SearchByDemand({ request, errors, handleChange }) {
     const fromDate = `${request.date || '1900-01-01'} ${request.startTime || '00:00:00'}`;
     const toDate = `${request.date || '2100-01-01'} ${request.endTime || '23:59:59'}`;
     setLoading(true);
-    // getAvailableRooms(component, { fromDate, toDate, building: request?.building?.mkey }, { signal }).then(data => {
-    getAvailableRooms(component, { fromDate, toDate}, { signal }).then(data => {
+    getAvailableRooms(component, { fromDate, toDate, roomType: request.roomType?.mkey }, { signal }).then(data => {
       setAvailableRooms(data);
       handleChange('room', '');
         }).catch(error => console.error('Lỗi khi lấy dữ liệu đặt xe:', error))
@@ -115,11 +114,11 @@ function SearchByDemand({ request, errors, handleChange }) {
   };
 
   const searchRooms = () => {
-    const rooms = masterData.rooms.filter(room => room.building.toString() === request.building?.mkey?.toString());
-    setFilteredRooms(request.building?.mkey ? rooms : masterData.rooms);
+    const rooms = masterData.rooms.filter(room => room.roomType.toString() === request.roomType?.mkey?.toString());
+    setFilteredRooms(request.roomType?.mkey ? rooms : masterData.rooms);
   };
 
-  const handleBuildingChange = (field, value) => {
+  const handleRoomTypeChange = (field, value) => {
     handleChange([field, 'room'], [value, '']);
     searchRooms();
   };
@@ -143,7 +142,7 @@ function SearchByDemand({ request, errors, handleChange }) {
 
   useEffect(() => {
     searchRooms();
-  }, [request.building]);
+  }, [request.roomType]);
 
   useEffect(() => {
     sessionStorage.removeItem(`${routes.bookingForm.component}_requestContext`);
@@ -160,7 +159,7 @@ function SearchByDemand({ request, errors, handleChange }) {
             request={request} 
             errors={errors} 
             handleChange={
-              field === 'building' ? handleBuildingChange : 
+              field === 'roomType' ? handleRoomTypeChange : 
               field === 'startTime' ? handleStartTimeChange : 
               handleChange
             } 
@@ -172,10 +171,10 @@ function SearchByDemand({ request, errors, handleChange }) {
           <tbody className="divide-y divide-gray-200">
             {Object.keys(groupedRooms).map(roomType => (
               <tr key={roomType}>
-                <td className="px-6 py-4 w-1/4 whitespace-nowrap text-sm font-medium text-gray-900"> {groupedRooms[roomType]?.[0]?.roomTypeMValue}</td>
+                {/* <td className="px-6 py-4 w-1/4 whitespace-nowrap text-sm font-medium text-gray-900"> {groupedRooms[roomType]?.[0]?.roomTypeMValue}</td> */}
                 <td className="px-6 py-4 text-sm text-gray-800">
                   {groupedRooms[roomType].map(room => {
-                    const isAvailable = availableRooms.some(availableRoom => availableRoom === room.mkey);
+                    const isAvailable = Array.isArray(availableRooms) && availableRooms.some(availableRoom => availableRoom === room.mkey);
                     return <div 
                       key={room.mkey} 
                       className={`inline-block cursor-pointer text-xs px-2 py-0.5 rounded-full mr-1 mb-1 bg-gray-100 text-gray-800`}
@@ -208,14 +207,14 @@ function SearchByDemand({ request, errors, handleChange }) {
         >
           {t('booking.Trở về')}
         </button>
-        <button
+        {/* <button
           className="submit-btn"
           type="button"
           disabled={availableRooms.length === 0 || !request.room?.mkey}
           onClick={() => goToBookingForm()}
         >
           {t('booking.Đặt xe')}
-        </button>
+        </button> */}
       </div>
     </div>
   );

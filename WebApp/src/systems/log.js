@@ -204,6 +204,10 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Đang mở khoá";
                 case "isDeleted":
                     return "Đã xoá";
+                case "hasServiceCar":
+                    return "Xe đặt ngoài";
+                case "licensePlateNumber":
+                    return "Biển số";
                 default:
                     return key.toUpperCase();
             }
@@ -211,10 +215,10 @@ export const logMasterDataKeyMapping = (mtype, key) => {
             switch (key) {
                 case "note":
                     return "Ghi chú";
-                case "building":
-                    return "Chi nhánh";
+                case "departureLocation":
+                    return "Điểm xuất phát";
                 case "roomType":
-                    return "Loại phòng";
+                    return "Loại xe";
                 case "createdDate":
                     return "Ngày tạo";
                 case "approvedDate":
@@ -227,18 +231,18 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Người duyệt";
                 case "rejectedUsers":
                     return "Người từ chối";
-                case "size":
-                    return "Mẫu xe";
-                case "persons":
-                    return "Sức chứa";
+                case "employees":
+                    return "Tên nhân viên tham gia";
+                case "flightNumber":
+                    return "Số hiệu chuyến bay";
                 case "room":
-                    return "Phòng";
+                    return "Xe";
                 case "department":
                     return "Phòng ban";
                 case "mainUser":
                     return "Người sử dụng";
-                case "users":
-                    return "Tên nhân viên tham gia";
+                case "carLine":
+                    return "Dòng xe đề xuất";
                 case "startDate":
                     return "Ngày sử dụng";
                 case "startTime":
@@ -255,8 +259,8 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Số lượng khách";
                 case "clientNames":
                     return "Tên khách";
-                case "externalClients":
-                    return "Khách bên ngoài";
+                case "driver":
+                    return "Tài xế đề xuất";
                 case "externalClientNames":
                     return "Phân loại khách ngoài";
                 case "isPriority":
@@ -268,9 +272,27 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                 case "rejectedReason":
                     return "Lý do từ chối";
                 case "isApproved":
-                    return "Duyệt & phân công (0: chưa duyệt, 1: đã duyệt , 2: chờ tài xế xác nhận, 3: tài xế đã xác nhận, -1: từ chối, -2: tài xế từ chối)";
-                case "equipments":
-                    return "Thiết bị";
+                    return "Duyệt & phân công (0: Chờ duyệt, 1: Đã duyệt, 2: Đã phân công, 3: Tài xế đã xác nhận, 4: Hoàn thành, -1: Từ chối, -2: Tài xế từ chối)";
+                case "detailedSchedule":
+                    return "Lịch trình chi tiết";
+                case "serviceType":
+                    return "Loại dịch vụ";
+                case "licensePlateNumber":
+                    return "Biển số xe";
+                case "driverUser":
+                    return "Tài xế";
+                case "driverPhoneNumber":
+                    return "Số điện thoại tài xế";
+                case "assignmentDate":
+                    return "Ngày phân công";
+                case "assignmentUser":
+                    return "Người phân công";
+                case "driverDeclineUser":
+                    return "Tài xế từ chối";
+                case "driverDeclineDate":
+                    return "Ngày tài xế từ chối";
+                 case "driverDeclineReason":
+                    return "Lý do tài xế từ chối";
                 default:
                     return key.toUpperCase();
             }
@@ -291,7 +313,7 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Esuhai User ID";
                 case "mvalue":
                     return "Esuhai User Name";
-                case "phonenumber":
+                case "driverPhoneNumber":
                     return "Số điện thoại";
                 case "isDeleted":
                     return "Đã xoá";

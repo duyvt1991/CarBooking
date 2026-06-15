@@ -26,7 +26,7 @@ function Home() {
   const systemButtons = [
     { ...routes.adminList, icon: FaUser },
     { ...routes.approverList, icon: FaUser },
-    { ...routes.priorityApproverList, icon: FaUser },
+    // { ...routes.priorityApproverList, icon: FaUser },
     { ...routes.managerList, icon: FaUser },
     { ...routes.log, icon: FaClipboardList },
     { ...routes.config, icon: FaCogs },

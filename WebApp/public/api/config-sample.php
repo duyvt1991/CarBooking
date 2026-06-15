@@ -11,3 +11,5 @@ define('DAT_PHONG_DB_USER', $DBLogin);
 define('DAT_PHONG_DB_PASSWORD', $DBPassword);
 define('DAT_PHONG_DB_HOST', $DBHost);
 define('DAT_PHONG_DB_TYPE', $DBType);
+define('DAT_XE_MOBILE_URL', "");
+

@@ -48,9 +48,10 @@ class Item {
             'managerReviewForm' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'],
             'carLineForm' => ['Permission [Car_Booking_Admin]'],
             'driverForm' => ['Permission [Car_Booking_Admin]'],
-            'approveAssignBookingForm' => ['Permission [Car_Booking_Admin', 'Permission [Car_Booking_Approval', 'Permission [Car_Booking_Priority_Approval'],
-            'driverConfirmBookingList' => ['Permission [Car_Booking_Admin', , 'Permission [Car_Booking_Driver_Confirm'],
-            'driverRejectBookingForm' => ['Permission [Car_Booking_Admin', , 'Permission [Car_Booking_Driver_Confirm']
+            'approveAssignBookingForm' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]'],
+            'driverConfirmBookingList' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Driver_Confirm]'],
+            'driverRejectBookingForm' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Driver_Confirm]'],
+            'driverReviewForm' => ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Driver_Confirm]']
 
         ];
 
@@ -293,33 +294,36 @@ class Item {
         if (!$hasPermission) {
             return ['status' => 'error', 'message' => 'Tài khoản của bạn không có quyền thực hiện thao tác này'];
         }
-        if (!in_array($component, ["bookingForm", "cancelBookingForm", "rejectBookingForm", "approveBookingForm", "userReviewForm", "managerReviewForm", "bookingList", "approveBookingList", "userReviewList", "managerReviewList"])) {
+        if (!in_array($component, ["bookingForm", "cancelBookingForm", "rejectBookingForm", "approveBookingForm", "userReviewForm"
+        , "managerReviewForm", "bookingList", "approveBookingList", "userReviewList", "managerReviewList"
+        , "driverRejectBookingForm", "driverReviewForm",
+          "approveAssignBookingForm", "driverConfirmBookingList"])) {
             $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
             $queryMasterData->setSelect(['*']);
             $queryMasterData->setFilter(['id' => $id]);
             $currentItem = $queryMasterData->exec()->fetch();
-            if ($currentItem && $component == "buildingList") {
-                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
-                $queryMasterData->setSelect(['*']);
-                $queryMasterData->setFilter([
-                    'mtype' => 'rooms',
-                    '%options' => '"building":"'.$currentItem['mkey'].'"',
-                    'isDeleted' => 0
-                ]);
-                $existRooms = $queryMasterData->exec()->fetchAll();
-                if ($existRooms) {
-                    return ['status' => 'error', 'message' => 'Không thể xóa chi nhánh này vì có xe đang sử dụng'];
-                }
-            }
+            // if ($currentItem && $component == "buildingList") {
+            //     $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+            //     $queryMasterData->setSelect(['*']);
+            //     $queryMasterData->setFilter([
+            //         'mtype' => 'rooms',
+            //         '%options' => '"building":"'.$currentItem['mkey'].'"',
+            //         'isDeleted' => 0
+            //     ]);
+            //     $existRooms = $queryMasterData->exec()->fetchAll();
+            //     if ($existRooms) {
+            //         return ['status' => 'error', 'message' => 'Không thể xóa chi nhánh này vì có xe đang sử dụng'];
+            //     }
+            // }
 
             if ($component == "approverList" && $currentItem) {
-                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
-                $queryMasterData->setSelect(['*']);
-                $queryMasterData->setFilter(['mtype' => 'roomTypes', 'isDeleted' => 0, '%options' => '"'.$currentItem['mkey'].'"']);
-                $existRoomTypes = $queryMasterData->exec()->fetchAll();
-                if (!empty($existRoomTypes)) {
-                    return ['status' => 'error', 'message' => 'Không thể xóa người phê duyệt này vì có loại xe đang sử dụng'];
-                }
+                // $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                // $queryMasterData->setSelect(['*']);
+                // $queryMasterData->setFilter(['mtype' => 'roomTypes', 'isDeleted' => 0, '%options' => '"'.$currentItem['mkey'].'"']);
+                // $existRoomTypes = $queryMasterData->exec()->fetchAll();
+                // if (!empty($existRoomTypes)) {
+                //     return ['status' => 'error', 'message' => 'Không thể xóa người phê duyệt này vì có loại xe đang sử dụng'];
+                // }
 
                 $connection = Application::getConnection("car_booking_connection");
                 $existRooms = $connection->query("
@@ -330,15 +334,15 @@ class Item {
                 }
             }
 
-            if ($component == "priorityApproverList" && $currentItem) {
-                $connection = Application::getConnection("car_booking_connection");
-                $existRooms = $connection->query("
-                    SELECT * FROM car_booking_masterdata WHERE mtype = 'rooms' AND isDeleted = 0 AND JSON_CONTAINS(options->'$.priorityApprovers', '[\"".$currentItem['mkey']."\"]')
-                    ")->fetchAll();
-                if (!empty($existRooms)) {
-                    return ['status' => 'error', 'message' => 'Không thể xóa người phê duyệt ưu tiên này vì có xe đang sử dụng'];
-                }
-            }
+            // if ($component == "priorityApproverList" && $currentItem) {
+            //     $connection = Application::getConnection("car_booking_connection");
+            //     $existRooms = $connection->query("
+            //         SELECT * FROM car_booking_masterdata WHERE mtype = 'rooms' AND isDeleted = 0 AND JSON_CONTAINS(options->'$.priorityApprovers', '[\"".$currentItem['mkey']."\"]')
+            //         ")->fetchAll();
+            //     if (!empty($existRooms)) {
+            //         return ['status' => 'error', 'message' => 'Không thể xóa người phê duyệt ưu tiên này vì có xe đang sử dụng'];
+            //     }
+            // }
 
             \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $id], ['isDeleted' => 1]);
             if ($currentItem) {
@@ -363,16 +367,16 @@ class Item {
                     $connection = Application::getConnection();
                     $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$bitrixId}' AND GROUP_ID = '{$groupId}'");
                 }
-                if ($component == "priorityApproverList") {
-                    $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
-                    $queryMasterData->setSelect(['*']);
-                    $queryMasterData->setFilter(['mkey' => 'bookingPriorityApprovalGroupId']);
-                    $bookingPriorityApprovalGroupId = $queryMasterData->exec()->fetch();
-                    $bitrixId = str_replace( "BitrixID-", "", $currentItem['mkey'] ?? "");
-                    $groupId = $bookingPriorityApprovalGroupId['mvalue'] ?? 48;
-                    $connection = Application::getConnection();
-                    $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$bitrixId}' AND GROUP_ID = '{$groupId}'");
-                }
+                // if ($component == "priorityApproverList") {
+                //     $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                //     $queryMasterData->setSelect(['*']);
+                //     $queryMasterData->setFilter(['mkey' => 'bookingPriorityApprovalGroupId']);
+                //     $bookingPriorityApprovalGroupId = $queryMasterData->exec()->fetch();
+                //     $bitrixId = str_replace( "BitrixID-", "", $currentItem['mkey'] ?? "");
+                //     $groupId = $bookingPriorityApprovalGroupId['mvalue'] ?? 48;
+                //     $connection = Application::getConnection();
+                //     $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$bitrixId}' AND GROUP_ID = '{$groupId}'");
+                // }
                 if ($component == "managerList") {
                     $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                     $queryMasterData->setSelect(['*']);
@@ -433,7 +437,10 @@ class Item {
         if (!$hasPermission) {
             return ['status' => 'error', 'message' => 'Tài khoản của bạn không có quyền thực hiện thao tác này'];
         }
-        if (!in_array($component, ["bookingForm", "cancelBookingForm", "rejectBookingForm", "approveBookingForm", "userReviewForm", "managerReviewForm", "bookingList", "approveBookingList", "userReviewList", "managerReviewList"])) {
+        if (!in_array($component, ["bookingForm", "cancelBookingForm", "rejectBookingForm", "approveBookingForm", "userReviewForm",
+         "managerReviewForm", "bookingList", "approveBookingList", "userReviewList", "managerReviewList",
+          "driverRejectBookingForm", "driverReviewForm",
+          "approveAssignBookingForm", "driverConfirmBookingList"])) {
             $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
             $queryMasterData->setSelect(['*']);
             $queryMasterData->setFilter(['id' => $id]);
@@ -481,7 +488,11 @@ class Item {
         if (!$hasPermission) {
             return ['status' => 'error', 'message' => 'Tài khoản của bạn không có quyền thực hiện thao tác này'];
         }
-        if (!in_array($component, ["bookingForm", "cancelBookingForm", "rejectBookingForm", "approveBookingForm", "userReviewForm", "managerReviewForm", "bookingList", "approveBookingList", "userReviewList", "managerReviewList"])) {
+        if (!in_array($component, ["bookingForm", "cancelBookingForm", "rejectBookingForm",
+         "approveBookingForm", "userReviewForm", "managerReviewForm", "bookingList",
+          "approveBookingList", "userReviewList", "managerReviewList",
+          "driverRejectBookingForm", "driverReviewForm",
+          "approveAssignBookingForm", "driverConfirmBookingList"])) {
             $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
             $queryMasterData->setSelect(['*']);
             $queryMasterData->setFilter(['id' => $id]);
@@ -521,41 +532,45 @@ class Item {
                 $currentItem = $query->exec()->fetch();
             }
             if ($currentItem) {
-                if ($currentItem['isPriority'] && is_array($hasPermission) && !in_array("Permission [Car_Booking_Priority_Approval]", $hasPermission)) {
-                    return ['status' => 'error', 'message' => 'Bạn không có quyền duyệt đặt xe ưu tiên'];
-                }
-                $approvedUsers = array_merge($currentItem['approvedUsers'], [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]]);
+                // if ($currentItem['isPriority'] && is_array($hasPermission) && !in_array("Permission [Car_Booking_Priority_Approval]", $hasPermission)) {
+                //     return ['status' => 'error', 'message' => 'Bạn không có quyền duyệt đặt xe ưu tiên'];
+                // }
+                // $currentApprovedUsers = [];
+                // if (!empty($currentItem['approvedUsers'])) {
+                //     $currentApprovedUsers = is_string($currentItem['approvedUsers']) ? Json::decode($currentItem['approvedUsers']) : (array)$currentItem['approvedUsers'];
+                // }
+                // $approvedUsers = array_merge($currentApprovedUsers, [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]]);
+                $approvedUsers =  [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]];
                 \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], ['isApproved' => 1, 'approvedUsers' => Json::encode($approvedUsers), 'approvedDate' => new \Bitrix\Main\Type\DateTime()]);
                 self::logBooking($id, $currentItem, $userId);
 
-                $roomKey = '';
-                if ($currentItem['room']) {
-                    $roomKey = $currentItem['room']['mkey'] ?? '';
-                }
-                $startDate = $currentItem['startDate'] ?? '';
-                $startTime = $currentItem['startTime'] ?? '';
-                $endTime = $currentItem['endTime'] ?? '';
-                $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
-                $startTimeCondition = $startDateCondition->format('H:i:s');
-                $endDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $endTime, "Y-m-d H:i:s");
-                $endTimeCondition = $endDateCondition->format('H:i:s');
-                $overlappingBookings = self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 0, 0);
-                if ($currentItem['isPriority']) {
-                    $overlappingBookings = array_merge($overlappingBookings, self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 1, 0));
+                // $roomKey = '';
+                // if ($currentItem['room']) {
+                //     $roomKey = $currentItem['room']['mkey'] ?? '';
+                // }
+                // $startDate = $currentItem['startDate'] ?? '';
+                // $startTime = $currentItem['startTime'] ?? '';
+                // $endTime = $currentItem['endTime'] ?? '';
+                // $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
+                // $startTimeCondition = $startDateCondition->format('H:i:s');
+                // $endDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $endTime, "Y-m-d H:i:s");
+                // $endTimeCondition = $endDateCondition->format('H:i:s');
+                // $overlappingBookings = self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 0, 0);
+                // if ($currentItem['isPriority']) {
+                //     $overlappingBookings = array_merge($overlappingBookings, self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 1, 0));
+                // }
+                // foreach($overlappingBookings as $booking) {
+                //     if ($booking['isCancelled'] == 1) {
+                //         continue;
+                //     }
+                //     \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], ['isCancelled' => 1, 'cancelledReason' => "Huỷ tự động bởi hệ thống do trùng lịch với đặt xe số ".$id." đã được duyệt bởi ".\Booking\Query::getUserFullname($userId, true)."."]);
+                //     self::logBooking($booking['id'], $booking, $userId);
 
-                }
-                foreach($overlappingBookings as $booking) {
-                    if ($booking['isCancelled'] == 1) {
-                        continue;
-                    }
-                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], ['isCancelled' => 1, 'cancelledReason' => "Huỷ tự động bởi hệ thống do trùng lịch với đặt xe số ".$id." đã được duyệt bởi ".\Booking\Query::getUserFullname($userId, true)."."]);
-                    self::logBooking($booking['id'], $booking, $userId);
-
-                    $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_cancel_booking', $booking['id']);
-                    foreach($mailContent['userIds'] as $userId) {
-                        \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
-                    }
-                }
+                //     $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_cancel_booking', $booking['id']);
+                //     foreach($mailContent['userIds'] as $userId) {
+                //         \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                //     }
+                // }
 
                 $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_approve_booking', $id);
                 foreach($mailContent['userIds'] as $userId) {
@@ -577,11 +592,17 @@ class Item {
         if (!$hasPermission) {
             return ['status' => 'error', 'message' => 'Tài khoản của bạn không có quyền thực hiện thao tác này'];
         }
-        if (in_array($component, ["bookingForm", "cancelBookingForm", "rejectBookingForm", "approveBookingForm", "userReviewForm", "managerReviewForm", "bookingList", "approveBookingList", "userReviewList", "managerReviewList"])) {
+        if (in_array($component, ["bookingForm", "cancelBookingForm", "rejectBookingForm", "approveBookingForm"
+        , "userReviewForm", "managerReviewForm", "bookingList", "approveBookingList", "userReviewList", "managerReviewList"
+        , "driverRejectBookingForm", "driverReviewForm", "driverConfirmBookingList", "approveAssignBookingForm"])) {
             $query = \Booking\Query::getInstance("car_booking_requests");
         } else {
             if (((!$mkey || !$mvalue || !$component) && $component != "config") || 
-                ($component == "config" && (!$maxDayToBooking || !$maxHourToAutoApprove || !$maxDayToReview || !$usagePurposeKeyForClient || !$bookingAdminGroupId || !$bookingApprovalGroupId || !$bookingPriorityApprovalGroupId || !$bookingMonitorGroupId || !$bookingDriverGroupId))) {
+                ($component == "config" && (!$maxDayToBooking 
+                // || !$maxHourToAutoApprove 
+                || !$maxDayToReview || !$usagePurposeKeyForClient || !$bookingAdminGroupId || !$bookingApprovalGroupId 
+                // || !$bookingPriorityApprovalGroupId 
+                || !$bookingMonitorGroupId || !$bookingDriverGroupId))) {
                 return ['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin'];
             }
             $query = \Booking\Query::getInstance("car_booking_masterdata");
@@ -712,12 +733,12 @@ class Item {
                     return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
                 }
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'maxDayToBooking'], ['mvalue' => $maxDayToBooking ?? "7"]);
-                \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'maxHourToAutoApprove'], ['mvalue' => $maxHourToAutoApprove ?? "4"]);
+                // \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'maxHourToAutoApprove'], ['mvalue' => $maxHourToAutoApprove ?? "4"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'maxDayToReview'], ['mvalue' => $maxDayToReview ?? "3"]);
                 // \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'buildingDefault'], ['mvalue' => $buildingDefault ?? ""]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingAdminGroupId'], ['mvalue' => $bookingAdminGroupId ?? "25"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingApprovalGroupId'], ['mvalue' => $bookingApprovalGroupId ?? "26"]);
-                \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingPriorityApprovalGroupId'], ['mvalue' => $bookingPriorityApprovalGroupId ?? "48"]);
+                // \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingPriorityApprovalGroupId'], ['mvalue' => $bookingPriorityApprovalGroupId ?? "48"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingMonitorGroupId'], ['mvalue' => $bookingMonitorGroupId ?? "27"]);
                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['mkey' => 'bookingDriverGroupId'], ['mvalue' => $bookingDriverGroupId ?? "28"]);
                 $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
@@ -731,6 +752,28 @@ class Item {
                 if ($currentItem && $newItem) {
                     self::log($currentItem, $newItem, "Edit", $userId);
                 }
+                break;
+            case 'driverForm':
+                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                $queryMasterData->setSelect(['*']);
+                $queryMasterData->setFilter(['mkey' => 'bookingDriverGroupId']);
+                $bookingDriverGroupId = $queryMasterData->exec()->fetch();
+                $groupId = $bookingDriverGroupId['mvalue'] ?? 28;
+                $bitrixId = str_replace( "BitrixID-", "", $mkey ?? "");
+                $options = ['driverPhoneNumber' => $driverPhoneNumber ?? ""];
+                $connection = Application::getConnection();
+                if ($id != "") {
+                    $currentBitrixId = str_replace( "BitrixID-", "", $currentItem['mkey'] ?? "");
+                    $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$currentBitrixId}' AND GROUP_ID = '{$groupId}'");
+                    \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $id], ['mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => Json::encode($options)]);
+                } else { // Lỗi copy-paste: mtype phải là 'drivers'
+                    $id = \Booking\Query::insertRecord('car_booking_masterdata', ['mtype' => 'drivers', 'mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => Json::encode($options)]);
+                }
+                self::logMasterDataSubmit($id, $currentItem, $userId);
+                if ($bitrixId != "") {
+                    $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$bitrixId}' AND GROUP_ID = '{$groupId}'");
+                    $connection->queryExecute("INSERT INTO b_sonet_user2group (USER_ID, GROUP_ID, ROLE, AUTO_MEMBER, DATE_CREATE, DATE_UPDATE, INITIATED_BY_TYPE, INITIATED_BY_USER_ID) VALUES ('{$bitrixId}', '{$groupId}', 'K', 'N', NOW(), NOW(), 'U', '{$userId}')");
+                } 
                 break;
 
             case 'buildingForm':
@@ -782,16 +825,21 @@ class Item {
                 }
                 self::logMasterDataSubmit($id, $currentItem, $userId);
                 break;
-
+            
+            case 'carLineForm':
+                $options = [];
+                if ($id != "") {
+                    \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $id], ['mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => Json::encode($options)]);
+                } else {
+                    $id = \Booking\Query::insertRecord('car_booking_masterdata', ['mtype' => 'carLines', 'mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => Json::encode($options)]);
+                }
+                self::logMasterDataSubmit($id, $currentItem, $userId);
+                break;
             case 'roomTypeForm':
                 try {
                     $options = [
-                        // 'approvers' => Json::decode($approvers) ?: []
-                        // , 'equipments' => Json::decode($equipments) ?: []
-                        , 'size' => $size ?? 0
-                        , 'persons' => $persons ?? 0
+                        'persons' => $persons ?? 0
                         , 'color' => $color ?? ""
-                        // , 'hasAutoApprove' => $hasAutoApprove ?? 0
                         ];
                 } catch (\Throwable $th) {
                     return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
@@ -811,8 +859,6 @@ class Item {
                     foreach($haveToUpdateBookings as $booking) {
                         \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], [
                             'roomType' => Json::encode($newItem),
-                            // 'equipments' => Json::encode($newItem['equipments'] ?? []),
-                            'size' => $newItem['size'] ?? 0,
                             'persons' => $newItem['persons'] ?? 0
                         ]);
                     }
@@ -823,14 +869,10 @@ class Item {
                 try {
                     $options = [
                         'roomType' => $roomType ?? ""
-                        // , 'building' => $building ?? ""
-                        // , 'approvers' => Json::decode($approvers) ?: []
-                        // , 'priorityApprovers' => Json::decode($priorityApprovers ?: '[]') ?: []
-                        // , 'equipments' => Json::decode($equipments) ?: []
-                        , 'size' => $size ?? ""
                         , 'persons' => $persons ?? ""
                         , 'color' => $color ?? ""
                         , 'note' => $note ?? ""
+                        , 'licensePlateNumber' => $licensePlateNumber ?? ""
                         , 'hasServiceCar' => $hasServiceCar ?? 0
                     ];
                 } catch (\Throwable $th) {
@@ -857,12 +899,8 @@ class Item {
                         unset($roomType['options']);
                     }
                     try {
-                        $size = $newItem['size'] ?: ($roomType['size'] ?: 0);
                         $persons = $newItem['persons'] ?: ($roomType['persons'] ?: 0);
-                        // $equipmentKeys = $newItem['equipments'] ?: [];
-                        // if (empty($equipmentKeys)) {
-                        //     $equipmentKeys = $roomType['equipments'] ?: [];
-                        // }
+                      
                         $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                         $queryMasterData->setSelect(['*']);
                         // $queryMasterData->setFilter(['mkey' => $equipmentKeys, 'mtype' => 'equipments']);
@@ -870,9 +908,9 @@ class Item {
                         foreach($haveToUpdateBookings as $booking) {
                             \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], [
                                 'room' => Json::encode($newItem),
-                                // 'equipments' => Json::encode($equipments ?? []),
-                                'size' => $size ?? 0,
-                                'persons' => $persons ?? 0
+                                'persons' => $persons ?? 0,
+                                'licensePlateNumber' => $licensePlateNumber ?? "",
+                                'hasServiceCar' => $hasServiceCar ?? 0
                             ]);
                         }
                     } catch (\Throwable $th) {
@@ -883,25 +921,35 @@ class Item {
 
             case 'managerReviewForm':
                 if ($id != "") {
-                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], ['managerReviewScore' => $managerReviewScore ?? "5", 'managerReviewComment' => $managerReviewComment ?? ""]);
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], ['managerReviewScore' => $managerReviewScore ?? "5", 'managerReviewCommentMost' => $managerReviewCommentMost ?? "", 'managerReviewCommentBad' => $managerReviewCommentBad ?? "", 'managerReviewCommentRequest' => $managerReviewCommentRequest ?? ""]);
                 }
                 break;
 
             case 'userReviewForm':
                 if ($id != "") {
-                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'], ['userReviewCleanScore' => $userReviewCleanScore ?? "5", 'userReviewCleanComment' => $userReviewCleanComment ?? "", 'userReviewEquipmentScore' => $userReviewEquipmentScore ?? "5", 'userReviewEquipmentComment' => $userReviewEquipmentComment ?? "", 'userReviewFacilityScore' => $userReviewFacilityScore ?? "5", 'userReviewFacilityComment' => $userReviewFacilityComment ?? ""]);
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'], ['userReviewScore' => $userReviewScore ?? "5", 'userReviewCommentMost' => $userReviewCommentMost ?? "", 'userReviewCommentBad' => $userReviewCommentBad ?? ""]);
                 }
                 break;
 
             case 'bookingForm':
-                if (!$mainUser || !$users || !$department || !$building || !$room || !$startDate || !$startTime || !$endTime || !$usagePurpose || !$usagePurposeLocale || !$usagePurposeDetail) {
+                if (!$departureLocation 
+                || !$roomType  
+                || !$startDate || !$startTime || !$endTime 
+                || !$usagePurposeDetail 
+                || !$mainUser 
+                || !$department
+                || !$usagePurpose 
+                || !$detailedSchedule
+                
+                ) {
                     return ['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin'];
                 }
                 try {
-                    $room = Json::decode($room) ?: [];
+                    $roomType = Json::decode($roomType) ?: [];
                 } catch (\Throwable $th) {
                     return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
                 }
+
                 $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                 $queryMasterData->setSelect(['*']);
                 $queryMasterData->setFilter(['mkey' => 'maxDayToBooking']);
@@ -909,12 +957,7 @@ class Item {
 
                 $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                 $queryMasterData->setSelect(['*']);
-                $queryMasterData->setFilter(['mkey' => 'maxHourToAutoApprove']);
-                $maxHourToAutoApprove = $queryMasterData->exec()->fetch();
-
-                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
-                $queryMasterData->setSelect(['*']);
-                $queryMasterData->setFilter(['mkey' => $room['roomType'] ?? '', 'mtype' => 'roomTypes']);
+                $queryMasterData->setFilter(['mkey' => $roomType['mkey'] ?? '', 'mtype' => 'roomTypes']);
                 $roomType = $queryMasterData->exec()->fetch();
 
                 if (!empty($roomType)) {
@@ -922,7 +965,7 @@ class Item {
                     unset($roomType['options']);
                 }
 
-                $roomKey = $room['mkey'] ?? '';
+                // $roomKey = $room['mkey'] ?? '';
                 $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
                 $startTimeCondition = $startDateCondition->format('H:i:s');
                 $endDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $endTime, "Y-m-d H:i:s");
@@ -943,123 +986,59 @@ class Item {
                         return ['status' => 'error', 'message' => 'Không thể đặt xe quá ' . $maxBookingDays . ' ngày kể từ hôm nay'];
                     }
 
-                    // Check duplicate booking
-                    if ($isPriority) {
-                        $overlappingBookings = self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 1, 1);
-                        foreach($overlappingBookings as $booking) {
-                            if ($booking['isPriority'] == 1 && $booking['isCancelled'] == 0 && $booking['isApproved'] != -1) {
-                                // Has any priority booking pending or approved
-                                return ['status' => 'error', 'message' => 'Xe đã có đặt ưu tiên vào khung giờ này'];
-                            }
-                            if ($booking['isPriority'] == 1 && $booking['isApproved'] == -1 && $booking['bookingUser'] && $booking['bookingUser']['mkey'] == 'BitrixID-'.$userId) {
-                                // Has previous priority booking by the same user but not approved
-                                return ['status' => 'error', 'message' => 'Bạn đã có đặt xe ưu tiên bị từ chối trong khung giờ này'];
-                            }
-                        }
-                    } else {
-                        $overlappingBookings = self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 1, 0);
-                        $overlappingBookingsWaitingApproval = self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 0, 0);
-                        // Filter only isCancelled = 0
-                        $overlappingBookingsWaitingApproval = array_filter($overlappingBookingsWaitingApproval, function($booking) {
-                            return isset($booking['isCancelled']) && $booking['isCancelled'] == 0;
-                        });
-                        $priorityBookings = self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 1, 1);
-                        // Filter only isApproved = 1
-                        $priorityBookings = array_filter($priorityBookings, function($booking) {
-                            return isset($booking['isApproved']) && $booking['isApproved'] == 1;
-                        });
-                        $overlappingBookings = array_merge($overlappingBookings, $overlappingBookingsWaitingApproval, $priorityBookings);
-                        if (!empty($overlappingBookings)) {
-                            return ['status' => 'error', 'message' => 'Khung giờ đặt xe bị trùng với một đặt xe khác'];
-                        }
-                    }
-
-                    if ($isPriority && (!$room['priorityApprovers'] || !is_array($room['priorityApprovers']) || count($room['priorityApprovers']) == 0)) {
-                        return ['status' => 'error', 'message' => 'Xe không được cấu hình duyệt ưu tiên'];
-                    }
-                    try {
-                        $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
-                        $equipmentKeys = $room['equipments'] ?: ($roomType['equipments'] ?: []);
-                        $queryMasterData->setSelect(['*']);
-                        $queryMasterData->setFilter(['mkey' => $equipmentKeys, 'mtype' => 'equipments']);
-                        $equipments = $queryMasterData->exec()->fetchAll();
-                        $size = $room['size'] ?: ($roomType['size'] ?: 0);
-                        $persons = $room['persons'] ?: ($roomType['persons'] ?: 0);
-                        $hasAutoApprove = $room['hasAutoApprove'] ?: "";
-                        if ($hasAutoApprove == "") {
-                            $hasAutoApprove = $roomType['hasAutoApprove'] ?: 0;
-                        }
-                    } catch (\Throwable $th) {
-                        return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
-                    }
-                    
-
-                    // Check if the booking is auto-approved
-                    $isApproved = 0;
-                    $approvedDate = new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s");
-                    if ($maxHourToAutoApprove['mvalue'] > 0) {
-                        $maxAutoApproveHours = intval($maxHourToAutoApprove['mvalue'] ?? 4);
-                        $deltaTime = $endDateCondition->getTimestamp() - $startDateCondition->getTimestamp();
-
-                        if ($hasAutoApprove && $deltaTime <= $maxAutoApproveHours * 3600 && !$isPriority) {
-                            $isApproved = 1;
-                            $approvedDate = new \Bitrix\Main\Type\DateTime();
-                            $overlappingBookings = self::getDuplicatedBooking($id, $roomKey, $startDateCondition, $startTimeCondition, $endTimeCondition, 0, 0);
-                            foreach($overlappingBookings as $booking) {
-                                if ($booking['isCancelled'] == 1) {
-                                    continue;
-                                }
-                                \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], ['isCancelled' => 1, 'cancelledReason' => "Huỷ tự động bởi hệ thống do trùng lịch với đặt xe số ".$id." đã được duyệt tự động."]);
-                                self::logBooking($booking['id'], $booking, $userId);
-
-                                $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_cancel_booking', $booking['id']);
-                                foreach($mailContent['userIds'] as $userId) {
-                                    \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
-                                }
-                            }
-                        }
-                    }
                     try {
                         $data = [
                             "createdDate" => new \Bitrix\Main\Type\DateTime(),
                             'notificationCount' => 0,
                             "bookingUser" => Json::encode(["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]),	
-                            "mainUser" => Json::encode(Json::decode($mainUser)),	
-                            "users" => Json::encode(Json::decode($users)),	
-                            "department" => Json::encode(Json::decode($department)),	
-                            "building" => Json::encode(Json::decode($building)),	
-                            "room" => Json::encode($room),	
+                            "departureLocation" => Json::encode(Json::decode($departureLocation)),
                             "roomType" => Json::encode($roomType),	
                             "startDate" => new \Bitrix\Main\Type\DateTime($startDate, "Y-m-d"),
                             "startTime" => new \Bitrix\Main\Type\DateTime($startTime, "H:i:s"),
                             "endTime" => new \Bitrix\Main\Type\DateTime($endTime, "H:i:s"),
-                            "equipments" => Json::encode($equipments),	
-                            "size" => $size ?? 0,
-                            "persons" => $persons ?? 0,
-                            "usagePurpose" => Json::encode(Json::decode($usagePurpose)),	
+                            "employees" => $employees ?? "",
+                            "flightNumber" => $flightNumber ?? "",
                             "usagePurposeDetail" => $usagePurposeDetail ?? "",	
-                            "usagePurposeLocale" => $usagePurposeLocale ?? "",
-                            "note" => $note ?? "",
+                            "carLine" => $carLine ? Json::encode(Json::decode($carLine)) : Json::encode([]),	
+                            "driver" => $driver ? Json::encode(Json::decode($driver)) : Json::encode([]),	
+                            "mainUser" => Json::encode(Json::decode($mainUser)),	
+                            "department" => Json::encode(Json::decode($department)),	
+                            "usagePurpose" => Json::encode(Json::decode($usagePurpose)),	
                             "clients" => $clients ?? 0,
                             "clientNames" => Json::encode(Json::decode($clientNames)),	
-                            "externalClients" => $externalClients ?? 0,
-                            "externalClientNames" => Json::encode(Json::decode($externalClientNames)),
-                            "isApproved" => $isApproved,
-                            "isPriority" => $isPriority ? 1 : 0,
+                            "detailedSchedule" => $detailedSchedule ?? "",
+                            "note" => $note ?? "",
+                            "isPriority" => 0,
+                            
+                            "isApproved" => 0,
                             "approvedUsers" => "[]",
-                            "approvedDate" => $approvedDate,
+                            "approvedDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
                             "rejectedUsers" => "[]",	
                             "rejectedDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
                             "isCancelled" => 0,
-                            "cancelledReason" => "",	
-                            "userReviewCleanScore" => 0,
-                            "userReviewCleanComment" => "",	
-                            "userReviewEquipmentScore" => 0,
-                            "userReviewEquipmentComment" => "",	
-                            "userReviewFacilityScore" => 0,
-                            "userReviewFacilityComment" => "",
+                            "cancelledReason" => "",
+                            "driverConfirmationUser" => "[]",
+                            "driverConfirmationDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
+                            "driverDeclineUser" => "[]",
+                            "driverDeclineDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
+                            "driverDeclineReason" => "",
+                            "userReviewScore" => 0,
+                            "userReviewCommentMost" => "",	
+                            "userReviewCommentBad" => "",	
+                            "userReviewDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
+                            "driverReviewScore" => 0,
+                            "driverReviewCommentMost" => "",	
+                            "driverReviewCommentBad" => "",	
+                            "driverReviewCommentRequest" => "",
+                            "driverReviewDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
                             "managerReviewScore" => 0,
-                            "managerReviewComment" => ""
+                            "managerReviewComment" => "",
+                            "managerReviewCommentMost" => "",	
+                            "managerReviewCommentBad" => "",
+                            "managerReviewCommentRequest" => "",
+                            "managerReviewDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
+                            "notificationDriverCount" => 0,
+                            "isSyncedThirdParty" => 0
                         ];
                     } catch (\Throwable $th) {
                         return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
@@ -1067,46 +1046,52 @@ class Item {
 
                     if ($id != "" && $id != "*") {
                         \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, 
-                            ['%bookingUser' => '"mkey":"BitrixID-'.$userId.'"', '%room' => '"BitrixID-'.$userId.'"', '%roomType' => '"BitrixID-'.$userId.'"']
+                            ['%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'
+                            // , '%room' => '"BitrixID-'.$userId.'"'
+                            // , '%roomType' => '"BitrixID-'.$userId.'"'
+                            ]
                         ], $data);
                         self::logBooking($id, $currentItem, $userId);
                     } else {
                         $id = \Booking\Query::insertRecord('car_booking_requests', $data);
                     }
-                    if ($isApproved == 0) {
+                    // if ($isApproved == 0) {
                         $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_create_booking', $id, null, $isPriority);
-                        $approversOrPriorityApprovers = $isPriority ? $mailContent['priorityApprovers'] : $mailContent['approvers'];
+                        // $approversOrPriorityApprovers = $isPriority ? $mailContent['priorityApprovers'] : $mailContent['approvers'];
+                        $approversOrPriorityApprovers = $mailContent['approvers'];
                         foreach($approversOrPriorityApprovers as $userId) {
                             \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
                         }
-                    } else {
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_approve_booking', $id, null, $isPriority);
-                        foreach($mailContent['userIds'] as $userId) {
-                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
-                        }
-                    }
+                    // } else {
+                    //     $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_approve_booking', $id, null, $isPriority);
+                    //     foreach($mailContent['userIds'] as $userId) {
+                    //         \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    //     }
+                    // }
                 } else {
                     try {
                         $data = [
-                            "mainUser" => Json::encode(Json::decode($mainUser)),	
-                            "users" => Json::encode(Json::decode($users)),	
-                            "department" => Json::encode(Json::decode($department)),	
+                            // "mainUser" => Json::encode(Json::decode($mainUser)),	
+                            // "users" => Json::encode(Json::decode($users)),	
+                            // "department" => Json::encode(Json::decode($department)),	
                             "endTime" => new \Bitrix\Main\Type\DateTime($endTime, "H:i:s"),
-                            "usagePurpose" => Json::encode(Json::decode($usagePurpose)),	
-                            "usagePurposeDetail" => $usagePurposeDetail ?? "",	
-                            "usagePurposeLocale" => $usagePurposeLocale ?? "",
-                            "note" => $note ?? "",
-                            "clients" => $clients ?? 0,
-                            "clientNames" => Json::encode(Json::decode($clientNames)),	
-                            "externalClients" => $externalClients ?? 0,
-                            "externalClientNames" => Json::encode(Json::decode($externalClientNames))
+                            // "usagePurpose" => Json::encode(Json::decode($usagePurpose)),	
+                            // "usagePurposeDetail" => $usagePurposeDetail ?? "",	
+                            // "usagePurposeLocale" => $usagePurposeLocale ?? "",
+                            // "note" => $note ?? "",
+                            // "clients" => $clients ?? 0,
+                            // "clientNames" => Json::encode(Json::decode($clientNames)),	
+                            // "externalClients" => $externalClients ?? 0,
+                            // "externalClientNames" => Json::encode(Json::decode($externalClientNames))
                         ];
                     } catch (\Throwable $th) {
                         return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
                     }
                     if ($id != "" && $id != "*") {
                         \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, 
-                            ['%bookingUser' => '"mkey":"BitrixID-'.$userId.'"', '%room' => '"BitrixID-'.$userId.'"', '%roomType' => '"BitrixID-'.$userId.'"']
+                            ['%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'
+                            // , '%room' => '"BitrixID-'.$userId.'"', '%roomType' => '"BitrixID-'.$userId.'"'
+                            ]
                         ], $data);
                         self::logBooking($id, $currentItem, $userId);
                     }
@@ -1133,11 +1118,23 @@ class Item {
                     $currentItem = $query->exec()->fetch();
                 }
                 if ($currentItem) {
-                    if ($currentItem['isPriority'] && is_array($hasPermission) && !in_array("Permission [Car_Booking_Priority_Approval]", $hasPermission)) {
-                        return ['status' => 'error', 'message' => 'Bạn không có quyền từ chối đặt xe ưu tiên'];
-                    }
-                    $rejectedUsers = array_merge($currentItem['rejectedUsers'], [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]]);
-                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], ['isApproved' => -1, 'rejectedReason' => $rejectedReason ?? "", 'rejectedUsers' => Json::encode($rejectedUsers), 'rejectedDate' => new \Bitrix\Main\Type\DateTime()]);
+                    // if ($currentItem['isPriority'] && is_array($hasPermission) && !in_array("Permission [Car_Booking_Priority_Approval]", $hasPermission)) {
+                    //     return ['status' => 'error', 'message' => 'Bạn không có quyền từ chối đặt xe ưu tiên'];
+                    // }
+                    // $currentRejectedUsers = [];
+                    // if (!empty($currentItem['rejectedUsers'])) {
+                    //     $currentRejectedUsers = is_string($currentItem['rejectedUsers']) ? Json::decode($currentItem['rejectedUsers']) : (array)$currentItem['rejectedUsers'];
+                    // }
+                    // $rejectedUsers = array_merge($currentRejectedUsers, [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]]);
+                    $rejectedUsers =  [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]];
+                    
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], [
+                        'isApproved' => -1
+                        , 'rejectedReason' => $rejectedReason ?? ""
+                        , 'rejectedUsers' => Json::encode($rejectedUsers)
+                        , 'rejectedDate' => new \Bitrix\Main\Type\DateTime()
+                        , 'serviceType' => null, 'licensePlateNumber' => null, 'driverUser' => null, 'driverPhoneNumber' => null, 'room' => null
+                        ]);
                     self::logBooking($id, $currentItem, $userId);
                     if ($currentItem['isApproved'] == 1) {
                         $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_reject_booking_after_approved', $id);
@@ -1149,39 +1146,291 @@ class Item {
                     }
                 }
                 break;
-            case 'carLineForm':
-                $options = [];
+            
+            case 'driverReviewForm':
                 if ($id != "") {
-                    \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $id], ['mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => Json::encode($options)]);
-                } else {
-                    $id = \Booking\Query::insertRecord('car_booking_masterdata', ['mtype' => 'carLines', 'mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => Json::encode($options)]);
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"'], ['driverReviewScore' => $driverReviewScore ?? "5", 'driverReviewCommentMost' => $driverReviewCommentMost ?? "", 'driverReviewCommentBad' => $driverReviewCommentBad ?? "", 'driverReviewCommentRequest' => $driverReviewCommentRequest ?? ""]);
                 }
-                self::logMasterDataSubmit($id, $currentItem, $userId);
+                break;
+            
+            // KHi tài xế từ chối: -2 là từ chối bởi tài xế, -1 là từ chối bởi quản lý
+            // TRường hợp tài xế từ chối thì sẽ gửi lại thông tin cho quản lý để biết lý do từ chối của tài xế
+            // Nếu tài xế từ chối thì sẽ reset về null các giá trị: serviceType, licensePlateNumber, driverUser, driverPhoneNumber, room 
+            // để quản lý dễ dàng sắp xếp lại tài xế khác mà không bị ràng buộc bởi các thông tin đã có của tài xế trước đó
+            case 'driverRejectBookingForm':
+                if ($id != "") {
+                    $query = \Booking\Query::getInstance("car_booking_requests");
+                    $query->setSelect(['*']);
+                    $query->setFilter(['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"']);
+                     // Chỉ cho phép tài xế từ chối khi họ là người được phân công lái xe, tránh trường hợp người dùng khác cố tình từ chối
+                    $currentItem = $query->exec()->fetch();
+                }
+                if ($currentItem) {
+                    $driverDeclineUser = [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]];
+                    
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], ['isApproved' => -2,
+                     'serviceType' => null, 'licensePlateNumber' => null, 'driverUser' => null, 'driverPhoneNumber' => null, 'room' => null,
+                     'driverDeclineReason' => $driverDeclineReason ?? ""
+                     , 'driverDeclineUser' => Json::encode($driverDeclineUser),
+                      'driverDeclineDate' => new \Bitrix\Main\Type\DateTime()
+                      ]);
+                    self::logBooking($id, $currentItem, $userId);
+                    // Gửi thông báo cho quản lý và những người liên quan về việc tài xế từ chối đặt xe
+                    $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_approve_when_driver_reject_booking', $id);
+                    // Gửi cho user
+                    // foreach($mailContent['userIds'] as $userId) {
+                    //     \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    // }
+                    // Gửi cho quản lý
+                    foreach($mailContent['assignmentUser'] as $userId) {
+                        \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    }
+                }
                 break;
 
-            case 'driverForm':
-                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
-                $queryMasterData->setSelect(['*']);
-                $queryMasterData->setFilter(['mkey' => 'bookingDriverGroupId']);
-                $bookingDriverGroupId = $queryMasterData->exec()->fetch();
-                $groupId = $bookingDriverGroupId['mvalue'] ?? 28;
-                $bitrixId = str_replace( "BitrixID-", "", $mkey ?? "");
-                $connection = Application::getConnection();
+            // Duyệt và phân công này sẽ có 3 tình huống xảy ra:
+            // 1. Dịch vụ Xe nội bộ: Bắt buộc có dự liệu Xe và Tài xế, có đi kèm số điện thoại tài xế(theo tài xế) và biển số xe(theo xe)
+            // 2. Dịch vụ Xe dịch vụ: Chọn xe dịch vụ và điền thông tin tài xế, số điện thoại tài xế, 
+            // biển số xe tương ứng với xe dịch vụ được chọn. 
+            // Trạng thái isApproved = 3: Tức là tài xế đã xác nhận vì đây là xe thêu bên ngoài, cron sẽ tự update isApproved = 4 sau khi hoàn thành chuyến.
+            // 3. Dịch vụ Xe Grab: Chỉ cần chọn dịch vụ xe Grab, người dùng tự book xe đi, nếu admin book thì admin sẽ điền thông tin tài xế, số điện thoại tài xế,
+            //  biển số xe tương ứng với xe Grab được book. Trạng thái isApproved = 3: Tức là tài xế đã xác nhận vì đây là xe thêu bên ngoài, cron sẽ tự update isApproved = 4 sau khi hoàn thành chuyến.
+            // Check duplicate sẽ chỉ áp dụng cho Xe nội bộ 
+            case 'approveAssignBookingForm':
                 if ($id != "") {
-                    $currentBitrixId = str_replace( "BitrixID-", "", $currentItem['mkey'] ?? "");
-                    $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$currentBitrixId}' AND GROUP_ID = '{$groupId}'");
-                    \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $id], ['mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? ""]);
-                } else {
-                    $id = \Booking\Query::insertRecord('car_booking_masterdata', ['mtype' => 'managers', 'mvalue' => $mvalue ?? "", 'mkey' => $mkey ?? "", 'options' => '[]']);
+                    $query = \Booking\Query::getInstance("car_booking_requests");
+                    $query->setSelect(['*']);
+                    $query->setFilter(['id' => $id]);
+                    $currentItem = $query->exec()->fetch();
                 }
-                self::logMasterDataSubmit($id, $currentItem, $userId);
-                if ($bitrixId != "") {
-                    $connection->queryExecute("DELETE FROM b_sonet_user2group WHERE USER_ID = '{$bitrixId}' AND GROUP_ID = '{$groupId}'");
-                    $connection->queryExecute("INSERT INTO b_sonet_user2group (USER_ID, GROUP_ID, ROLE, AUTO_MEMBER, DATE_CREATE, DATE_UPDATE, INITIATED_BY_TYPE, INITIATED_BY_USER_ID) VALUES ('{$bitrixId}', '{$groupId}', 'K', 'N', NOW(), NOW(), 'U', '{$userId}')");
-                } 
+                if ($currentItem) {
+                    $decodeJsonItem = function ($value) {
+                        if (is_array($value)) {
+                            return $value;
+                        }
+
+                        if (!is_string($value) || trim($value) === '') {
+                            return [];
+                        }
+
+                        try {
+                            $decoded = Json::decode($value);
+                            return is_array($decoded) ? $decoded : [];
+                        } catch (\Throwable $th) {
+                            return [];
+                        }
+                    };
+
+                    $getKey = function ($value) use ($decodeJsonItem) {
+                        if (is_string($value) && trim($value) !== '' && !str_starts_with(trim($value), '{') && !str_starts_with(trim($value), '[')) {
+                            return trim($value);
+                        }
+                        $decoded = $decodeJsonItem($value);
+                        return $decoded['mkey'] ?? '';
+                    };
+
+                    $roomKey = $getKey($room ?? '');
+                    $serviceTypeValue = $getKey($serviceType ?? '');
+                    $driverUserKey = $getKey($driverUser ?? '');
+
+                    if (!$serviceTypeValue) {
+                        return ['status' => 'error', 'message' => 'Vui lòng chọn loại dịch vụ'];
+                    }
+
+                    $decodeOptions = function($item, $mtype) {
+                        $options = [];
+                        if (!empty($item['options'])) {
+                            try {
+                                $options = is_string($item['options']) ? Json::decode($item['options']) : (array)$item['options'];
+                            } catch (\Throwable $th) {}
+                        }
+                        $item = array_merge($item, $options, \Booking\Util::setDefaultValueIfNullMasterDataItem($mtype, $options));
+                        unset($item['options']);
+                        return $item;
+                    };
+
+                    // Lấy toàn bộ thông tin serviceType từ master data
+                    $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                    $queryMasterData->setSelect(['*']);
+                    $queryMasterData->setFilter(['mkey' => $serviceTypeValue, 'mtype' => 'serviceTypes']);
+                    $serviceTypeItem = $queryMasterData->exec()->fetch();
+                    $serviceTypeItem = $serviceTypeItem ? $decodeOptions($serviceTypeItem, 'serviceTypes') : ['mkey' => $serviceTypeValue, 'mvalue' => $serviceTypeValue];
+
+                    $isInternalServiceType = ($serviceTypeValue === 'ST001'); // Xe nội bộ
+                    $isRoomRequired = in_array($serviceTypeValue, ['ST001', 'ST002'], true);
+
+                    $roomItem = [];
+                    if ($isRoomRequired) {
+                        if (!$roomKey) {
+                            return ['status' => 'error', 'message' => 'Vui lòng chọn xe'];
+                        }
+                        $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                        $queryMasterData->setSelect(['*']);
+                        $queryMasterData->setFilter(['mkey' => $roomKey, 'mtype' => 'rooms']);
+                        $roomItem = $queryMasterData->exec()->fetch();
+
+                        if (!$roomItem) {
+                            return ['status' => 'error', 'message' => 'Vui lòng chọn xe'];
+                        }
+
+                        $roomItem = $decodeOptions($roomItem, 'rooms');
+                    }
+
+                    $driverItem = [];
+                    if ($isInternalServiceType) {
+                        if (!$driverUserKey) {
+                            return ['status' => 'error', 'message' => 'Vui lòng chọn tài xế'];
+                        }
+
+                        $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                        $queryMasterData->setSelect(['*']);
+                        $queryMasterData->setFilter(['mkey' => $driverUserKey, 'mtype' => 'drivers']);
+                        $driverItem = $queryMasterData->exec()->fetch();
+                        if ($driverItem) {
+                            $driverItem = $decodeOptions($driverItem, 'drivers');
+                        }
+                        else {
+                            return ['status' => 'error', 'message' => 'Tài xế không hợp lệ'];
+                        }
+                    } 
+                    else if ($isRoomRequired) {
+                        if (!$driverPhoneNumber || !$licensePlateNumber) {
+                            return ['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin tài xế và biển số'];
+                        }
+                    }
+
+                    $assignedUser = [["mkey" => "BitrixID-".$userId, "mvalue" => \Booking\Query::getUserFullname($userId, true)]];
+                    
+                    // Nếu là Xe nội bộ  thì chuyển tới trạng thái chờ tài xế xác nhận (isApproved = 2), 
+                    // nếu là Xe dịch vụ hoặc Xe Grab thì chuyển tới trạng thái đã duyệt (isApproved = 3) 
+                    // luôn vì bên ngoài nên không cần chờ tài xế xác nhận nữa, 
+                    // cron sẽ tự update isApproved = 4 sau khi hoàn thành chuyến.
+                    $isApproved = $isInternalServiceType ? 2 : 3;
+
+                    if ($isInternalServiceType) {
+                        // Check trùng booking với cùng tài xế hoặc cùng xe trong khung giờ: Check xem Xe hoặc tài xế có bị trùng lịch với booking khác hay không, 
+                        // chỉ áp dụng cho các booking đã được phần công (isApproved = 2) hoặc đã được tài xế xác nhận (isApproved = 3) và chưa bị huỷ (isCancelled = 0)
+                        $startDateStr = is_object($currentItem['startDate']) ? $currentItem['startDate']->format('Y-m-d') : explode(' ', $currentItem['startDate'] ?? '')[0];
+                        $startTimeStr = is_object($currentItem['startTime']) ? $currentItem['startTime']->format('H:i:s') : $currentItem['startTime'];
+                        $endTimeStr = is_object($currentItem['endTime']) ? $currentItem['endTime']->format('H:i:s') : $currentItem['endTime'];
+
+                        $startDateCondition = new \Bitrix\Main\Type\DateTime($startDateStr . " " . $startTimeStr, "Y-m-d H:i:s");
+                        $startTimeCondition = $startDateCondition->format('H:i:s');
+                        $endDateCondition = new \Bitrix\Main\Type\DateTime($startDateStr . " " . $endTimeStr, "Y-m-d H:i:s");
+                        $endTimeCondition = $endDateCondition->format('H:i:s');
+                        $overlappingBookings = self::getDuplicatedBookingWithDriverAndCar($id, $roomKey, $driverUserKey, $startDateCondition, $startTimeCondition, $endTimeCondition);
+                        if (!empty($overlappingBookings)) {
+                            return ['status' => 'error', 'message' => 'Tài xế hoặc xe đã được phân công vào khung giờ này'];
+                        }
+                    }
+
+                    $updateData = [
+                        'serviceType' => Json::encode($serviceTypeItem),
+                        'room' => Json::encode($roomItem),
+                        'driverUser' => Json::encode($driverItem),
+                        'driverPhoneNumber' => $driverPhoneNumber ?? '',
+                        'licensePlateNumber' => $licensePlateNumber ?? '',
+                        'assignmentDate' => new \Bitrix\Main\Type\DateTime(),
+                        'assignmentUser' => Json::encode($assignedUser),
+                        'isApproved' => $isApproved,
+                        'driverDeclineReason' => '',
+                        'driverDeclineUser' => '[]',
+                        'driverDeclineDate' => null
+                    ];
+
+                    // if (!$isInternalServiceType) {
+                    //     $updateData['driverConfirmationDate'] = new \Bitrix\Main\Type\DateTime();
+                    //     $updateData['driverConfirmationUser'] = Json::encode($assignedUser);
+                    // }
+
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], $updateData);
+                    self::logBooking($id, $currentItem, $userId);
+                }
                 break;
+
+            
 
         }
         return ['status' => 'success', 'message' => $id ? 'Chỉnh sửa thành công' : 'Thêm mới thành công'];
+    }
+
+    public static function confirmItem() {
+        global $USER;
+        $userId = $USER->GetID();
+        $request = Context::getCurrent()->getRequest();
+        extract($request->getPostList()->toArray());
+        $component = $component ?? '';
+        $id = $id ?? '';
+        $hasPermission = self::checkPermission($userId, $component);
+        if (!$hasPermission) {
+            return ['status' => 'error', 'message' => 'Tài khoản của bạn không có quyền thực hiện thao tác này'];
+        }
+        if (in_array($component, ["driverConfirmBookingList"])) {
+            if ($id != "") {
+                $query = \Booking\Query::getInstance("car_booking_requests");
+                $query->setSelect(['*']);
+                $query->setFilter(['id' => $id]);
+                $currentItem = $query->exec()->fetch();
+            }
+            if ($currentItem) {
+                $driverConfirmationUser =  [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]];
+                \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], ['isApproved' => 3, 'driverConfirmationUser' => Json::encode($driverConfirmationUser), 'driverConfirmationDate' => new \Bitrix\Main\Type\DateTime()]);
+                self::logBooking($id, $currentItem, $userId);
+                
+                $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_confirm_booking', $id);
+                foreach($mailContent['userIds'] as $userId) {
+                    \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                }
+            }
+        }
+        return ['status' => 'success', 'message' => 'Xác nhận thành công'];
+    }
+
+    // Check trùng booking với cùng tài xế hoặc cùng xe trong khung giờ: Check xem Xe hoặc tài xế có bị trùng lịch với booking khác hay không, 
+    // chỉ áp dụng cho các booking đã được phần công (isApproved = 2) hoặc đã được tài xế xác nhận (isApproved = 3) và chưa bị huỷ (isCancelled = 0)
+    public static function getDuplicatedBookingWithDriverAndCar($id, $roomKey, $driverKey, $startDateCondition, $startTimeCondition, $endTimeCondition) {
+        $queryBookingFilter = [];
+        $queryBookingFilter = array_merge($queryBookingFilter, ['!id' => $id]);
+        // $queryBookingFilter = array_merge($queryBookingFilter, ['%room' => '"mkey":"'.$roomKey.'"']);
+        // $queryBookingFilter = array_merge($queryBookingFilter, ['%driverUser' => '"mkey":"'.$driverKey.'"']);
+        $queryBookingFilter = array_merge($queryBookingFilter, ['isCancelled' => 0]);
+        $queryBookingFilter = array_merge($queryBookingFilter, ['@isApproved' => [2, 3, 4]]);
+        
+        $orConditions = ['LOGIC' => 'OR'];
+        if (!empty($roomKey)) {
+            $orConditions[] = ['%room' => '"mkey":"'.$roomKey.'"'];
+        }
+        if (!empty($driverKey)) {
+            $orConditions[] = ['%driverUser' => '"mkey":"'.$driverKey.'"'];
+        }
+        if (count($orConditions) > 1) {
+            $queryBookingFilter[] = $orConditions;
+        } else {
+            return []; // Không có cả xe và tài xế thì không cần check trùng
+        }
+        
+        $queryBookingFilter[] =  [
+            'LOGIC' => 'OR',
+            [
+                '=startDate' => $startDateCondition,
+                '>=startTime' => $startTimeCondition,
+                '<startTime' => $endTimeCondition
+            ],
+            [
+                '=startDate' => $startDateCondition,
+                '>endTime' => $startTimeCondition,
+                '<=endTime' => $endTimeCondition
+            ],
+            [
+                '=startDate' => $startDateCondition,
+                '<=startTime' => $startTimeCondition,
+                '>=endTime' => $endTimeCondition
+            ]
+        ];
+
+        $queryBooking = \Booking\Query::getInstance("car_booking_requests", true);
+        $queryBooking->setSelect(['*']);
+        $queryBooking->setFilter($queryBookingFilter);
+        return $queryBooking->exec()->fetchAll();
     }
 }
