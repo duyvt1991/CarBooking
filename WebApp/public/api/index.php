@@ -43,6 +43,12 @@ function handleResponse($action) {
             return \Booking\Install::setupPriorityApprovalData();
         case 'setupDeployFB20250812':
             return \Booking\Install::setupDeployFB20250812();
+        case 'DriverConfirmRejectBooking':
+            return \Booking\Page\Item::APIDriverConfirmRejectBooking();
+        case 'ManagerApproveAssignBooking':
+            return \Booking\Page\Item::APIApproveAssignBookingForm();
+        case 'ManagerApproveRejectBooking':
+            return \Booking\Page\Item::APIManagerApproveRejectBooking();
         case 'testMailTemplate':
             $mailTemplates = \Booking\MailTemplate::$mailTemplates;
             foreach ($mailTemplates as $key => $template) {
@@ -51,7 +57,7 @@ function handleResponse($action) {
                 echo ($mailContent['subject'] . "<br>");
                 echo ($mailContent['content'] . "<br>");
                 echo "<br>----------------------<br>";
-                \Booking\Notification::sendNotificationToUser(551, $mailContent['subject'], $mailContent['content']);
+                \Booking\Notification::sendNotificationToUser(468, $mailContent['subject'], $mailContent['content']);
             }
             die;
         case 'test':
@@ -64,6 +70,8 @@ function handleResponse($action) {
             } else {
                 return ['status' => 'error', 'message' => 'Unauthorized'];
             }
+        case 'confirmItem':
+            return \Booking\Page\Item::confirmItem();
         default:
             return [ 'status' => 'success' ];
     }

@@ -265,7 +265,7 @@ const handleRoomTypeChange = (field, value) => {  // ← Thay
            // DO NOTHING
       } else if (isPastBooking) {
         // DO NOTHING
-      } else if (request?.isApproved === 1) { // Đã duyệt, chờ phân công
+      } else if ([1, 2, 3, -2].includes(request?.isApproved)) { // Đã duyệt, chờ phân công, chờ tài xế...
           if (canApprove) {
             actionButtons.push({
               label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
@@ -291,9 +291,11 @@ const handleRoomTypeChange = (field, value) => {  // ← Thay
           // DO NOTHING
         } else {
           if (!isBookingInProgress) {
-            actionButtons.push({
-              label: t('booking.Sửa'), className: 'bg-blue-500', action: (request) => handleEdit(request, routes.bookingForm.path)
-            });
+            if ([0, -1].includes(request?.isApproved)) {
+              actionButtons.push({
+                label: t('booking.Sửa'), className: 'bg-blue-500', action: (request) => handleEdit(request, routes.bookingForm.path)
+              });
+            }
             actionButtons.push({
               label: t('booking.Huỷ'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.cancelBookingForm.path)
             });

@@ -51,8 +51,8 @@ function ApproveBookingList({
       options: [
         {value: -1, label: t('booking.Từ chối')}, 
         {value: 0, label: t('booking.Chờ duyệt')}, 
-        {value: 1, label: t('booking.Chờ phân công')},
-        {value: 2, label: t('booking.Chờ tài xế xác nhận')},
+        {value: 1, label: t('booking.Đã duyệt')},
+        {value: 2, label: t('booking.Đã phân công')},
         {value: 3, label: t('booking.Tài xế đã xác nhận')},
         {value: 4, label: t('booking.Hoàn thành')},
       ]

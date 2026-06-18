@@ -246,8 +246,12 @@ class Lists {
                     ];
                 }
                 if ($userRoles && is_array($userRoles)) {
-                    if (!in_array("Permission [Car_Booking_Driver_Confirm]", $userRoles) && !in_array("Permission [Car_Booking_Approval]", $userRoles)) {
+                    if (!in_array("Permission [Car_Booking_Driver_Confirm]", $userRoles) && !in_array("Permission [Car_Booking_Approval]", $userRoles) && !in_array("Permission [Car_Booking_Admin]", $userRoles)) {
                         return [ 'currentItems' => [], 'totalPages' => 0, 'totalItems' => 0 ];
+                    }
+
+                    if (!in_array("Permission [Car_Booking_Admin]", $userRoles) && !in_array("Permission [Car_Booking_Approval]", $userRoles)) {
+                        $queryFilters = array_merge($queryFilters, ['%driverUser' => '"mkey":"BitrixID-'.$userId.'"']);
                     }
                 } else {
                     return [ 'currentItems' => [], 'totalPages' => 0, 'totalItems' => 0 ];
@@ -264,11 +268,17 @@ class Lists {
                 // if ($isApproved != "") {
                 //     $queryFilters = array_merge($queryFilters, ['isApproved' => $isApproved * 1]);
                 // }
+                $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
+
                 $tab = $filters['tab'] ?? '';
                 if ($tab == "pending") {
-                    $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
-                    $queryFilters = array_merge($queryFilters, ['@isApproved' => [3]]);
-
+                    $queryFilters = array_merge($queryFilters, ['@isApproved' => [2]]);
+                }
+                else if ($tab == "review") {
+                     $queryFilters = array_merge($queryFilters, ['@isApproved' => [3, 4]]);
+                }
+                else {
+                    $queryFilters = array_merge($queryFilters, ['@isApproved' => [2, 3, 4, -2]]);
                 }
                 break;
             case 'userReviewList':
