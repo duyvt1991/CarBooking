@@ -944,26 +944,26 @@ class Item {
                 ) {
                     return ['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin'];
                 }
-                try {
-                    $roomType = Json::decode($roomType) ?: [];
-                } catch (\Throwable $th) {
-                    return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
-                }
+                // try {
+                //     $roomType = Json::decode($roomType) ?: [];
+                // } catch (\Throwable $th) {
+                //     return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
+                // }
 
                 $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                 $queryMasterData->setSelect(['*']);
                 $queryMasterData->setFilter(['mkey' => 'maxDayToBooking']);
                 $maxDayToBooking = $queryMasterData->exec()->fetch();
 
-                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
-                $queryMasterData->setSelect(['*']);
-                $queryMasterData->setFilter(['mkey' => $roomType['mkey'] ?? '', 'mtype' => 'roomTypes']);
-                $roomType = $queryMasterData->exec()->fetch();
+                // $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                // $queryMasterData->setSelect(['*']);
+                // $queryMasterData->setFilter(['mkey' => $roomType['mkey'] ?? '', 'mtype' => 'roomTypes']);
+                // $roomType = $queryMasterData->exec()->fetch();
 
-                if (!empty($roomType)) {
-                    $roomType = array_merge($roomType, \Booking\Util::setDefaultValueIfNullMasterDataItem('roomTypes', $roomType['options']));
-                    unset($roomType['options']);
-                }
+                // if (!empty($roomType)) {
+                //     $roomType = array_merge($roomType, \Booking\Util::setDefaultValueIfNullMasterDataItem('roomTypes', $roomType['options']));
+                //     unset($roomType['options']);
+                // }
 
                 // $roomKey = $room['mkey'] ?? '';
                 $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
@@ -992,7 +992,8 @@ class Item {
                             'notificationCount' => 0,
                             "bookingUser" => Json::encode(["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]),	
                             "departureLocation" => Json::encode(Json::decode($departureLocation)),
-                            "roomType" => Json::encode($roomType),	
+                            // "roomType" => Json::encode($roomType),	
+                             "roomType" => Json::encode(Json::decode($roomType)),
                             "startDate" => new \Bitrix\Main\Type\DateTime($startDate, "Y-m-d"),
                             "startTime" => new \Bitrix\Main\Type\DateTime($startTime, "H:i:s"),
                             "endTime" => new \Bitrix\Main\Type\DateTime($endTime, "H:i:s"),
@@ -1164,6 +1165,9 @@ class Item {
                     $query->setFilter(['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"']);
                      // Chỉ cho phép tài xế từ chối khi họ là người được phân công lái xe, tránh trường hợp người dùng khác cố tình từ chối
                     $currentItem = $query->exec()->fetch();
+                    if (!$currentItem) {
+                        return ['status' => 'error', 'message' => 'Chuyến xe không tồn tại hoặc bạn không phải là tài xế được phân công.'];
+                    }
                 }
                 if ($currentItem) {
                     $driverDeclineUser = [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]];
@@ -1338,13 +1342,16 @@ class Item {
                         'driverDeclineDate' => null
                     ];
 
-                    // if (!$isInternalServiceType) {
-                    //     $updateData['driverConfirmationDate'] = new \Bitrix\Main\Type\DateTime();
-                    //     $updateData['driverConfirmationUser'] = Json::encode($assignedUser);
-                    // }
-
                     \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], $updateData);
                     self::logBooking($id, $currentItem, $userId);
+
+                      // Gửi email cho tài xế được phân công
+                    if ($isInternalServiceType) {
+                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_driver_when_assign_booking', $id);
+                        foreach($mailContent['driverUser'] as $uid) {
+                            \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                        }
+                    }
                 }
                 break;
 
@@ -1365,7 +1372,7 @@ class Item {
         if (!$hasPermission) {
             return ['status' => 'error', 'message' => 'Tài khoản của bạn không có quyền thực hiện thao tác này'];
         }
-        if (in_array($component, ["driverConfirmBookingList"])) {
+        if ($component === "driverConfirmBookingList") {
             if ($id != "") {
                 $query = \Booking\Query::getInstance("car_booking_requests");
                 $query->setSelect(['*']);
@@ -1433,4 +1440,432 @@ class Item {
         $queryBooking->setFilter($queryBookingFilter);
         return $queryBooking->exec()->fetchAll();
     }
+
+
+    public static function APIApproveAssignBookingForm() {
+        $request = Context::getCurrent()->getRequest();
+        
+        // Lấy secret từ header
+        $secret = $request->getHeader("X-Secret") ?: $request->getHeader("Secret");
+        if ($secret !== DAT_PHONG_KEY_INSTALL) { // Có thể điều chỉnh lại constant chứa key nếu muốn
+            return ['status' => 'error', 'message' => 'Unauthorized'];
+        }
+
+        // Lấy dữ liệu từ body của request
+        $input = $request->getInput();
+        $data = [];
+        if (!empty($input)) {
+            try {
+                $data = Json::decode($input);
+            } catch (\Throwable $th) {
+                return ['status' => 'error', 'message' => 'Invalid JSON data in body'];
+            }
+        } else {
+            $data = $request->getPostList()->toArray();
+        }
+
+        extract($data);
+        $id = $idBooking ?? '';
+        $emailUser = $userEmail ?? '';
+
+        if ($id == "" || $emailUser == "" ) {
+            return ['status' => 'error', 'message' => 'Vui lòng cung cấp đầy đủ id, userEmail'];
+        }
+
+        if ($id != "") {
+            $query = \Booking\Query::getInstance("car_booking_requests");
+            $query->setSelect(['*']);
+            $query->setFilter(['id' => $id]);
+            $currentItem = $query->exec()->fetch();
+        } else {
+            return ['status' => 'error', 'message' => 'Vui lòng cung cấp ID chuyến xe'];
+        }
+
+        if ($currentItem) {
+            
+            // Thêm check: nếu chuyến xe đã quá thời gian sử dụng thì không cho phân công
+            $startDateStr = is_object($currentItem['startDate']) ? $currentItem['startDate']->format('Y-m-d') : explode(' ', $currentItem['startDate'] ?? '')[0];
+            $startTimeStr = is_object($currentItem['startTime']) ? $currentItem['startTime']->format('H:i:s') : $currentItem['startTime'];
+            $startDateTime = new \Bitrix\Main\Type\DateTime($startDateStr . " " . $startTimeStr, "Y-m-d H:i:s");
+            $currentDateTime = new \Bitrix\Main\Type\DateTime();
+
+            if ($startDateTime < $currentDateTime) {
+                return ['status' => 'error', 'message' => 'Chuyến xe đã quá thời gian sử dụng, không thể phân công.'];
+            }
+
+            if ($currentItem['isCancelled'] != 0 || !in_array($currentItem['isApproved'], [0, 1, -2])) {
+                return ['status' => 'error', 'message' => 'Chuyến xe không ở trạng thái có thể phân công.'];
+            }
+        
+            $roomKey = ($carCode ?? '');
+            $serviceTypeValue = ($serviceType ?? '');
+            $driverUserKey = ($driverCode ?? '');
+
+
+            if (!$serviceTypeValue) {
+                return ['status' => 'error', 'message' => 'Vui lòng chọn loại dịch vụ'];
+            }
+
+            $decodeOptions = function($item, $mtype) {
+                $options = [];
+                if (!empty($item['options'])) {
+                    try {
+                        $options = is_string($item['options']) ? Json::decode($item['options']) : (array)$item['options'];
+                    } catch (\Throwable $th) {}
+                }
+                $item = array_merge($item, $options, \Booking\Util::setDefaultValueIfNullMasterDataItem($mtype, $options));
+                unset($item['options']);
+                return $item;
+            };
+
+            // Lấy toàn bộ thông tin serviceType từ master data
+            $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+            $queryMasterData->setSelect(['*']);
+            $queryMasterData->setFilter(['mkey' => $serviceTypeValue, 'mtype' => 'serviceTypes']);
+            $serviceTypeItem = $queryMasterData->exec()->fetch();
+            $serviceTypeItem = $serviceTypeItem ? $decodeOptions($serviceTypeItem, 'serviceTypes') : ['mkey' => $serviceTypeValue, 'mvalue' => $serviceTypeValue];
+
+            $isInternalServiceType = ($serviceTypeValue === 'ST001'); // Xe nội bộ
+            $isRoomRequired = in_array($serviceTypeValue, ['ST001', 'ST002'], true);
+
+            $roomItem = [];
+            if ($isRoomRequired) {
+                if (!$roomKey) {
+                    return ['status' => 'error', 'message' => 'Vui lòng chọn xe'];
+                }
+                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                $queryMasterData->setSelect(['*']);
+                $queryMasterData->setFilter(['mkey' => $roomKey, 'mtype' => 'rooms']);
+                $roomItem = $queryMasterData->exec()->fetch();
+
+                if (!$roomItem) {
+                    return ['status' => 'error', 'message' => 'Xe không tồn tại'];
+                }
+
+                $roomItem = $decodeOptions($roomItem, 'rooms');
+            }
+
+            $driverItem = [];
+            if ($isInternalServiceType) {
+                if (!$driverUserKey) {
+                    return ['status' => 'error', 'message' => 'Vui lòng chọn tài xế'];
+                }
+
+                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                $queryMasterData->setSelect(['*']);
+                $queryMasterData->setFilter(['mkey' => $driverUserKey, 'mtype' => 'drivers']);
+                $driverItem = $queryMasterData->exec()->fetch();
+                if ($driverItem) {
+                    $driverItem = $decodeOptions($driverItem, 'drivers');
+                }
+                else {
+                    return ['status' => 'error', 'message' => 'Tài xế không hợp lệ'];
+                }
+            } 
+            else if ($isRoomRequired) {
+                if (!isset($driverPhoneNumber) || !isset($licensePlateNumber) || $driverPhoneNumber === '' || $licensePlateNumber === '') {
+                    return ['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin tài xế và biển số'];
+                }
+            }
+
+            $apiUserId = 0; // Mặc định là user hệ thống
+            $assignedUser = [["mkey" => "BitrixID-".$apiUserId, "mvalue" => "Hệ thống (API)"]];
+
+            if ($emailUser != "") {
+                $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+                $queryMasterData->setSelect(['*']);
+                $queryMasterData->setFilter([
+                    'mtype' => 'approvers',
+                    'isDeleted' => 0,
+                    '%mvalue' => '(' . trim($emailUser) . ')'
+                ]);
+                $executorItem = $queryMasterData->exec()->fetch();
+                if ($executorItem) {
+                    $apiUserId = (int)str_replace('BitrixID-', '', $executorItem['mkey']);
+                    $assignedUser = [["mkey" => $executorItem['mkey'], "mvalue" => $executorItem['mvalue']]];
+                } else {
+                    return ['status' => 'error', 'message' => 'emailUser không tồn tại trong danh sách người duyệt'];
+                }
+            }
+            
+            $isApproved = $isInternalServiceType ? 2 : 3;
+
+            if ($isInternalServiceType) {
+                $startDateStr = is_object($currentItem['startDate']) ? $currentItem['startDate']->format('Y-m-d') : explode(' ', $currentItem['startDate'] ?? '')[0];
+                $startTimeStr = is_object($currentItem['startTime']) ? $currentItem['startTime']->format('H:i:s') : $currentItem['startTime'];
+                $endTimeStr = is_object($currentItem['endTime']) ? $currentItem['endTime']->format('H:i:s') : $currentItem['endTime'];
+
+                $startDateCondition = new \Bitrix\Main\Type\DateTime($startDateStr . " " . $startTimeStr, "Y-m-d H:i:s");
+                $startTimeCondition = $startDateCondition->format('H:i:s');
+                $endDateCondition = new \Bitrix\Main\Type\DateTime($startDateStr . " " . $endTimeStr, "Y-m-d H:i:s");
+                $endTimeCondition = $endDateCondition->format('H:i:s');
+                $overlappingBookings = self::getDuplicatedBookingWithDriverAndCar($id, $roomKey, $driverUserKey, $startDateCondition, $startTimeCondition, $endTimeCondition);
+                if (!empty($overlappingBookings)) {
+                    return ['status' => 'error', 'message' => 'Tài xế hoặc xe đã được phân công vào khung giờ này'];
+                }
+            }
+
+            $updateData = [
+                'serviceType' => Json::encode($serviceTypeItem),
+                'room' => Json::encode($roomItem),
+                'driverUser' => Json::encode($driverItem),
+                'driverPhoneNumber' => $driverPhoneNumber ?? '',
+                'licensePlateNumber' => $licensePlateNumber ?? '',
+                'assignmentDate' => new \Bitrix\Main\Type\DateTime(),
+                'assignmentUser' => Json::encode($assignedUser),
+                'isApproved' => $isApproved,
+                'driverDeclineReason' => '',
+                'driverDeclineUser' => '[]',
+                'driverDeclineDate' => null
+            ];
+
+            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], $updateData);
+            self::logBooking($id, $currentItem, $apiUserId);
+
+             // Gửi email cho tài xế được phân công
+                    if ($isInternalServiceType) {
+                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_driver_when_assign_booking', $id);
+                        foreach($mailContent['driverUser'] as $uid) {
+                            \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                        }
+                    }
+
+        } else {
+            return ['status' => 'error', 'message' => 'Chuyến xe không tồn tại'];
+        }
+
+        return ['status' => 'success', 'message' => 'Phân công thành công'];
+    }
+    
+    public static function APIDriverConfirmRejectBooking() {
+        $request = Context::getCurrent()->getRequest();
+        
+        // Xác thực Secret từ header
+        $secret = $request->getHeader("X-Secret") ?: $request->getHeader("Secret");
+        if ($secret !== DAT_PHONG_KEY_INSTALL) {
+            return ['status' => 'error', 'message' => 'Unauthorized'];
+        }
+
+        // Lấy dữ liệu body
+        $input = $request->getInput();
+        $data = [];
+        if (!empty($input)) {
+            try {
+                $data = Json::decode($input);
+            } catch (\Throwable $th) {
+                return ['status' => 'error', 'message' => 'Invalid JSON data in body'];
+            }
+        } else {
+            $data = $request->getPostList()->toArray();
+        }
+
+        $id = $data['idBooking'] ?? '';
+        $emailUser = $data['userEmail'] ?? '';
+        $confirm = isset($data['confirm']) ? (string)$data['confirm'] : '';
+        $reason = $data['reason'] ?? '';
+
+        if ($id == "" || $emailUser == "" || !in_array($confirm, ['0', '1'], true)) {
+            return ['status' => 'error', 'message' => 'Vui lòng cung cấp đầy đủ id, userEmail và confirm (1: Xác nhận, 0: Từ chối)'];
+        }
+
+        if ($confirm === '0' && trim($reason) === '') {
+            return ['status' => 'error', 'message' => 'Vui lòng cung cấp lý do từ chối'];
+        }
+
+        // 1. Tìm tài xế trong MasterData thông qua chuỗi email (Email thường được lưu trong mvalue)
+        $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+        $queryMasterData->setSelect(['*']);
+        $queryMasterData->setFilter([
+            'mtype' => 'drivers',
+            'isDeleted' => 0,
+            '%mvalue' => '(' . trim($emailUser) . ')'
+
+        ]);
+        $driverItem = $queryMasterData->exec()->fetch();
+
+        if (!$driverItem) {
+            return ['status' => 'error', 'message' => 'Không tìm thấy tài xế nào có email này'];
+        }
+
+        // 2. Tìm chuyến xe
+        $query = \Booking\Query::getInstance("car_booking_requests");
+        $query->setSelect(['*']);
+        $query->setFilter(['id' => $id]);
+        $currentItem = $query->exec()->fetch();
+
+        if (!$currentItem) {
+            return ['status' => 'error', 'message' => 'Chuyến xe không tồn tại'];
+        }
+
+        // Kiểm tra xem chuyến xe có đang chờ xác nhận không (isApproved = 2)
+        if ($currentItem['isApproved'] != 2) {
+            if ($currentItem['isApproved'] == 3 && $confirm === '1') {
+                return ['status' => 'success', 'message' => 'Chuyến xe này đã được xác nhận trước đó'];
+            }
+            return ['status' => 'error', 'message' => 'Chuyến xe không ở trạng thái chờ tài xế xác nhận'];
+        }
+
+        // Xác minh xem tài xế truyền lên có đúng là tài xế đang được phân công hay không
+        $currentDriverUser = [];
+        try {
+            $currentDriverUser = is_string($currentItem['driverUser']) ? Json::decode($currentItem['driverUser']) : (array)$currentItem['driverUser'];
+        } catch (\Throwable $th) {}
+
+        if (empty($currentDriverUser['mkey']) || $currentDriverUser['mkey'] !== $driverItem['mkey']) {
+            return ['status' => 'error', 'message' => 'Tài xế này không phải là người được phân công cho chuyến xe này'];
+        }
+
+        $apiUserId = 0; // Mặc định là user hệ thống
+        $apiUserId = (int)str_replace('BitrixID-', '', $driverItem['mkey']);
+            
+        $driverUserAction = [["mkey" => $driverItem['mkey'], "mvalue" => $driverItem['mvalue']]];
+
+        // 3. Xử lý Logic Confirm hoặc Reject
+        if ($confirm === '1') {
+            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], [
+                'isApproved' => 3, 
+                'driverConfirmationUser' => Json::encode($driverUserAction), 
+                'driverConfirmationDate' => new \Bitrix\Main\Type\DateTime()
+            ]);
+            self::logBooking($id, $currentItem, $apiUserId);
+            
+            $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_confirm_booking', $id);
+            foreach($mailContent['userIds'] as $uid) {
+                \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+            }
+
+            return ['status' => 'success', 'message' => 'Xác nhận chuyến xe thành công'];
+
+        } else if ($confirm === '0') {
+            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], [
+                'isApproved' => -2,
+                'serviceType' => null, 
+                'licensePlateNumber' => null, 
+                'driverUser' => null, 
+                'driverPhoneNumber' => null, 
+                'room' => null,
+                'driverDeclineReason' => $reason,
+                'driverDeclineUser' => Json::encode($driverUserAction),
+                'driverDeclineDate' => new \Bitrix\Main\Type\DateTime()
+            ]);
+            self::logBooking($id, $currentItem, $apiUserId);
+
+            // Gửi thông báo lại cho người phân công/quản lý để họ biết tài xế từ chối
+            $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_approve_when_driver_reject_booking', $id);
+            foreach($mailContent['assignmentUser'] as $uid) {
+                \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+            }
+
+            return ['status' => 'success', 'message' => 'Từ chối chuyến xe thành công'];
+        }
+
+        return ['status' => 'error', 'message' => 'Hành động không hợp lệ'];
+    }
+
+    public static function APIManagerApproveRejectBooking() {
+        $request = Context::getCurrent()->getRequest();
+        // Xác thực Secret từ header
+        $secret = $request->getHeader("X-Secret") ?: $request->getHeader("Secret");
+        if ($secret !== DAT_PHONG_KEY_INSTALL) {
+            return ['status' => 'error', 'message' => 'Unauthorized'];
+        }
+
+        // Lấy dữ liệu body
+        $input = $request->getInput();
+        $data = [];
+        if (!empty($input)) {
+            try {
+                $data = Json::decode($input);
+            } catch (\Throwable $th) {
+                return ['status' => 'error', 'message' => 'Invalid JSON data in body'];
+            }
+        } else {
+            $data = $request->getPostList()->toArray();
+        }
+
+        $id = $data['idBooking'] ?? '';
+        $emailUser = $data['userEmail'] ?? '';
+        $approve = isset($data['approve']) ? (string)$data['approve'] : '';
+        $reason = $data['reason'] ?? '';
+
+        if ($id == "" || $emailUser == "" || !in_array($confirm, ['0', '1'], true)) {
+            return ['status' => 'error', 'message' => 'Vui lòng cung cấp đầy đủ id, userEmail và approve (1: Duyệt, 0: Từ chối)'];
+        }
+
+        if ($confirm === '0' && trim($reason) === '') {
+            return ['status' => 'error', 'message' => 'Vui lòng cung cấp lý do từ chối'];
+        }
+
+        // 1. Tìm tài xế trong MasterData thông qua chuỗi email (Email thường được lưu trong mvalue)
+        $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
+        $queryMasterData->setSelect(['*']);
+        $queryMasterData->setFilter([
+            'mtype' => 'approvers',
+            'isDeleted' => 0,
+            '%mvalue' => '(' . trim($emailUser) . ')'
+
+        ]);
+        $approverItem = $queryMasterData->exec()->fetch();
+
+        if (!$approverItem) {
+            return ['status' => 'error', 'message' => 'Không tìm thấy user nào có email này'];
+        }
+
+        // 2. Tìm chuyến xe
+        $query = \Booking\Query::getInstance("car_booking_requests");
+        $query->setSelect(['*']);
+        $query->setFilter(['id' => $id]);
+        $currentItem = $query->exec()->fetch();
+
+        if (!$currentItem) {
+            return ['status' => 'error', 'message' => 'Chuyến xe không tồn tại'];
+        }
+
+        // Kiểm tra xem chuyến xe có đang chờ xác nhận không (isApproved = 2)
+        if ($currentItem['isApproved'] != 0) {
+            return ['status' => 'error', 'message' => 'Chuyến xe không ở trạng thái chờ duyệt'];
+        }
+
+        $apiUserId = 0; // Mặc định là user hệ thống
+        $apiUserId = (int)str_replace('BitrixID-', '', $approverItem['mkey']);
+            
+        $approverUserAction = [["mkey" => $approverItem['mkey'], "mvalue" => $approverItem['mvalue']]];
+
+        // 3. Xử lý Logic Confirm hoặc Reject
+        if ($confirm === '1') {
+            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], [
+                'isApproved' => 1, 
+                'approvedUsers' => Json::encode($approverUserAction), 
+                'approvedDate' => new \Bitrix\Main\Type\DateTime()
+            ]);
+            self::logBooking($id, $currentItem, $apiUserId);
+
+            $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_approve_booking', $id);
+                foreach($mailContent['userIds'] as $userId) {
+                    \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                }
+
+            return ['status' => 'success', 'message' => 'Duyệt thành công'];
+
+        } else if ($confirm === '0') {
+            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], [
+                'isApproved' => -1,
+                'rejectedReason' => $reason,
+                'rejectedUsers' => Json::encode($approverUserAction),
+                'rejectedDate' => new \Bitrix\Main\Type\DateTime()
+            ]);
+            self::logBooking($id, $currentItem, $apiUserId);
+
+            // Gửi thông báo lại cho người phân công/quản lý để họ biết tài xế từ chối
+            $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_reject_booking', $id);
+            foreach($mailContent['userIds'] as $uid) {
+                \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+            }
+
+            return ['status' => 'success', 'message' => 'Từ chối chuyến xe thành công'];
+        }
+
+        return ['status' => 'error', 'message' => 'Hành động không hợp lệ'];
+    }
+
 }

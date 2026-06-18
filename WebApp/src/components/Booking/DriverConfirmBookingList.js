@@ -87,6 +87,7 @@ function DriverConfirmBookingList({
     const isBookingInProgress = currentTime >= bookingStartTime && currentTime <= bookingEndTime;
     const isPastBooking = currentTime > bookingEndTime;
     const approvedStatus = Number(request?.isApproved);
+    const isDriver = request?.driverUser?.mkey === masterData.userId;
 
     // Button templates
     const statusButtons = {
@@ -103,36 +104,27 @@ function DriverConfirmBookingList({
 
     if (tempFilters?.tab === 'review')
     {
-       return request?.driverReviewScore > 0 ? 
-            [{ component: <span className="flex items-center justify-center gap-1"><FaCheck className="text-green-500" /></span> }]
-            : [
+       return (request?.driverReviewScore === 0 && request?.isApproved === 4) ? 
+             [
                 { label: t('booking.Đánh giá'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverReviewForm.path) }
-            ]
+            ] : 
+            [{ component: <span className="flex items-center justify-center gap-1"><FaCheck className="text-green-500" /></span> }]
     }
 
+    // Ưu tiên kiểm tra các trạng thái Hủy / Từ chối trước
+    if (approvedStatus === -1 || approvedStatus === -2) return [statusButtons.rejected];
+
+    // Sau đó mới kiểm tra tiến độ thời gian
     if (isBookingInProgress) return [statusButtons.inProgress];
     if (isPastBooking) return [statusButtons.done];
-    if (approvedStatus === -2) return [statusButtons.rejected];
 
-    // Pending tab logic
-    if (tempFilters?.tab === "pending") {
-      const result = [];
-      result.push(actionDefs.approve);
-      result.push(actionDefs.reject);
-      return result;
+    // Xử lý các trạng thái chờ hành động
+    if (isDriver && approvedStatus === 2) {
+      return [actionDefs.approve, actionDefs.reject];
     }
 
-    // Default view by approval status
-    switch (approvedStatus) {
-      case 2:
-        return [actionDefs.approve,actionDefs.reject];
-      case 3:
-        return [actionDefs.reject];
-      case -2:
-        return [statusButtons.rejected];
-      default:
-        return [statusButtons.default];
-    }
+    // Trả về mặc định (chờ đến giờ, v.v...)
+    return [statusButtons.default];
   };
 
   return (

@@ -317,31 +317,7 @@ function BookingForm({ request, setRequest, errors, handleChange }) {
     toggleClientFieldsDisplay(request.usagePurpose);
   }, [request.usagePurpose]);
 
-  // const renderRoomDetails = () => {
-  //   const details = [
-  //     { label: 'booking.Loại xe', value: roomDetails.roomType },
-  //     { label: 'booking.Thiết bị', value: formatEquipmentsWithType(roomDetails.equipments, masterData) },
-  //     // { label: 'booking.Diện tích', value: formatSize(roomDetails.size) },
-  //     { label: 'booking.Sức chứa', value: formatPersons(roomDetails.persons, null, t) },
-  //     { label: 'booking.Ghi chú xe', value: roomDetails.note }
-  //   ].filter(detail => detail.value);
   
-  //   return (
-  //     <div className="my-4 border border-gray-200 rounded-lg">
-  //       <table className="w-full divide-y divide-gray-200">
-  //         <tbody className="divide-y divide-gray-200">
-  //           {details.map((detail, index) => (
-  //             <tr key={index}>
-  //               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{t(detail.label)}</td>
-  //               <td className="px-6 py-4 text-sm text-gray-800">{detail.value}</td>
-  //             </tr>
-  //           ))}
-  //         </tbody>
-  //       </table>
-  //     </div>
-  //   );
-  // };
-
   const renderFormElements = (column) => (
     Object.keys(initFormState).filter(field => initFormState[field].label && initForm[field].column === column).map((field, index) => (
       <Fragment key={index}>

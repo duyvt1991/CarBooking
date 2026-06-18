@@ -213,6 +213,7 @@ class Install {
         return ['status' => 'success', 'message' => 'Table created and mock data inserted successfully'];
     }
 
+    
 
     // public static function setupDeployFB20250812() {
     //     $request = Context::getCurrent()->getRequest();
@@ -234,39 +235,4 @@ class Install {
     //     return ['status' => 'success', 'message' => 'Deploy FB20250812 data setup successfully'];
     // }
 
-    // public static function setupDeployFB20260520() {
-    //     $request = Context::getCurrent()->getRequest();
-    //     if ($request->getPost("secret") !== DAT_PHONG_KEY_INSTALL) {
-    //         return ['status' => 'error', 'message' => 'Unauthorized'];
-    //     }
-    //     $connection = Application::getConnection("car_booking_connection");
-
-    //      // Insert new record bookingDriverGroupId in booking_master_data
-    //     $sql = "SELECT COUNT(*) AS count FROM car_booking_masterdata WHERE mkey = 'bookingDriverGroupId'";
-    //     $result = $connection->query($sql);
-    //     $row = $result->fetch();
-    //     if ($row['count'] == 0) {
-    //         // If the record does not exist, insert it
-    //         $sql = "INSERT INTO car_booking_masterdata (mtype, mParentKey, mkey, mvalue, options, isActive)
-    //                 VALUES ('config', '', 'bookingDriverGroupId', '28', '[]', 1)";
-    //         $connection->queryExecute($sql);
-    //     }
-
-
-    //     $columns = $connection->query("SHOW COLUMNS FROM car_booking_requests")->fetchAll();
-    //     $existingColumns = array_column($columns, 'Field');
-
-    //     // Add column
-    //     $newColumns = [
-    //         'isPriority' => 'INT DEFAULT 0',
-    //         'note' => "TEXT NULL"
-    //     ];
-    //     foreach ($newColumns as $column => $type) {
-    //         if (!in_array($column, $existingColumns)) {
-    //             $connection->queryExecute("ALTER TABLE car_booking_requests ADD COLUMN $column $type AFTER id");
-    //         }
-    //     }
-
-    //     return ['status' => 'success', 'message' => 'Priority approval data setup successfully'];
-    // }
 }

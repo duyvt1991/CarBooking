@@ -161,6 +161,16 @@ class MailTemplate {
                     return "Chào bạn,<br/><br/>Đặt xe số ".$id." của bạn đã được xác nhận:<br/><br/>- Xe: ".$room["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."" .$noteWhenUsing ."" .$noteAfterUsing ."" .$commonNote;
                 }
             ],
+            'send_to_driver_when_assign_booking' => [
+                'subject' => 'Yêu cầu đặt xe cần xác nhận',
+                'content' => function($currentItem) use ($additionalMessages) {
+                    extract($additionalMessages);
+                    extract($currentItem);
+                    $driverConfirmUrl = str_replace('%ID%', $id, $approversUrl);
+                  
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đang cần xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người sử dụng: ".$mainUser["mvalue"]."<br/>- Loại xe: ".$roomType["mvalue"]." - Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approversUrl."".$commonNote;
+                }
+            ],
         ];
     }
 
@@ -186,22 +196,15 @@ class MailTemplate {
             $currentItem['userIds'] = $userIdOverrides;
         } else {
             try {
-                $currentItem['userIds'] = [
-                    str_replace('BitrixID-', '', $currentItem['bookingUser']['mkey']),
-                    str_replace('BitrixID-', '', $currentItem['mainUser']['mkey'])
-                ];
-                foreach ($currentItem['users'] as $user) {
-                    $currentItem['userIds'][] = str_replace('BitrixID-', '', $user['mkey']);
+                $currentItem['userIds'] = [];
+                if (!empty($currentItem['bookingUser']['mkey'])) {
+                    $currentItem['userIds'][] = str_replace('BitrixID-', '', $currentItem['bookingUser']['mkey']);
                 }
+                if (!empty($currentItem['mainUser']['mkey'])) {
+                    $currentItem['userIds'][] = str_replace('BitrixID-', '', $currentItem['mainUser']['mkey']);
+                }
+               
                 $currentItem['userIds'] = array_unique($currentItem['userIds']);
-
-                // $roomTypeApprovers = $currentItem['roomType']['approvers'] ?? [];
-                // $roomApprovers = $currentItem['room']['approvers'] ?? [];
-                // $approvers = empty($roomApprovers) ? $roomTypeApprovers : $roomApprovers;
-                // $approvers = array_map(function($approver) {
-                //     return str_replace('BitrixID-', '', $approver);
-                // }, $approvers);
-                // $approvers = array_unique($approvers);
 
                 $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                 $queryMasterData->setSelect(['mkey']);
@@ -216,18 +219,36 @@ class MailTemplate {
                 }, $approvers);
                 $approvers = array_unique($approvers);
 
-                // $priorityApprovers = $currentItem['room']['priorityApprovers'] ?? [];
-                // $priorityApprovers = array_map(function($approver) {
-                //     return str_replace('BitrixID-', '', $approver);
-                // }, $priorityApprovers);
-                // $priorityApprovers = array_unique($priorityApprovers);
-
-                if (!empty($currentItem['driverUser']) && isset($currentItem['driverUser']['mkey'])) {
-                    $driverUser[] = str_replace('BitrixID-', '', $currentItem['driverUser']['mkey']);
+                $dUserField = $currentItem['driverUser'];
+                if (is_string($dUserField)) {
+                    try { $dUserField = \Bitrix\Main\Web\Json::decode($dUserField); } catch (\Throwable $th) { $dUserField = []; }
+                }
+                if (!empty($dUserField)) {
+                    if (isset($dUserField['mkey'])) {
+                        $driverUser[] = str_replace('BitrixID-', '', $dUserField['mkey']);
+                    } else if (is_array($dUserField)) {
+                        foreach ($dUserField as $dUser) {
+                            if (isset($dUser['mkey'])) {
+                                $driverUser[] = str_replace('BitrixID-', '', $dUser['mkey']);
+                            }
+                        }
+                    }
                 }
 
-                if (!empty($currentItem['assignmentUser']) && isset($currentItem['assignmentUser']['mkey'])) {
-                    $assignmentUser[] = str_replace('BitrixID-', '', $currentItem['assignmentUser']['mkey']);
+                $aUserField = $currentItem['assignmentUser'];
+                if (is_string($aUserField)) {
+                    try { $aUserField = \Bitrix\Main\Web\Json::decode($aUserField); } catch (\Throwable $th) { $aUserField = []; }
+                }
+                if (!empty($aUserField)) {
+                    if (isset($aUserField['mkey'])) {
+                        $assignmentUser[] = str_replace('BitrixID-', '', $aUserField['mkey']);
+                    } else if (is_array($aUserField)) {
+                        foreach ($aUserField as $aUser) {
+                            if (isset($aUser['mkey'])) {
+                                $assignmentUser[] = str_replace('BitrixID-', '', $aUser['mkey']);
+                            }
+                        }
+                    }
                 }
             } catch (\Throwable $th) {
                 //throw $th;
