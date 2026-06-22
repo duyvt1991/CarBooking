@@ -1,0 +1,285 @@
+$border-color: #6b7280;
+$background-color: white;
+$hover-background-color: #cccccc;
+$active-background-color: #e5e7eb;
+$header-background-color: #ddd;
+$event-background-color: #22c55e;
+$event-color: white;
+$padding: 4px;
+$border-radius: 4px;
+
+.calendar-grid-wrapper {
+  position: relative;
+  max-height: 75vh;
+  overflow-y: auto;
+  .calendar-body {
+    tr:first-child {
+      td {
+        &.calendar-time-slot {
+          .timeslot {
+            opacity: 0;
+          }
+        }
+      }
+    }
+    tr:nth-child(2n) {
+      td {
+        border-bottom: 1px solid #dddddd;
+        &.calendar-time-slot {
+          .timeslot {
+            opacity: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.calendar-grid-month-wrapper {
+  position: relative;
+  max-height: 75vh;
+  overflow-y: auto;
+  .calendar-time-slot {
+    border-left: 1px solid #dddddd !important;
+    border-right: 1px solid #dddddd !important;
+    border-bottom: 1px solid #dddddd !important;
+    height: 100px !important;
+    overflow: hidden;
+    font-size: larger;
+  }
+}
+
+.calendar-grid {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+
+  .calendar-header {
+    display: table-header-group;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    .calendar-header-cell {
+      display: table-cell;
+      padding: $padding;
+      background-color: $header-background-color;
+      color: #333;
+      text-align: center;
+      border: 1px solid #dddddd57;
+      border-top: none;
+      .week-day {
+        font-size: small;
+        font-weight: normal;
+      }
+      .day {
+        font-size: large;
+      }
+      &.calendar-header-timeslot {
+        width: 100px;
+      }
+    }
+  }
+
+  .calendar-body {
+    display: table-row-group;
+    .calendar-time-slot {
+      display: table-cell;
+      position: relative;
+      min-width: 100px;
+      height: 33px;
+      padding: $padding;
+      border-left: 1px solid #dddddd57;
+      border-right: 1px solid #dddddd57;
+      border-bottom: 1px dashed #dddddd;
+      text-align: center;
+      .timeslot {
+        position: relative;
+        top: -16px;
+        padding: 0 5px;
+        background-color: $background-color;
+      }
+      .timeslot-bg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        &:hover {
+          background-color: $hover-background-color;
+        }
+      }
+    }
+  }
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $padding 0;
+  gap: 4px;
+
+  .button-group {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .my-calendar-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .my-calendar .active{
+    background-color: #3b82f6 !important;
+    color: white;
+  }
+
+  .button {
+    padding: 8px 12px;
+    border: 1px solid $border-color;
+    border-radius: 0;
+    background-color: $background-color;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: background-color 0.3s ease;
+
+    &:first-child {
+      border-top-left-radius: $border-radius;
+      border-bottom-left-radius: $border-radius;
+    }
+
+    &:last-child {
+      border-top-right-radius: $border-radius;
+      border-bottom-right-radius: $border-radius;
+    }
+
+    & + button {
+      border-left: none;
+    }
+
+    span {
+      display: inline-block;
+    }
+
+    &:hover, &.active {
+      background-color: $hover-background-color;
+    }
+  }
+}
+
+.responsive-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .responsive-controls .my-calendar-group {
+    width: 100%;
+  }
+  .responsive-controls .my-calendar {
+    margin-bottom: 10px;
+  }
+
+  .responsive-controls .button-group {
+    flex: 1 1 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    button {
+      width: 100%;
+      white-space: nowrap;
+    }
+  }
+
+  .responsive-controls .current-month {
+    flex: 1 1 100%;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+}
+
+.current-month {
+  font-weight: bold;
+  font-size: large;
+}
+
+.event {
+  background-color: $event-background-color;
+  color: $event-color;
+  padding: 1px 2px;
+  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  font-size: x-small;
+  overflow: hidden;
+  cursor: pointer;
+  .event-timeslot {
+    display: block;
+    font-size: xx-small;
+  }
+  &:hover {
+    filter: brightness(1.2);
+    .btn-priority {
+      opacity: 1;
+    }
+  }
+  .btn-priority {
+    padding: 2px 4px;
+    transition: all 0.3s ease;
+    position: absolute;
+    background-color: #3b82f6;
+    border-radius: 5px;
+    border: 1px solid #3b41f6;
+    color: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    &:hover {
+      background-color: #3b41f6;
+    }
+  }
+}
+
+.current-time-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: red;
+  z-index: 1;
+  &.week {
+    min-width: 800px;
+  }
+}
+
+.month-events {
+  margin-top: 5px;
+  font-size: small;
+  color: $event-background-color;
+  height: 0;
+  span {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: smaller;
+    border-radius: $border-radius;
+    background-color: $border-color;
+    color: $event-color;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    &:hover {
+      background-color: $hover-background-color;
+    }
+  }
+}
