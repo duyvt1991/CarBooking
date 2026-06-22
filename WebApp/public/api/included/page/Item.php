@@ -1868,4 +1868,73 @@ class Item {
         return ['status' => 'error', 'message' => 'Hành động không hợp lệ'];
     }
 
+    public static function CallMobile() {
+        $querySyncData = \Booking\Query::getInstance("car_booking_masterdata", true);
+        $querySyncData->setSelect(['*']);
+        $querySyncData->setFilter([
+            '@mtype' => ['drivers', 'rooms'],
+            // 'isDeleted' => 0
+        ]);
+        $unsyncedItems = $querySyncData->exec()->fetchAll();
+
+        foreach ($unsyncedItems as $item) {
+            try {
+                $options = [];
+                if (!empty($item['options'])) {
+                    try {
+                        $options = is_string($item['options']) ? \Bitrix\Main\Web\Json::decode($item['options']) : (array)$item['options'];
+                    } catch (\Throwable $th) {}
+                }
+
+                $isSync = isset($options['isSync']) ? (int)$options['isSync'] : 0;
+
+                if ($isSync === 0) {
+                    // TODO: Gọi API đồng bộ sang hệ thống thứ 3 ở đây
+                    // Ví dụ: $syncSuccess = \Booking\ThirdPartyApi::syncData($item['mtype'], $item);
+                    // Gọi API đồng bộ sang hệ thống thứ 3 ở đây
+                    $syncSuccess = \Booking\ThirdPartyApi::syncMasterDataItem($item);
+
+                    if ($syncSuccess) {
+                        $options['isSync'] = 1;
+                        \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $item['id']], ['options' => \Bitrix\Main\Web\Json::encode($options)]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Bỏ qua lỗi và tiếp tục vòng lặp để không ảnh hưởng đến toàn bộ cron job
+            }
+        }
+    }
+    public static function CallMobileBooking() {
+        $logFile = dirname(__FILE__) . '/debug_sync.log';
+        @file_put_contents($logFile, "=== Start Sync CallMobileBooking at " . date('Y-m-d H:i:s') . " ===\n", FILE_APPEND);
+        
+        $querySyncData = \Booking\Query::getInstance("car_booking_requests", true);
+        $querySyncData->setSelect(['*']);
+        $querySyncData->setFilter([
+            '@isSyncedThirdParty' => [0, 2]
+        ]);
+        $unsyncedBookings = $querySyncData->exec()->fetchAll();
+
+        @file_put_contents($logFile, "Found " . count($unsyncedBookings) . " unsynced bookings.\n", FILE_APPEND);
+
+        foreach ($unsyncedBookings as $booking) {
+            try {
+                @file_put_contents($logFile, "Syncing booking ID: " . $booking['id'] . "\n", FILE_APPEND);
+                $syncResponse = \Booking\ThirdPartyApi::createBooking($booking);
+                @file_put_contents($logFile, "Response: " . print_r($syncResponse, true) . "\n", FILE_APPEND);
+
+                if (is_array($syncResponse) && ($syncResponse['status'] ?? '') === 'success') {
+                    $affectedRows = \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], [
+                        'isSyncedThirdParty' => 1,
+                        'thirdPartySyncDate' => new \Bitrix\Main\Type\DateTime()
+                    ]);
+                    @file_put_contents($logFile, "Updated DB. Affected rows: " . $affectedRows . "\n", FILE_APPEND);
+                } else {
+                    @file_put_contents($logFile, "Sync did not return success status.\n", FILE_APPEND);
+                }
+            } catch (\Throwable $e) {
+                @file_put_contents($logFile, "Exception: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
+            }
+        }
+    }
 }

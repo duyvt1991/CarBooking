@@ -31,7 +31,9 @@ class Bookings {
         $queryBookingFilter = array_merge($queryBookingFilter, ['isCancelled' => 0]);
         $queryBookingFilter = array_merge($queryBookingFilter, ['@isApproved' => [ 2, 3]]);
         if ($roomType != "") {
-            $queryBookingFilter = array_merge($queryBookingFilter, ['%roomType' => '"mkey":"'.$roomType.'"']);
+            // $queryBookingFilter = array_merge($queryBookingFilter, ['%roomType' => '"mkey":"'.$roomType.'"']);
+            $queryBookingFilter = array_merge($queryBookingFilter, ['%room' => '"roomType":"'.$roomType.'"']);
+
         }
         $queryBookingFilter[] =  [
             'LOGIC' => 'OR',
@@ -143,12 +145,11 @@ class Bookings {
             ]
         ];
 
-        // if ($building != "") {
-        //     $queryFilters = array_merge($queryFilters, ['%building' => '"mkey":"'.$building.'"']);
-        // }
 
         if ($roomType != "") {
-            $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
+            // $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
+            $queryFilters = array_merge($queryFilters, ['%room' => '"roomType":"'.$roomType.'"']);
+
         }
 
         if ($room != "") {
