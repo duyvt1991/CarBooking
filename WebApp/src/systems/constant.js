@@ -1,5 +1,5 @@
 export const API_ENDPOINT = window.location.origin.includes('localhost') ? process.env.REACT_APP_URL : `${window.location.origin}/datxe`;
-export const DEBUG_WITH_MOCK_DATA = true;
+export const DEBUG_WITH_MOCK_DATA = false;
 
 export const defaultFilters = {
     id: '',

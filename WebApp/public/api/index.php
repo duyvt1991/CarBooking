@@ -49,6 +49,10 @@ function handleResponse($action) {
             return \Booking\Page\Item::APIApproveAssignBookingForm();
         case 'ManagerApproveRejectBooking':
             return \Booking\Page\Item::APIManagerApproveRejectBooking();
+        case 'TestCallMobile':
+            return \Booking\Page\Item::CallMobile();
+         case 'TestCallMobileBooking':
+            return \Booking\Page\Item::CallMobileBooking();
         case 'testMailTemplate':
             $mailTemplates = \Booking\MailTemplate::$mailTemplates;
             foreach ($mailTemplates as $key => $template) {

@@ -326,42 +326,6 @@ class Cron {
         }
         // End
 
-        // Quét các master data: drivers, rooms có isSync = 0 để đồng bộ sang hệ thống thứ 3 nếu có
-        // $querySyncData = \Booking\Query::getInstance("car_booking_masterdata", true);
-        // $querySyncData->setSelect(['*']);
-        // $querySyncData->setFilter([
-        //     '@mtype' => ['drivers', 'rooms'],
-        //     'isDeleted' => 0
-        // ]);
-        // $unsyncedItems = $querySyncData->exec()->fetchAll();
-
-        // foreach ($unsyncedItems as $item) {
-        //     try {
-        //         $options = [];
-        //         if (!empty($item['options'])) {
-        //             try {
-        //                 $options = is_string($item['options']) ? \Bitrix\Main\Web\Json::decode($item['options']) : (array)$item['options'];
-        //             } catch (\Throwable $th) {}
-        //         }
-
-        //         $isSync = isset($options['isSync']) ? (int)$options['isSync'] : 0;
-
-        //         if ($isSync === 0) {
-        //             // TODO: Gọi API đồng bộ sang hệ thống thứ 3 ở đây
-        //             // Ví dụ: $syncSuccess = \Booking\ThirdPartyApi::syncData($item['mtype'], $item);
-        //             // Gọi API đồng bộ sang hệ thống thứ 3 ở đây
-        //             $syncSuccess = \Booking\ThirdPartyApi::syncMasterDataItem($item);
-
-        //             if ($syncSuccess) {
-        //                 $options['isSync'] = 1;
-        //                 \Booking\Query::updateRecordsWithConditions('car_booking_masterdata', ['id' => $item['id']], ['options' => \Bitrix\Main\Web\Json::encode($options)]);
-        //             }
-        //         }
-        //     } catch (\Throwable $e) {
-        //         // Bỏ qua lỗi và tiếp tục vòng lặp để không ảnh hưởng đến toàn bộ cron job
-        //     }
-        // }
-
 
         \CEvent::ExecuteEvents();
     
