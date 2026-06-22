@@ -1,0 +1,521 @@
+﻿import { FaCheck, FaClock, FaStar, FaTimes, FaMinusCircle, FaBan, FaCar } from "react-icons/fa";
+import ModalContent from "../shared/ModalContent";
+import { logMasterDataKeyMapping, logMasterDataTypeMapping } from "./log";
+
+export const cacheRequest = (requestContext, id, component) => {
+  let cachedRequest;
+  const componentKey = component || 'default';
+  try {
+    cachedRequest = JSON.parse(sessionStorage.getItem(`${componentKey}_requestContext`));
+    if (cachedRequest && cachedRequest.id === id && !requestContext.request) {
+      requestContext.setRequest(cachedRequest);
+    } else if (cachedRequest && cachedRequest.id === "*") {
+      requestContext.setRequest(cachedRequest);
+    } else {
+      cachedRequest = requestContext.request;
+      sessionStorage.setItem(`${componentKey}_requestContext`, JSON.stringify(cachedRequest));
+    }
+  } catch (error) {
+    cachedRequest = requestContext.request;
+    sessionStorage.setItem(`${componentKey}_requestContext`, JSON.stringify(cachedRequest));
+  }
+  return cachedRequest;
+};
+
+export const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  const [datePart] = dateString.split(' ');
+  const [year, month, day] = datePart.split('-');
+  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+};
+
+export const formatDateTime = (dateString) => {
+  if (!dateString) return '-';
+  const [datePart, timePart] = dateString.split(' ');
+  const [year, month, day] = datePart.split('-');
+  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year} ${timePart || ''}`;
+};
+
+export const formatTime = (dateString) => {
+  if (!dateString) return '-';
+  const timePart = dateString.split(' ').pop();
+  return `${timePart || ''}`;
+};
+
+export const formatLogType = (logType, t) => {
+  switch (logType) {
+    case "Add":
+      return <span className="px-2 py-1 rounded text-black bg-white border border-gray-300">{t('log.Thêm')}</span>;
+    case "Edit":
+      return <span className="px-2 py-1 rounded text-white bg-blue-500">{t('log.Sửa')}</span>;
+    case "Delete":
+      return <span className="px-2 py-1 rounded text-white bg-red-500">{t('log.Xoá')}</span>;
+    case "Active":
+      return <span className="px-2 py-1 rounded text-white bg-gray-500">{t('log.Mở khoá')}</span>;
+    case "Deactive":
+      return <span className="px-2 py-1 rounded text-white bg-green-500">{t('log.Tạm khoá')}</span>;
+    default:
+      return '-';
+  }
+}
+
+// export const formatLogPage = (log) => {
+//   const oldValue = log.logOldValue;
+//   const newValue = log.logNewValue;
+//   const id = oldValue.id ?? newValue.id;
+//   return logMasterDataTypeMapping[oldValue.mtype ?? newValue.mtype] + (id ? (" - ID: " + id) : "");
+// }
+
+export const formatLogPage = (log) => {
+  const oldValue = log?.logOldValue || {};
+  const newValue = log?.logNewValue || {};
+  const id = oldValue.id ?? newValue.id;
+  const mtype = oldValue.mtype ?? newValue.mtype;
+
+  return (logMasterDataTypeMapping[mtype] || '-') + (id ? ` - ID: ${id}` : '');
+};
+
+export const formatLogValue = (value, type) => {
+  return formatLogData(value, type)
+    .filter(item => item)
+    .map((item, index) => (<li key={index}>{`${item.displayKey}: '${item.displayValue}'`}</li>));
+}
+
+export const formatLogData = (value, type) => {
+  return Object.keys(value)
+    .map((key, index) => {
+      if (key === 'id' || key === 'mtype' || key === 'isDeleted' || key === 'isActive'|| (key === 'mParentKey' && type !== "equipments")) return null;
+      const displayKey = logMasterDataKeyMapping(type, key);
+      const displayValue = Array.isArray(value[key]) ? value[key].map(v => v?.mvalue || v).join(', ') : (value[key]?.mvalue || value[key]);
+      return {displayKey, displayValue};
+    });
+}
+
+export const formatLogOldValue = (log) => {
+  if (log.logOldValue) {
+    const newValue = log.logNewValue || {};
+    let oldValue = log.logOldValue;
+    oldValue = Object.fromEntries(
+      Object.keys(oldValue)
+        .filter(key => {
+          return (log.logType === "Edit" && (key in newValue || key === 'mtype')) ||
+            (log.logType !== "Edit" && ['id', 'mtype', 'mkey', 'mvalue'].includes(key));
+        })
+        .map(key => ([key, oldValue[key]]))
+    );
+
+    return formatLogValue(oldValue, oldValue.mtype ?? newValue.mtype);
+  }
+  return '-';
+}
+
+export const formatLogNewValue = (log) => {
+  if (log.logNewValue) {
+    const oldValue = log.logOldValue;
+    const newValue = log.logNewValue;
+    return formatLogValue(newValue, newValue.mtype ?? oldValue.mtype);
+  }
+  return '-';
+}
+
+export const formatEquipmentType = (mkey, masterData) => {
+  const equipmentType = masterData?.equipmentTypes?.find((item) => item.mkey.toString() === mkey.toString());
+  return equipmentType ? equipmentType.mvalue : '-';
+};
+
+export const formatRoomType = (mkey, masterData) => {
+  const roomType = masterData?.roomTypes?.find((item) => item.mkey.toString() === mkey.toString());
+  return roomType ? roomType.mvalue : '-';
+};
+
+export const formatRoom = (mkey, masterData) => {
+  const room = masterData?.rooms?.find((item) => item.mkey.toString() === mkey.toString());
+  return room ? room.mvalue : '-';
+};
+
+export const formatBuilding = (mkey, masterData) => {
+  const building = masterData?.buildings?.find((item) => item.mkey.toString() === mkey.toString());
+  return building ? building.mvalue : '-';
+};
+
+export const formatDepartment = (mkey, masterData) => {
+  const department = masterData?.departments?.find((item) => item.mkey.toString() === mkey.toString());
+  return department ? department.mvalue : '-';
+};
+
+export const formatScore = (score, t) => {
+  switch (score) {
+    case "score1":
+      return t('common.1 điểm');
+    case "score2":
+      return t('common.2 điểm');
+    case "score3":
+      return t('common.3 điểm');
+    case "score4":
+      return t('common.4 điểm');
+    case "score5":
+      return t('common.5 điểm');
+    default:
+      return '-';
+  }
+};
+
+export const formatLocale = (mkey) => {
+  return mkey === "vn" ? "Việt" : mkey === "jp" ? "Nhật" : "-";
+};
+
+export const formatUsagePurpose = (mkey, masterData) => {
+  const usagePurpose = masterData?.usagePurposes?.find((item) => item.mkey.toString() === mkey.toString());
+  return usagePurpose ? usagePurpose.mvalue : '-';
+};
+
+export const formatUsagePurposes = (mkeys, masterData) => {
+  return mkeys.map(mkey => {
+    const usagePurpose = masterData?.usagePurposes?.find((item) => item.mkey.toString() === mkey.toString());
+    return usagePurpose ? usagePurpose.mvalue : '-';
+  }).filter(e => e !== "-").join(', ');
+};
+
+export const formatApprovers = (mkeys, masterData) => {
+  return mkeys.map(mkey => {
+    const approver = masterData?.approvers?.find((item) => item.mkey.toString() === mkey.toString());
+    return approver ? approver.mvalue : '-';
+  }).filter(e => e !== "-").join(', ');
+};
+
+export const formatPriorityApprovers = (mkeys, masterData) => {
+  return mkeys.map(mkey => {
+    const priorityApprover = masterData?.priorityApprovers?.find((item) => item.mkey.toString() === mkey.toString());
+    return priorityApprover ? priorityApprover.mvalue : '-';
+  }).filter(e => e !== "-").join(', ');
+};
+
+export const formatEquipments = (mkeys, masterData) => {
+  return mkeys.map(mkey => {
+    const equipment = masterData?.equipments?.find((item) => item.mkey.toString() === mkey.toString());
+    return equipment ? equipment.mvalue : '-';
+  }).filter(e => e !== "-").join(', ');
+};
+
+export const formatEquipmentsWithType = (equipments, masterData) => {
+  const groupedEquipments = equipments.reduce((acc, equipment) => {
+    const equipmentType = masterData.equipmentTypes.find(type => type.mkey === equipment.mParentKey);
+    if (equipmentType) {
+      if (!acc[equipmentType.mvalue]) {
+        acc[equipmentType.mvalue] = [];
+      }
+      acc[equipmentType.mvalue].push(equipment.mvalue);
+    }
+    return acc;
+  }, {});
+
+  return <div className="flex flex-col gap-2">
+    {Object.entries(groupedEquipments).map(([type, equipmentList]) => (
+      <div key={type} className="flex flex-col gap-1">
+        <strong className="text-xs font-medium text-gray-800">{type}:</strong>
+        <div>
+          {equipmentList.map((equipment, index) => (
+            <span key={index} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">
+              {equipment}
+            </span>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>;
+};
+
+export const formatSize = (size, masterData) => {
+  // return size ? `${size} m²` : '-';
+  return size ? `${size}` : '-';
+};
+
+export const formatPersons = (persons, masterData, t) => {
+  return persons ? t('common.[count] người', { count: persons }) : '-';
+};
+
+export const formatUser = (user, masterData) => {
+  return user ? user.mvalue : '-';
+};
+
+export const formatColor = (color, masterData) => {
+  return (
+    <div className="w-5 h-5 rounded-full inline-block" style={{ backgroundColor: color }} />
+  );
+};
+
+export const getFieldsBookingDetail = (request, masterData, t) => {
+  const safeApprovedUsers = Array.isArray(request.approvedUsers) ? request.approvedUsers : [];
+  const safeRejectedUsers = Array.isArray(request.rejectedUsers) ? request.rejectedUsers : [];
+  const safeAssimentUser = Array.isArray(request.assignmentUser) ? request.assignmentUser : (request.assignmentUser?.mkey ? [request.assignmentUser] : []);
+  const safeDriverConfirmationUser = Array.isArray(request.driverConfirmationUser) ? request.driverConfirmationUser : [];
+  const safeDriverDeclineUser = Array.isArray(request.driverDeclineUser) ? request.driverDeclineUser : [];
+
+  const safeClientNames = Array.isArray(request.clientNames) ? request.clientNames : [];
+  const safeDepartureLocations = Array.isArray(request.departureLocation) ? request.departureLocation : [request.departureLocation].filter(Boolean);
+  const rejectedCount = safeRejectedUsers.length;
+
+  // 1. Xác định Trạng thái tổng thể của booking dựa vào isApproved
+  let statusIcon, statusText, statusBgColor, statusUser = [];
+  const approvedStatus = Number(request?.isApproved);
+
+   if (request?.isCancelled) {
+    statusIcon = <FaMinusCircle />;
+    statusText = t('booking.Đã huỷ');
+    statusBgColor = 'bg-red-100 text-red-500';
+  } else if (approvedStatus === -1 && rejectedCount === 0) {
+    statusIcon = <FaBan />;
+    statusText = t('common.Hệ thống từ chối');
+    statusBgColor = 'bg-red-100 text-red-500';
+  } else if (approvedStatus === -1) {
+    statusIcon = <FaTimes />;
+    statusText = t('common.Từ chối');
+    statusBgColor = 'bg-red-100 text-red-500';
+    statusUser = safeRejectedUsers.length > 0 ? [safeRejectedUsers[safeRejectedUsers.length - 1].mvalue] : [];
+  } else if (approvedStatus === 4) {
+    statusIcon = <FaCheck />;
+    statusText = t('booking.Hoàn thành');
+    statusBgColor = 'bg-green-100 text-green-500';
+  } else if (approvedStatus === 3) {
+    statusIcon = <FaCar />;
+    statusText = t('booking.Tài xế đã xác nhận');
+    statusBgColor = 'bg-green-100 text-green-500';
+    statusUser = safeDriverConfirmationUser.length > 0 ? [safeDriverConfirmationUser[safeDriverConfirmationUser.length - 1].mvalue] : [];
+  } else if (approvedStatus === 2) {
+    statusIcon = <FaClock />;
+    statusText = t('booking.Đã phân công');
+    statusBgColor = 'bg-blue-100 text-blue-500';
+    statusUser = safeAssimentUser.length > 0 ? [safeAssimentUser[safeAssimentUser.length - 1].mvalue] : [];
+  } else if (approvedStatus === 1) {
+    statusIcon = <FaClock />;
+    statusText = t('booking.Đã duyệt');
+    statusBgColor = 'bg-yellow-100 text-yellow-600';
+    statusUser = safeApprovedUsers.length > 0 ? [safeApprovedUsers[safeApprovedUsers.length - 1].mvalue] : [];
+  } else if (approvedStatus === -2) {
+    statusIcon = <FaTimes />;
+    statusText = t('booking.Tài xế từ chối');
+    statusBgColor = 'bg-red-100 text-red-500';
+    statusUser = safeDriverDeclineUser.length > 0 ? [safeDriverDeclineUser[safeDriverDeclineUser.length - 1].mvalue] : [];
+  } else {
+    statusIcon = <FaClock />;
+    statusText = t('common.Chờ duyệt');
+    statusBgColor = 'bg-gray-100 text-gray-500';
+    
+    // Logic tìm danh sách người duyệt đang chờ (Pending) từ masterData.approvers
+    const approverGroup = request?.isPriority ? (masterData.priorityApprovers || []) : (masterData.approvers || []);
+    statusUser = approverGroup.map(u => u.mvalue).filter(Boolean);
+  }
+
+
+  const fields = [
+    { label: 'ID', value: request.id },
+    { label: t('common.Thời điểm đặt'), value: formatDateTime(request.createdDate) },
+    {
+      label: t('common.Trạng thái'), 
+      value: (
+        <div className="flex flex-col items-start gap-1">
+          <span className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 text-xs rounded-full ${statusBgColor}`}>
+            {statusIcon} {statusText}
+          </span>
+          {statusUser.length > 0 && (
+            <div className="flex flex-col gap-0.5">
+              {statusUser.map((user, idx) => (
+                <span key={idx} className="text-xs text-gray-500">{user}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )
+    },
+
+    !!request.rejectedReason && { label: t('booking.Lý do từ chối duyệt'), value: request.rejectedReason },
+    !!request.driverDeclineReason && { label: t('booking.Lý do tài xế từ chối'), value: request.driverDeclineReason },
+     {
+      label: t('booking.Điểm xuất phát'), value: safeDepartureLocations.map((location, index) => (
+        <span key={index} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">
+          {typeof location === 'object' ? (location?.mvalue || location?.mkey) : location}
+        </span>
+      ))
+    },
+    { label: t('common.Loại xe'), value: request.roomType?.mvalue},
+    { label: t('common.Dòng xe đề xuất'), value: request.carLine?.mvalue},
+    { label: t('common.Tài xế đề xuất'), value: request.driver?.mvalue},
+    { label: t('common.Ngày sử dụng'), value: formatDate(request.startDate) },
+    { label: t('common.Khung giờ sử dụng'), value: `${formatTime(request.startTime).replace(":00", "")} - ${formatTime(request.endTime).replace(":00", "")}` },
+    { label: t('common.Người đặt'), value: <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{request.bookingUser?.mvalue}</span> },
+    { label: t('common.Người sử dụng'), value: <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{request.mainUser?.mvalue}</span> },
+    { label: t('common.Phòng ban'), value: request.department?.mvalue},
+    { label: t('common.Phân loại khách'), value: request.usagePurpose?.mvalue},
+    request.clients > 0 && { label: t('common.Số lượng khách'), value: formatPersons(request.clients, null, t) },
+    safeClientNames.length > 0 && {
+      label: t('common.Tên khách'), value: safeClientNames.map((name, index) => (
+        <span key={index} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{name}</span>
+      ))
+    },
+    { label: t('booking.Tên nhân viên tham gia'), value: request.employees },
+    { label: t('booking.Số hiệu chuyến bay'), value: request.flightNumber },
+    { label: t('booking.Mục đích chuyến đi'), value: request.usagePurposeDetail },
+    { label: t('booking.Lịch trình chi tiết'), value: request.detailedSchedule },
+    { label: t('booking.Ghi chú đặt xe'), value: request.note },
+    { label: t('common.Xe'), value: request.room?.mvalue},
+    { label: t('common.Biển số xe'), value: request.licensePlateNumber },
+    { label: t('common.Tài xế'), value: request.driverUser?.mvalue},
+    { label: t('common.Số điện thoại tài xế'), value: request.driverPhoneNumber },
+    request.isCancelled && { label: t('common.Lý do huỷ'), value: request.cancelledReason },
+    request.isCancelled && request.cancelledDate && { label: t('common.Thời điểm huỷ'), value: formatDateTime(request.cancelledDate) },
+  // ].filter(field => field && field.value !== undefined);
+  ].filter(Boolean); // Tạm thởi bỏ để hiển  thị hết
+
+  let fieldLogs = [];
+  if (request.log && Array.isArray(request.log)) {
+    fieldLogs = request.log.map((log, index) => ({
+      title: formatUser(log.logUser).split(" (")[0] + " - " + formatDateTime(log.logDate),
+      oldValues: formatLogData(log.logOldValue, "booking"),
+      newValues: formatLogData(log.logNewValue, "booking")
+    }));
+  }
+  return { fields, fieldLogs };
+}
+
+export const formatIdDetail = (request, masterData, setModal, t) => {
+  const bgColor = 'bg-green-100 text-green-500';
+  const { fields, fieldLogs } = getFieldsBookingDetail(request, masterData, t);
+  return (
+    <span
+      className={`flex items-center cursor-pointer justify-center gap-1 px-1 py-0 text-sm my-1.5 rounded ${bgColor}`}
+      onClick={() => setModal(<ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={Array.isArray(request.log) && request.log.length > 0 ? [
+        { label: t('common.Thông tin'), isDetail: true },
+        { label: t('common.Lịch sử'), isHistory: true },
+      ] : []} />)}
+    >
+      {request.id}
+    </span>
+  );
+}
+
+// isCancelled: true - đã huỷ
+// isApproved: Trạng thái Duyệt & phân công 
+// (0: chưa duyệt, 1: chờ phân công , 2: chờ tài xế xác nhận, 3: tài xế đã xác nhận, 4: hoàn thành, -1: từ chối, -2: tài xế từ chối)
+export const formatBookingStatus = (request, masterData, setModal, t) => {
+  const safeRejectedUsers = Array.isArray(request.rejectedUsers) ? request.rejectedUsers : [];
+  
+    const rejectedCount = safeRejectedUsers.length;
+
+  let icon, text, bgColor, statusUser = [];
+
+   // 1) Da huy uu tien cao nhat
+  if (request?.isCancelled) {
+    icon = <FaMinusCircle />;
+    text = t('booking.Đã huỷ');
+    bgColor = 'bg-red-100 text-red-500';
+  }  else if (request.isApproved === -1 && rejectedCount === 0) {
+    icon = <FaBan />;
+    text = t('common.Hệ thống từ chối');
+    bgColor = 'bg-red-100 text-red-500';
+  }  else if (request.isApproved === -1) {
+    icon = <FaTimes />;
+    text = t('common.Từ chối');
+    bgColor = 'bg-red-100 text-red-500';
+  } else if (request.isApproved === 4) {
+      icon = <FaCheck />;
+      text = t('booking.Hoàn thành');
+      bgColor = 'bg-green-100 text-green-500';
+    }
+    else if (request.isApproved === 3) {
+      icon = <FaCar />;
+      text = t('booking.Tài xế đã xác nhận');
+      bgColor = 'bg-green-100 text-green-500';
+    } else if (request.isApproved === 2) {
+      icon = <FaClock />;
+      text = t('booking.Đã phân công');
+      bgColor = 'bg-blue-100 text-blue-500';
+    } else if (request.isApproved === 1) {
+      icon = <FaClock />;
+      text = t('booking.Đã duyệt');
+      bgColor = 'bg-yellow-100 text-yellow-600';
+    
+    } else if (request.isApproved === -2) {
+      icon = <FaTimes />;
+      text = t('booking.Tài xế từ chối');
+      bgColor = 'bg-red-100 text-red-500';
+    } else {
+      icon = <FaClock />;
+      text = t('common.Chờ duyệt');
+      bgColor = 'bg-gray-100 text-gray-500';
+    }
+const { fields, fieldLogs } = getFieldsBookingDetail(request, masterData, t);
+  return (
+    <span
+      className={`inline-flex items-center cursor-pointer justify-center gap-1 px-2 py-0.5 text-xs my-1.5 rounded-full ${bgColor}`}
+      onClick={() => setModal(<ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={Array.isArray(request.log) && request.log.length > 0 ? [
+        { label: t('common.Thông tin'), isDetail: true },
+        { label: t('common.Lịch sử'), isHistory: true },
+      ] : []} />)}
+    >
+      {icon}
+      <span className="text-center">{text}</span>
+    </span>
+  );
+};
+
+export const formatUserReviewScore = (request, setModal, t) => {
+  const fields = [
+    { label: t('booking.Điều hài lòng nhất'), value: request.userReviewCommentMost || '-' },
+    { label: t('booking.Điều cần cải thiện'), value: request.userReviewCommentBad || '-' },
+  ];
+
+  return request.userReviewScore > 0 ? (
+    <span
+      className="cursor-pointer flex gap-1 justify-center"
+      onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
+    >
+      {Array.from({ length: 5 }, (_, i) => (
+        <FaStar key={i} className={i < request.userReviewScore ? 'text-yellow-500' : 'text-gray-300'} />
+      ))}
+    </span>
+  ) : <span className="flex justify-center">-</span>;
+}
+
+
+export const formatManagerReviewScore = (request, setModal, t) => {
+  const fields = [
+    { label: t('booking.Điểm mạnh nổi bật'), value: request.managerReviewCommentMost || '-' },
+    { label: t('booking.Điểm cần cải thiện'), value: request.managerReviewCommentBad || '-' },
+    { label: t('booking.Đề xuất thưởng - phạt - đào tạo'), value: request.managerReviewCommentRequest || '-' },
+  ];
+
+  return request.managerReviewScore > 0 ? (
+    <span
+      className="cursor-pointer flex gap-1 justify-center"
+      onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
+    >
+      {Array.from({ length: 5 }, (_, i) => (
+        <FaStar key={i} className={i < request.managerReviewScore ? 'text-yellow-500' : 'text-gray-300'} />
+      ))}
+    </span>
+  ) : <span className="flex justify-center">-</span>;
+};
+
+export const formatDriverReviewScore = (request, setModal, t) => {
+  const fields = [
+    { label: t('booking.Việc làm tốt hôm nay'), value: request.driverReviewCommentMost || '-' },
+    { label: t('booking.Việc chưa tốt cần cải thiện'), value: request.driverReviewCommentBad || '-' },
+    { label: t('booking.Đề xuất hỗ trợ từ quản lý'), value: request.driverReviewCommentRequest || '-' },
+  ];
+
+  return request.driverReviewScore > 0 ? (
+    <span
+      className="cursor-pointer flex gap-1 justify-center"
+      onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
+    >
+      {Array.from({ length: 5 }, (_, i) => (
+        <FaStar key={i} className={i < request.driverReviewScore ? 'text-yellow-500' : 'text-gray-300'} />
+      ))}
+    </span>
+  ) : <span className="flex justify-center">-</span>;
+};
+
+export const formatCarLine = (mkey, masterData) => {
+  const carLine = masterData?.carLines?.find((item) => item.mkey.toString() === mkey.toString());
+  return carLine ? carLine.mvalue : '-';
+};
