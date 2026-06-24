@@ -1,6 +1,6 @@
 {
-  "name": "esuhai-datxe",
-  "version": "3.5.7",
+  "name": "esuhai-bookcarmobile",
+  "version": "3.6.9",
   "private": true,
   "homepage": ".",
   "dependencies": {
@@ -26,7 +26,7 @@
     "build": "npm run version-bump && dotenv -e .env react-scripts build",
     "version-bump": "node version-bump.js",
     "postbuild": "node postbuild.js",
-    "deploy": "dotenv -e .env -- bash -c 'curl -X POST $REACT_APP_DEPLOY_URL -F \"path=datxe\" -F \"secret=$DAT_PHONG_KEY_DEPLOY\" -F \"file=@deploy/build.zip\"'",
+    "deploy": "dotenv -e .env -- bash -c 'curl -X POST $REACT_APP_DEPLOY_URL -F \"path=bookcarmobile\" -F \"secret=$DAT_PHONG_KEY_DEPLOY\" -F \"file=@deploy/build.zip\"'",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

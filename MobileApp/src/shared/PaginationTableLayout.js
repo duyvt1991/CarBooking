@@ -1,7 +1,7 @@
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import CustomSelect from "./CustomSelect";
 
-function PaginationTableLayout({ totalPages, currentPage, requestsPerPage = 20, handlePageChange, handlePageLimitChange }) {
+function PaginationTableLayout({ totalPages, currentPage, requestsPerPage = 5, handlePageChange, handlePageLimitChange }) {
     const pages = [];
     const maxPagesToShow = 3;
     const startPage = Math.max(1, currentPage - Math.ceil(maxPagesToShow / 2));
@@ -45,6 +45,7 @@ function PaginationTableLayout({ totalPages, currentPage, requestsPerPage = 20, 
                 value={requestsPerPage}
                 onChange={(e) => handlePageLimitChange(Number(e.target.value))}
                 options={[
+                    { value: 5, label: '5 / 1 page' },
                     { value: 10, label: '10 / 1 page' },
                     { value: 20, label: '20 / 1 page' },
                     { value: 30, label: '30 / 1 page' },

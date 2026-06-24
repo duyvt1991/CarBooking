@@ -458,7 +458,8 @@
     "Số điện thoại tài xế không được để trống": "運転手の電話番号は必須です",
     "Biển số xe không được để trống": "車両番号は必須です",
     "Đã duyệt": "承認済み",
-    "Đã phân công": "割り当て済み"
+    "Đã phân công": "割り当て済み",
+    "Phân công": "Phân công"
 
   },
   "report": {

@@ -19,7 +19,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
 $secret = 'your_secret_key';
-$allow_path = ['phapche', 'datphong', 'datxe'];
+$allow_path = ['phapche', 'datphong', 'datxe', 'bookcarmobile'];
 
 // Check if a file was uploaded
 if (isset($_FILES['file']) && isset($_POST['path']) && in_array($_POST['path'], $allow_path) && isset($_POST['secret']) && $_POST['secret'] === $secret) {

@@ -1,12 +1,12 @@
 <?php
-$logFile = $_SERVER["DOCUMENT_ROOT"]."/datxe/api/included/page/debug_mobile.log";
+// $logFile = $_SERVER["DOCUMENT_ROOT"]."/datxe/api/included/page/debug_mobile.log";
 $fallbackLog = dirname(__FILE__) . "/debug_mobile_root.log";
 
 global $scriptCompleted;
 $scriptCompleted = false;
 
 // Register shutdown function to catch fatal errors and premature exits
-register_shutdown_function(function() use ($logFile, $fallbackLog) {
+register_shutdown_function(function() use ($fallbackLog) {
     global $scriptCompleted;
     $error = error_get_last();
     if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR])) {
@@ -15,23 +15,23 @@ register_shutdown_function(function() use ($logFile, $fallbackLog) {
         $logData .= "Message: " . $error['message'] . "\n";
         $logData .= "File: " . $error['file'] . "\n";
         $logData .= "Line: " . $error['line'] . "\n";
-        @file_put_contents($logFile, $logData, FILE_APPEND);
+        // @file_put_contents($logFile, $logData, FILE_APPEND);
         @file_put_contents($fallbackLog, $logData, FILE_APPEND);
     } else if (!$scriptCompleted) {
         $logData = "=== SCRIPT EXITED PREMATURELY (exit or die called) ===\n";
-        @file_put_contents($logFile, $logData, FILE_APPEND);
+        // @file_put_contents($logFile, $logData, FILE_APPEND);
         @file_put_contents($fallbackLog, $logData, FILE_APPEND);
     }
 });
 
 // Register exception handler
-set_exception_handler(function($exception) use ($logFile, $fallbackLog) {
+set_exception_handler(function($exception) use ( $fallbackLog) {
     $logData = "=== UNCAUGHT EXCEPTION ===\n";
     $logData .= "Message: " . $exception->getMessage() . "\n";
     $logData .= "File: " . $exception->getFile() . "\n";
     $logData .= "Line: " . $exception->getLine() . "\n";
     $logData .= "Stack trace:\n" . $exception->getTraceAsString() . "\n";
-    @file_put_contents($logFile, $logData, FILE_APPEND);
+    // @file_put_contents($logFile, $logData, FILE_APPEND);
     @file_put_contents($fallbackLog, $logData, FILE_APPEND);
 });
 
@@ -43,9 +43,9 @@ $logData .= "GET: " . print_r($_GET, true) . "\n";
 $logData .= "POST Keys: " . print_r(array_keys($_POST), true) . "\n";
 $logData .= "Cookies: " . print_r($_COOKIE, true) . "\n";
 $logData .= "User Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'N/A') . "\n";
-@file_put_contents($logFile, $logData, FILE_APPEND);
+// @file_put_contents($logFile, $logData, FILE_APPEND);
 @file_put_contents($fallbackLog, $logData, FILE_APPEND);
-@file_put_contents($logFile, "Trace: 1 (Starting mask)\n", FILE_APPEND);
+// @file_put_contents($logFile, "Trace: 1 (Starting mask)\n", FILE_APPEND);
 @file_put_contents($fallbackLog, "Trace: 1 (Starting mask)\n", FILE_APPEND);
 
 // Backup entire request context to bypass Bitrix kernel REST & CSRF checks during prolog
@@ -84,13 +84,13 @@ if ($isMobileApp) {
     }
 }
 
-@file_put_contents($logFile, "Trace: 2 (Before prolog)\n", FILE_APPEND);
+// @file_put_contents($logFile, "Trace: 2 (Before prolog)\n", FILE_APPEND);
 @file_put_contents($fallbackLog, "Trace: 2 (Before prolog)\n", FILE_APPEND);
 
 define("NOT_CHECK_PERMISSIONS", true);
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
 
-@file_put_contents($logFile, "Trace: 3 (After prolog)\n", FILE_APPEND);
+// @file_put_contents($logFile, "Trace: 3 (After prolog)\n", FILE_APPEND);
 @file_put_contents($fallbackLog, "Trace: 3 (After prolog)\n", FILE_APPEND);
 
 if ($isMobileApp) {
@@ -102,7 +102,7 @@ if ($isMobileApp) {
     $_SERVER = $originalServer;
 }
 
-@file_put_contents($logFile, "Trace: 4 (After restore)\n", FILE_APPEND);
+// @file_put_contents($logFile, "Trace: 4 (After restore)\n", FILE_APPEND);
 @file_put_contents($fallbackLog, "Trace: 4 (After restore)\n", FILE_APPEND);
 
 global $USER;
@@ -139,10 +139,10 @@ if (is_object($USER) && !$USER->IsAuthorized() && $authId && $domain) {
     $logData .= "No AUTH_ID or DOMAIN provided for authorization.\n";
 }
 
-@file_put_contents($logFile, $logData, FILE_APPEND);
+// @file_put_contents($logFile, $logData, FILE_APPEND);
 @file_put_contents($fallbackLog, $logData, FILE_APPEND);
 
-@file_put_contents($logFile, "Trace: 5 (Before header)\n", FILE_APPEND);
+// @file_put_contents($logFile, "Trace: 5 (Before header)\n", FILE_APPEND);
 @file_put_contents($fallbackLog, "Trace: 5 (Before header)\n", FILE_APPEND);
 
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
@@ -154,16 +154,16 @@ if (is_object($USER)) {
 } else {
     $logDataAfter .= "USER object is not defined\n";
 }
-@file_put_contents($logFile, $logDataAfter, FILE_APPEND);
+// @file_put_contents($logFile, $logDataAfter, FILE_APPEND);
 @file_put_contents($fallbackLog, $logDataAfter, FILE_APPEND);
 
 $APPLICATION->SetTitle("Đặt xe");
 
 // Find the CSS and JS files with the hash in their filenames
-$cssFiles = glob($_SERVER["DOCUMENT_ROOT"]."/datxe/static/css/*.css");
-$jsFiles = glob($_SERVER["DOCUMENT_ROOT"]."/datxe/static/js/*.js");
+$cssFiles = glob($_SERVER["DOCUMENT_ROOT"]."/bookcarmobile/static/css/*.css");
+$jsFiles = glob($_SERVER["DOCUMENT_ROOT"]."/bookcarmobile/static/js/*.js");
 ?>
-<base href="/datxe/" />
+<base href="/bookcarmobile/" />
 <script>
 window.BX_AUTH = {
     AUTH_ID: <?php echo json_encode($_REQUEST['AUTH_ID'] ?? $_REQUEST['auth_id'] ?? ''); ?>,

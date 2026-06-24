@@ -357,14 +357,15 @@ export const getFieldsBookingDetail = (request, masterData, t) => {
     { label: t('booking.Mục đích chuyến đi'), value: request.usagePurposeDetail },
     { label: t('booking.Lịch trình chi tiết'), value: request.detailedSchedule },
     { label: t('booking.Ghi chú đặt xe'), value: request.note },
+    { label: t('booking.Loại dịch vụ'), value: request.serviceType?.mvalue },
     { label: t('common.Xe'), value: request.room?.mvalue},
     { label: t('common.Biển số xe'), value: request.licensePlateNumber },
     { label: t('common.Tài xế'), value: request.driverUser?.mvalue},
     { label: t('common.Số điện thoại tài xế'), value: request.driverPhoneNumber },
     request.isCancelled && { label: t('common.Lý do huỷ'), value: request.cancelledReason },
     request.isCancelled && request.cancelledDate && { label: t('common.Thời điểm huỷ'), value: formatDateTime(request.cancelledDate) },
-  // ].filter(field => field && field.value !== undefined);
-  ].filter(Boolean); // Tạm thởi bỏ để hiển  thị hết
+  ].filter(field => field && field.value !== undefined);
+  // ].filter(Boolean); // Tạm thởi bỏ để hiển  thị hết
 
   let fieldLogs = [];
   if (request.log && Array.isArray(request.log)) {
