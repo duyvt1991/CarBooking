@@ -46,10 +46,10 @@ function Home() {
   ];
 
   const bookingButtons = [
-    { ...routes.bookingCalendar, icon: FaCalendarAlt },
-    { ...routes.bookingList, icon: FaClipboardList },
+    // { ...routes.bookingCalendar, icon: FaCalendarAlt },
+    // { ...routes.bookingList, icon: FaClipboardList },
     { ...routes.approveBookingList, icon: FaClipboardCheck },
-    { ...routes.managerReviewList, icon: FaStar },
+    // { ...routes.managerReviewList, icon: FaStar },
     { ...routes.driverConfirmBookingList, icon: FaCar }
 
   ];
@@ -85,14 +85,14 @@ function Home() {
       ));
   };
 
-  const systemSection = renderButtons(systemButtons);
-  const categorySection = renderButtons(categoryButtons);
+  // const systemSection = renderButtons(systemButtons);
+  // const categorySection = renderButtons(categoryButtons);
   const bookingSection = renderButtons(bookingButtons);
-  const reportSection = renderButtons(reportButtons);
+  // const reportSection = renderButtons(reportButtons);
 
   return (
     <section className="p-1 space-y-6">
-      {systemSection.length > 0 && (
+      { /*  systemSection.length > 0 && (
         <div className="space-y-4 p-4 bg-white shadow-md rounded-lg">
           <h2 className="text-xl font-bold">{t('home.Hệ thống')}</h2>
           <div className="flex flex-wrap gap-4">
@@ -107,7 +107,7 @@ function Home() {
             {categorySection}
           </div>
         </div>
-      )}
+      ) */}
       {bookingSection.length > 0 && (
         <div className="space-y-4 p-4 bg-white shadow-md rounded-lg">
           <h2 className="text-xl font-bold">{t('home.Nghiệp vụ')}</h2>
@@ -116,11 +116,11 @@ function Home() {
           </div>
         </div>
       )}
-      {isAuthorized && (
+      { /* isAuthorized && (
         <div className='-mx-1'>
           <BookingCalendar isHome={true} />
         </div>
-      )}
+      )*/}
       {/* {reportSection.length > 0 && (
         <div className="space-y-4 p-4 bg-white shadow-md rounded-lg">
           <h2 className="text-xl font-bold">{t('home.Báo cáo thống kê')}</h2>

@@ -81,7 +81,7 @@ async function deploy() {
     if (typeof fetch === 'undefined') {
         console.log('fetch is not defined. Falling back to curl command...');
         try {
-            const curlCmd = `curl -X POST "${deployUrl}" -F "path=datxe" -F "secret=${secret || ''}" -F "file=@deploy/build.zip"`;
+            const curlCmd = `curl -X POST "${deployUrl}" -F "path=bookcarmobile" -F "secret=${secret || ''}" -F "file=@deploy/build.zip"`;
             execSync(curlCmd, { stdio: 'inherit' });
             console.log('Deployment via curl successful!');
             process.exit(0);
@@ -121,4 +121,5 @@ async function deploy() {
     }
 }
 
-deploy();
+console.log('=== Postbuild Finished: build.zip created ===');
+// deploy(); // Commented out so npm run build only builds/zips, does not deploy.

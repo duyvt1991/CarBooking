@@ -17,7 +17,7 @@ const withRequestData = (WrappedComponent, component) => {
     const [requests, setRequests] = useState([]);
     const [totalPages, setTotalPages] = useState(0);
     const [requestsPerPage, setRequestsPerPage] = useState(() => {
-      return parseInt(sessionStorage.getItem(`${componentKey}_requestsPerPage`)) || 20;
+      return parseInt(sessionStorage.getItem(`${componentKey}_requestsPerPage`)) || 5;
     });
     const [totalItems, setTotalItems] = useState(0);
     const [filters, setFilters] = useState(() => {
