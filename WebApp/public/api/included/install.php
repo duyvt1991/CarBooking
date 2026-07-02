@@ -118,9 +118,7 @@ class Install {
                 managerReviewUser TEXT NULL,     
                 notificationDriverCount INT DEFAULT 0,
                 notificationDriverDate DATETIME,           
-                isSyncedThirdParty INT DEFAULT 0,
-                thirdPartySyncDate DATETIME
-
+                employeeNumber INT DEFAULT 0
 
             )
         ";

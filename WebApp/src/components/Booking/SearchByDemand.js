@@ -11,19 +11,17 @@ import { useTranslation } from 'react-i18next';
 import { getAvailableRooms } from '../../systems/api';
 
 const generateTimeOptions = () => {
-  // Tạo các lựa chọn thời gian từ 07:00 đến 21:30 với khoảng cách 30 phút
-  const startHour = 7;
-  const endHour = 22; // end boundary (22:00 not included as a slot start)
-  const totalSlots = (endHour - startHour) * 2 + 1; // half-hour slots between 07:00 and 22:00
-  const timeOptions = Array.from({ length: totalSlots }, (_, i) => {
-    const hour = startHour + Math.floor(i / 2);
-    const minute = i % 2 === 0 ? '00' : '30';
-    const hh = String(hour).padStart(2, '0');
-    return {
-      mkey: `${hh}:${minute}:00`,
-      mvalue: `${hh}:${minute}`
-    };
-  });
+  // Tạo các lựa chọn thời gian từ 00:00 đến 23:30 với khoảng cách 30 phút
+  const timeOptions = [];
+  for (let hour = 0; hour <= 23; hour++) {
+    for (const minute of ['00', '30']) {
+      const hh = String(hour).padStart(2, '0');
+      timeOptions.push({
+        mkey: `${hh}:${minute}:00`,
+        mvalue: `${hh}:${minute}`
+      });
+    }
+  }
   
   return timeOptions;
 };

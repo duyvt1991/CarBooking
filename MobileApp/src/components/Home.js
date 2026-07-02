@@ -138,8 +138,14 @@ function Home() {
         </div>
       )}
       {(isAuthorized && !hasPermission && !loading) && (
-        <div className="text-red-500 text-lg font-bold">
-          {t('common.Bạn chưa được phân quyền')}
+        <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-lg shadow-md animate-fade-in" role="alert">
+          <p className="font-bold flex items-center text-sm">
+            <FaInfoCircle className="mr-2 text-yellow-600" />
+            {t('common.Thông tin')}
+          </p>
+          <p className="mt-1 text-sm font-medium">
+            {t('common.Bạn chưa được phân quyền')}
+          </p>
         </div>
       )}
     </section>

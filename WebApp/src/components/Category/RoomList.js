@@ -95,7 +95,7 @@ function RoomList({
     //       return <span className={request[field] ? "font-bold" : ""}>-</span>;
     //   }
     // } },
-     { name: 'hasServiceCar', align: 'center', label: t('room.Xe đặt ngoài'), render: (field, request) => {
+     { name: 'hasServiceCar', align: 'center', label: t('room.Xe ngoài'), render: (field, request) => {
       switch (request[field]) {
         case '1':
           return <FaCheck className="text-green-500 inline-block" />;

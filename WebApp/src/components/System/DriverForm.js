@@ -29,8 +29,9 @@ const initForm = {
   driverPhoneNumber: { 
     value: '', 
     label: 'driver.Số điện thoại', 
-    type: 'number',
-    validate: (value, t) => !value ? t('driver.Số điện thoại không được để trống') : '' 
+    // type: 'number',
+    // validate: (value, t) => !value ? t('driver.Số điện thoại không được để trống') : '' ,
+    validate: (value, t) => !value ? t('driver.Số điện thoại không được để trống') : !/^\d+$/.test(value) ? t('driver.Số điện thoại chỉ được chứa số') : ''
   },
   isSync: {
     value: 0,
@@ -42,6 +43,15 @@ const component = routes.driverForm.component;
 
 function DriverForm({ request, errors, handleChange }) {
 
+  const customHandleChange = (field, value) => {
+  if (field === 'driverPhoneNumber') {
+      const numericValue = value.replace(/\D/g, ''); // Chỉ giữ lại số
+      handleChange(field, numericValue);
+    } else {
+      handleChange(field, value);
+    }
+  };
+
   return (
         Object.keys(initForm).filter(field => initForm[field].label).map(field => (
           <LoopFormElement 
@@ -51,7 +61,7 @@ function DriverForm({ request, errors, handleChange }) {
             initForm={initForm} 
             request={request} 
             errors={errors} 
-            handleChange={handleChange} 
+            handleChange={customHandleChange} 
           />
         ))
   );

@@ -686,8 +686,7 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
-
-            new IntegerField('isSyncedThirdParty', [
+            new IntegerField('employeeNumber', [
                 'fetch_data_modification' => function() {
                     return [
                         function ($value) {
@@ -698,20 +697,6 @@ class booking_requestsTable extends DataManager {
             ], [
                 'default_value' => 0
             ]), 
-            new DateTimeField('thirdPartySyncDate', [
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            if ($value instanceof DateTime) {
-                                return $value->format('Y-m-d H:i:s');
-                            }
-                            return $value;
-                        }
-                    ];
-                }
-            ]),
-
-
 
         ];
     }

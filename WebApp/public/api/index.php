@@ -39,20 +39,6 @@ function handleResponse($action) {
             return \Booking\Cron::execute();
         case 'install':
             return \Booking\Install::execute();
-        case 'setupPriorityApprovalData':
-            return \Booking\Install::setupPriorityApprovalData();
-        case 'setupDeployFB20250812':
-            return \Booking\Install::setupDeployFB20250812();
-        case 'DriverConfirmRejectBooking':
-            return \Booking\Page\Item::APIDriverConfirmRejectBooking();
-        case 'ManagerApproveAssignBooking':
-            return \Booking\Page\Item::APIApproveAssignBookingForm();
-        case 'ManagerApproveRejectBooking':
-            return \Booking\Page\Item::APIManagerApproveRejectBooking();
-        case 'TestCallMobile':
-            return \Booking\Page\Item::CallMobile();
-         case 'TestCallMobileBooking':
-            return \Booking\Page\Item::CallMobileBooking();
         case 'testMailTemplate':
             $mailTemplates = \Booking\MailTemplate::$mailTemplates;
             foreach ($mailTemplates as $key => $template) {

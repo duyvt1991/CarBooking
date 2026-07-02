@@ -58,18 +58,18 @@ function DriverConfirmBookingList({
     ] : []),
     // { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
     // { name: 'bookingUser', label: t('booking.Người đặt'), render: (field, request) => formatUser(request[field]) },
-    { name: 'mainUser', label: t('booking.Người sử dụng'), render: (field, request) => formatUser(request[field]) },
+    { name: 'mainUser', label: t('booking.Người phụ trách'), render: (field, request) => formatUser(request[field]) },
     { name: 'startDate', align: 'center',  label: t('booking.Ngày sử dụng'), render: (field, request) => formatDate(request[field]) },
     { name: 'endTime', align: 'center',  label: t('booking.Khung giờ sử dụng'), render: (field, request) => `${formatTime(request['startTime']).replace(":00", "")} - ${formatTime(request[field]).replace(":00", "")}` },
     { name: 'departureLocation', label: t('booking.Điểm xuất phát'), render: (field, request) => (request[field] || []).join(', ') || '-'},
-    // { name: 'department', label: t('booking.Phòng ban'), render: (field, request) => request[field].mvalue },
-    // { name: 'usagePurpose', label: t('booking.Phân loại khách'), render: (field, request) => request[field].mvalue },
-    // { name: 'roomType', label: t('booking.Loại xe'), render: (field, request) => request[field].mvalue },
-    // { name: 'serviceType', label: t('booking.Loại dịch vụ'), render: (field, request) => request[field]?.mvalue || '-' },
-    // { name: 'room', label: t('booking.Xe'), render: (field, request) => request[field]?.mvalue || '-' },
-    // { name: 'licensePlateNumber', label: t('common.Biển số xe'), render: (field, request) => request[field] || '-' },
-    // { name: 'driverUser', label: t('common.Tài xế'), render: (field, request) => request[field]?.mvalue || '-' },
-    // { name: 'driverPhoneNumber', label: t('common.Số điện thoại tài xế'), render: (field, request) => request[field] || '-' },
+    { name: 'department', label: t('booking.Phòng ban'), render: (field, request) => request[field].mvalue },
+    { name: 'usagePurpose', label: t('booking.Phân loại khách'), render: (field, request) => request[field].mvalue },
+    { name: 'roomType', label: t('booking.Loại xe'), render: (field, request) => request[field].mvalue },
+    { name: 'serviceType', label: t('booking.Loại dịch vụ'), render: (field, request) => request[field]?.mvalue || '-' },
+    { name: 'room', label: t('booking.Xe'), render: (field, request) => request[field]?.mvalue || '-' },
+    { name: 'licensePlateNumber', label: t('common.Biển số xe'), render: (field, request) => request[field] || '-' },
+    { name: 'driverUser', label: t('common.Tài xế'), render: (field, request) => request[field]?.mvalue || '-' },
+    { name: 'driverPhoneNumber', label: t('common.Số điện thoại tài xế'), render: (field, request) => request[field] || '-' },
   ];
 
   const actionButtons = (request) => {
@@ -96,7 +96,7 @@ function DriverConfirmBookingList({
 
     if (tempFilters?.tab === 'review')
     {
-       return (request?.driverReviewScore === 0 && request?.isApproved === 4) ? 
+       return (isDriver && request?.driverReviewScore === 0 && request?.isApproved === 4) ? 
              [
                 { label: t('booking.Đánh giá'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverReviewForm.path) }
             ] : 

@@ -52,55 +52,55 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
   }, {});
 
   useEffect(() => {
-  if (!request.roomType) {  // ← Thay building
-    setFilteredRooms([]);
-    setEvents([]);
+  if (!request.roomType || !request.roomType.mkey) { 
+    setFilteredRooms(masterData.rooms || []);
+    refreshCalendar(null);
   } else {
     const rooms = (masterData.rooms || []).filter(room => 
-      room.roomType?.toString() === request.roomType?.mkey?.toString()  // ← Thay building
+      room.roomType?.toString() === request.roomType?.mkey?.toString()
     );
     setFilteredRooms(rooms);
-    refreshCalendar(request.roomType);  // ← Thay building
+    refreshCalendar(request.roomType);
   }
-}, [request.roomType, myCalendar]);  // ← Thay building
-  
-    useEffect(() => {
-      sessionStorage.removeItem(`${routes.bookingForm.component}_requestContext`);
-    }, []);
+}, [request.roomType, myCalendar, masterData.rooms]);
   
   useEffect(() => {
-  if (!keepRoomTypeState() && isHome && masterData.roomTypes?.length > 0 && !request.roomType) {
-    handleRoomTypeChange('roomType', masterData.roomTypes[0]);  // ← Thay building logic
-  }
-}, [masterData.roomTypes]);  // ← Thay
+      sessionStorage.removeItem(`${routes.bookingForm.component}_requestContext`);
+  }, []);
+  
+  useEffect(() => {
+    if (!keepRoomTypeState() && isHome && masterData.roomTypes?.length > 0 && !request.roomType) {
+      handleRoomTypeChange('roomType', masterData.roomTypes[0]);
+    }
+  }, [masterData.roomTypes]);
 
-useEffect(() => {
-  if (!keepRoomTypeState() && request.id && !request.roomType) {
-    handleRoomTypeChange('roomType', masterData.roomTypes[0]);  // ← Thay
-  }
-}, [request.id]);
+  useEffect(() => {
+    if (!keepRoomTypeState() && request.id && !request.roomType) {
+      handleRoomTypeChange('roomType', masterData.roomTypes[0]); 
+    }
+  }, [request.id]);
 
 const keepRoomTypeState = () => {
   let hasRoomTypeState = false;
-  const roomTypeState = sessionStorage.getItem('roomType_state');  // ← Thay building
-  if (roomTypeState && masterData.roomTypes?.length > 0) {        // ← Thay
+  const roomTypeState = sessionStorage.getItem('roomType_state'); 
+  if (roomTypeState && masterData.roomTypes?.length > 0) { 
     const roomType = masterData.roomTypes.find(rt =>
       rt.mkey.toString() === roomTypeState.toString()
     );
     if (roomType) {
-      handleRoomTypeChange('roomType', roomType);  // ← Thay
+      handleRoomTypeChange('roomType', roomType);  
       hasRoomTypeState = true;
     }
   }
   return hasRoomTypeState;
 };
 
-const handleRoomTypeChange = (field, value) => {  // ← Thay
+const handleRoomTypeChange = (field, value) => {  
   handleChange([field, 'room'], [value, '']);
   const cloneRequest = { ...request };
-  cloneRequest.roomType = value;  // ← Thay
+  cloneRequest.roomType = value;  
   sessionStorage.setItem(`${component}_requestContext`, JSON.stringify(cloneRequest));
-  sessionStorage.setItem('roomType_state', value?.mkey || '');  // ← Thay
+  sessionStorage.setItem('roomType_state', value?.mkey || '');  
 };
 
   const handleRoomChange = (field, value) => {
@@ -177,7 +177,7 @@ const handleRoomTypeChange = (field, value) => {  // ← Thay
             <td className="px-3 py-2 text-gray-600">{booking.bookingUser?.mvalue}</td>
           </tr>
           <tr>
-            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người sử dụng')}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người phụ trách')}</td>
             <td className="px-3 py-2 text-gray-600">{booking.mainUser?.mvalue}</td>
           </tr>
            <tr>
@@ -322,7 +322,6 @@ const handleRoomTypeChange = (field, value) => {  // ← Thay
 
   const onPriorityClick = (id) => {
     const request = tempRequests.find(request => request.id === id);
-    // const building = masterData.buildings.find(b => b.mkey === request?.building?.mkey);
     const roomType = masterData.roomTypes.find(rt => rt.mkey === request?.roomType?.mkey);
     setRequest({ 
       ...Object.fromEntries(Object.keys(initBookingForm).map(field => [field, initBookingForm[field].value])), 
@@ -400,7 +399,7 @@ const handleRoomTypeChange = (field, value) => {  // ← Thay
           <tbody className="divide-y divide-gray-200">
             {Object.keys(groupedRooms).map(roomType => (
               <tr key={roomType}>
-                {/* <td className="px-6 py-4 w-1/4 whitespace-nowrap text-sm font-medium text-gray-900"> {groupedRooms[roomType]?.[0]?.roomTypeMValue}</td> */}
+                <td className="px-6 py-4 w-1/4 whitespace-nowrap text-sm font-medium text-gray-900"> {groupedRooms[roomType]?.[0]?.roomTypeMValue}</td>
                 <td className="px-6 py-4 text-sm text-gray-800">
                   {groupedRooms[roomType].map(room => (
                     <div 
@@ -425,7 +424,7 @@ const handleRoomTypeChange = (field, value) => {  // ← Thay
           </tbody>
         </table>
       </div>
-      {!!request.roomType && <Calendar 
+      <Calendar 
         myCalendar={myCalendar} 
         onMyCalendarClick={() => setMyCalendar(!myCalendar)} 
         onCellClick={goToBookingForm} 
@@ -433,7 +432,7 @@ const handleRoomTypeChange = (field, value) => {  // ← Thay
         onEventClick={onEventClick} 
         onCalendarChange={onCalendarChange} 
         events={events} 
-      />}
+      />
     </div>
   );
 };

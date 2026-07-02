@@ -177,7 +177,7 @@ const handleRoomTypeChange = (field, value) => {  // ← Thay
             <td className="px-3 py-2 text-gray-600">{booking.bookingUser?.mvalue}</td>
           </tr>
           <tr>
-            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người sử dụng')}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người phụ trách')}</td>
             <td className="px-3 py-2 text-gray-600">{booking.mainUser?.mvalue}</td>
           </tr>
            <tr>

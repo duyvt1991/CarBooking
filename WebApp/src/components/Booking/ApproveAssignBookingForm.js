@@ -113,6 +113,20 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
         if (String(b.id) === String(request.id)) return false;
         if (Number(b.isCancelled) === 1) return false;
         if (![2, 3, 4].includes(Number(b.isApproved))) return false;
+        // Lọc trùng lịch: Chỉ lấy các booking có isServiceCar = '0' (hoặc trống)
+        const serviceTypeVal = b.serviceType;
+        let isServiceCarVal = '0';
+        if (serviceTypeVal) {
+          if (typeof serviceTypeVal === 'object') {
+            isServiceCarVal = String(serviceTypeVal.isServiceCar ?? '0');
+          } else {
+            try {
+              const parsed = JSON.parse(serviceTypeVal);
+              isServiceCarVal = String(parsed.isServiceCar ?? '0');
+            } catch (e) {}
+          }
+        }
+        if (isServiceCarVal !== '0') return false;
         
         const bStartStr = typeof b.startDate === 'object' && b.startDate.toISOString ? b.startDate.toISOString().split('T')[0] : String(b.startDate).split(' ')[0];
         const bStartTimeStr = typeof b.startTime === 'object' && b.startTime.toISOString ? b.startTime.toISOString().split('T')[1].substring(0,8) : String(b.startTime);

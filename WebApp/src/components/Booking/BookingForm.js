@@ -9,19 +9,17 @@ import { RequestContext } from '../../App';
 import { formatPersons, formatSize, formatEquipmentsWithType, formatUser } from '../../systems/util';
 
 const generateTimeOptions = () => {
-  // Tạo các lựa chọn thời gian từ 07:00 đến 21:30 với khoảng cách 30 phút
-  const startHour = 7;
-  const endHour = 22; // end boundary (22:00 not included as a slot start)
-  const totalSlots = (endHour - startHour) * 2 + 1; // half-hour slots between 07:00 and 22:00
-  const timeOptions = Array.from({ length: totalSlots }, (_, i) => {
-    const hour = startHour + Math.floor(i / 2);
-    const minute = i % 2 === 0 ? '00' : '30';
-    const hh = String(hour).padStart(2, '0');
-    return {
-      mkey: `${hh}:${minute}:00`,
-      mvalue: `${hh}:${minute}`
-    };
-  });
+  // Tạo các lựa chọn thời gian từ 00:00 đến 23:30 với khoảng cách 30 phút
+  const timeOptions = [];
+  for (let hour = 0; hour <= 23; hour++) {
+    for (const minute of ['00', '30']) {
+      const hh = String(hour).padStart(2, '0');
+      timeOptions.push({
+        mkey: `${hh}:${minute}:00`,
+        mvalue: `${hh}:${minute}`
+      });
+    }
+  }
   
   return timeOptions;
 };
@@ -42,16 +40,6 @@ const filterEndTimeOptions = (startTime, isEndBooking) => {
 
 export const initForm = {
   id: { value: '' },
-  // building: { 
-  //   column: 1,
-  //   value: '', 
-  //   label: 'booking.Toà nhà', 
-  //   type: 'select',
-  //   disabled: (request) => request.isPriority || request.isEndBooking,
-  //   isValueObject: true,
-  //   optionsMasterDataKey: "buildings",
-  //   validate: (value, t) => !value ? t('booking.Toà nhà không được để trống') : '' 
-  // },
   departureLocation: { 
     column: 1,
     value: [], 
@@ -74,16 +62,6 @@ export const initForm = {
     optionsMasterDataKey: "roomTypes",
     validate: (value, t) => !value ? t('booking.Loại xe không được để trống') : '' 
   },
-  // room: { 
-  //   column: 1,
-  //   value: '', 
-  //   label: '', 
-  //   type: 'select',
-  //   disabled: (request) => request.isPriority || request.isEndBooking,
-  //   isValueObject: true,
-  //   options: [],
-  //   validate: (value, t) => !value ? t('booking.Xe không được để trống') : '' 
-  // },
   startDate: { 
     column: 1,
     value: '', 
@@ -111,18 +89,19 @@ export const initForm = {
     options: generateTimeOptions(),
     validate: (value, t) => !value ? t('booking.Kết thúc lúc không được để trống') : '' 
   },
+  employeeNumber: { 
+    column: 1,
+    value: '', 
+    label: 'booking.Số lượng người', 
+    type: 'number',
+    // validate: (value, t) => !value ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
+  },
   employees: { 
     column: 1,
     value: '', 
     label: 'booking.Tên nhân viên tham gia', 
-    type: 'text',
+    type: 'textarea',
     // validate: (value, t) => !value ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
-  },
-   flightNumber: {
-    column: 1,
-    value: '', 
-    label: 'booking.Số hiệu chuyến bay', 
-    type: 'text'
   },
   usagePurposeDetail: { 
     column: 1,
@@ -131,7 +110,6 @@ export const initForm = {
     type: 'textarea',
     validate: (value, t) => !value ? t('booking.Mục đích chuyến đi không được để trống') : '' 
   },
-
   carLine: { 
     column: 2,
     value: '', 
@@ -152,13 +130,13 @@ export const initForm = {
   mainUser: { 
     column: 2,
     value: '', 
-    label: 'booking.Người sử dụng', 
+    label: 'booking.Người phụ trách', 
     type: 'suggest', 
     suggestionApi: suggestionUsers,
     suggestionDisplayField: 'mvalue',
     suggestionMappingField: [['*', 'mainUser']],
     formatter: (value) => formatUser(value),
-    validate: (value, t) => !value ? t('booking.Người sử dụng không được để trống') : ''
+    validate: (value, t) => !value ? t('booking.Người phụ trách không được để trống') : ''
   },
   department: { 
     column: 2,
@@ -179,17 +157,6 @@ export const initForm = {
     validate: (value, t) => !value ? t('booking.Phân loại khách không được để trống') : '' 
   },
   
-  // usagePurposeLocale: { 
-  //   column: 2,
-  //   value: 'vn', 
-  //   label: 'booking.Quốc gia', 
-  //   type: 'radio',
-  //   options: [
-  //     { mkey: 'vn', mvalue: ('booking.Việt') },
-  //     { mkey: 'jp', mvalue: ('booking.Nhật') }
-  //   ],
-  //   validate: (value, t) => !value ? t('booking.Quốc gia không được để trống') : '' 
-  // },
   clientNames: { 
     column: 2,
     value: [], 
@@ -208,24 +175,13 @@ export const initForm = {
     label: '', 
     type: 'number'
   },
-  // externalClientNames: {
-  //   column: 2,
-  //   value: [], 
-  //   label: '', 
-  //   type: 'tags',
-  //   insertable: true,
-  //   tagsApi: suggestionExternalClients,
-  //   tagsDisplayField: 'mvalue',
-  //   tagsMappingField: [['mkey', 'externalClientNames']],
-  //   placeholder: 'common.Nhập từ khoá & enter để tạo mới...'
-  // },
-  // externalClients: {
-  //   column: 2,
-  //   value: '',
-  //   label: '',
-  //   type: 'number'
-  // },
- 
+ flightNumber: {
+    column: 2,
+    value: '', 
+    label: 'booking.Số hiệu chuyến bay', 
+    type: 'text'
+  },
+
   detailedSchedule: { 
     column: 2,
     value: '', 
