@@ -15,8 +15,15 @@ function DriverList({
   const { t } = useTranslation();
 
   const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setTempFilters({ ...tempFilters, [name]: value });
+    // const { name, value } = e.target;
+    // setTempFilters({ ...tempFilters, [name]: value });
+     const { name, value } = e.target;
+    if (name === 'driverPhoneNumber') {
+      const numericValue = value.replace(/\D/g, ''); // Chỉ giữ lại số
+      setTempFilters({ ...tempFilters, [name]: numericValue });
+    } else {
+      setTempFilters({ ...tempFilters, [name]: value });
+    }
   };
 
   const applyFilters = () => setFilters(tempFilters);
@@ -31,7 +38,7 @@ function DriverList({
     { name: 'id', placeholder: t('driver.ID') },
     { name: 'mkey', placeholder: t('driver.Esuhai User ID') },
     { name: 'mvalue', placeholder: t('driver.Esuhai User Name') },
-    { name: 'driverPhoneNumber', type: 'number', placeholder: t('driver.Số điện thoại') }
+    { name: 'driverPhoneNumber', type: 'text', placeholder: t('driver.Số điện thoại') }
   ];
 
   const requestFields = [

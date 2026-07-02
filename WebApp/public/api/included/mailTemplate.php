@@ -13,7 +13,7 @@ class MailTemplate {
         $bookingUserUrl = "<br/><br/>Hãy truy cập <a target='_blank' href='".DAT_PHONG_ENDPOINT."/#/booking-list?id=%ID%'>[tại đây]</a> để xem thông tin chi tiết và đặt lại yêu cầu đặt xe.";
         $driverConfirmUrl = "<br/><br/>Hãy truy cập <a target='_blank' href='".DAT_PHONG_ENDPOINT."/#/driver-confirm-booking-list?id=%ID%'>[tại đây]</a> để xem thông tin chi tiết và xác nhận phân công tài xế cho yêu cầu đặt xe.";
 
-        $noteWhenUsing = "<br/><br/>Lưu ý khi sử dụng:<br/>- Vui lòng đến đúng giờ và giữ vệ sinh chung, kiểm tra toàn bộ Trang thiết bị/ dụng cụ của xe và trả về vị trí cũ sau khi sử dụng xong.<br/>- Không để lại vật dụng cá nhân nếu không có người trực tiếp quản lý.<br/>- Cập nhật thời gian sử dụng nếu xong trước thời gian dự kiến.";
+        $noteWhenUsing = "<br/><br/>Lưu ý khi sử dụng:<br/>- Vui lòng đến đúng giờ và giữ vệ sinh chung.<br/>- Không để lại vật dụng cá nhân nếu không có người trực tiếp quản lý.<br/>- Cập nhật thời gian sử dụng nếu xong trước thời gian dự kiến.";
         $noteAfterUsing = "<br/><br/>Vui lòng đánh giá chất lượng xe sau khi sử dụng để hỗ trợ team quản lý & cải tiến nhé. Cám ơn bạn.";
         $sorry = "Thành thật xin lỗi & mong bạn thông cảm về sự bất tiện này.";
 
@@ -44,7 +44,7 @@ class MailTemplate {
                     //     }
                     // }
                     // $users = implode(', ', $userNames);
-                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đang cần duyệt:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người sử dụng: ".$mainUser["mvalue"]."<br/>- Loại xe: ".$roomType["mvalue"]." - Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approversUrl."".$commonNote;
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đang cần duyệt:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Loại xe đề xuất: ".$roomType["mvalue"]." - Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approversUrl."".$commonNote;
                 }
             ],
             'send_to_booking_user_main_user_users_when_approve_booking' => [
@@ -52,7 +52,7 @@ class MailTemplate {
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     extract($currentItem);
-                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của bạn đã được duyệt:<br/><br/>- Loại xe: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."" .$noteWhenUsing ."" .$noteAfterUsing ."" .$commonNote;
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của bạn đã được duyệt:<br/><br/>- Loại xe đề xuất: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."" .$noteWhenUsing ."" .$noteAfterUsing ."" .$commonNote;
                 }
             ],
             'send_to_booking_user_main_user_users_when_reject_booking' => [
@@ -61,7 +61,7 @@ class MailTemplate {
                     extract($additionalMessages);
                     extract($currentItem);
                     $bookingUserUrl = str_replace('%ID%', $id, $bookingUserUrl);
-                    return "Chào bạn,<br/><br/>Rất tiếc đặt xe số ".$id." của bạn đã không được duyệt:<br/><br/>- Loại xe: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Lý do từ chối: ".$rejectedReason."" .$bookingUserUrl ."" .$commonNote;
+                    return "Chào bạn,<br/><br/>Rất tiếc đặt xe số ".$id." của bạn đã không được duyệt:<br/><br/>- Loại xe đề xuất: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Lý do từ chối: ".$rejectedReason."" .$bookingUserUrl ."" .$commonNote;
                 }
             ],
             'send_to_booking_user_main_user_users_when_reject_booking_after_approved' => [
@@ -77,7 +77,7 @@ class MailTemplate {
                         }
                     }
                     $rejectedUsers = implode(', ', $userNames);
-                    return "Chào bạn,<br/><br/>Rất tiếc đặt xe số ".$id." đã thành công trước đây của bạn đã bị hủy do có thay đổi ngoài dự kiến:<br/><br/>- Loại xe: ".$roomType["mvalue"]."<br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Người huỷ: ".$rejectedUsers."<br/>- Lý do huỷ: ".$rejectedReason."" .$bookingUserUrl ." " .$sorry ."" .$commonNote;
+                    return "Chào bạn,<br/><br/>Rất tiếc đặt xe số ".$id." đã thành công trước đây của bạn đã bị hủy do có thay đổi ngoài dự kiến:<br/><br/>- Loại xe đề xuất: ".$roomType["mvalue"]."<br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Người huỷ: ".$rejectedUsers."<br/>- Lý do huỷ: ".$rejectedReason."" .$bookingUserUrl ." " .$sorry ."" .$commonNote;
                 }
             ],
             'send_to_booking_user_main_user_users_when_cancel_booking' => [
@@ -86,7 +86,7 @@ class MailTemplate {
                     extract($additionalMessages);
                     extract($currentItem);
                     $bookingUserUrl = str_replace('%ID%', $id, $bookingUserUrl);
-                    return "Chào bạn,<br/><br/>Rất tiếc đặt xe số ".$id." của bạn đã bị hủy:<br/><br/>- Loại xe: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Lý do huỷ: ".$cancelledReason."" .$bookingUserUrl ." " .$sorry ."" .$commonNote;
+                    return "Chào bạn,<br/><br/>Rất tiếc đặt xe số ".$id." của bạn đã bị hủy:<br/><br/>- Loại xe đề xuất: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Lý do huỷ: ".$cancelledReason."" .$bookingUserUrl ." " .$sorry ."" .$commonNote;
                 }
             ],
             'send_to_approvers_when_booking_meet_condition_1' => [
@@ -95,14 +95,7 @@ class MailTemplate {
                     extract($additionalMessages);
                     extract($currentItem);
                     $approverRemindUrl = str_replace('%ID%', $id, $approverRemindUrl);
-                    // $userNames = [];
-                    // if (!empty($users)) {
-                    //     foreach ($users as $user) {
-                    //         $userNames[] = $user["mvalue"];
-                    //     }
-                    // }
-                    // $users = implode(', ', $userNames);
-                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 1/4 thời gian duyệt/xác nhận từ lúc đặt, nhưng vẫn chưa được duyệt/xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người sử dụng: ".$mainUser["mvalue"]."<br/>- Loại xe: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approverRemindUrl."".$commonNote;
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 1/4 thời gian duyệt từ lúc đặt, nhưng vẫn chưa được duyệt:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Loại xe đề xuất: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approverRemindUrl."".$commonNote;
                 }
             ],
             'send_to_approvers_when_booking_meet_condition_2' => [
@@ -111,14 +104,7 @@ class MailTemplate {
                     extract($additionalMessages);
                     extract($currentItem);
                     $approverRemindUrl = str_replace('%ID%', $id, $approverRemindUrl);
-                    // $userNames = [];
-                    // if (!empty($users)) {
-                    //     foreach ($users as $user) {
-                    //         $userNames[] = $user["mvalue"];
-                    //     }
-                    // }
-                    // $users = implode(', ', $userNames);
-                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 1/2 thời gian duyệt/xác nhận từ lúc đặt, nhưng vẫn chưa được duyệt/xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người sử dụng: ".$mainUser["mvalue"]."<br/>- Loại xe: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approverRemindUrl."".$commonNote;
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 1/2 thời gian duyệt từ lúc đặt, nhưng vẫn chưa được duyệt:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Loại xe đề xuất: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approverRemindUrl."".$commonNote;
                 }
             ],
             'send_to_approvers_when_booking_meet_condition_loop' => [
@@ -127,14 +113,7 @@ class MailTemplate {
                     extract($additionalMessages);
                     extract($currentItem);
                     $approverRemindUrl = str_replace('%ID%', $id, $approverRemindUrl);
-                    // $userNames = [];
-                    // if (!empty($users)) {
-                    //     foreach ($users as $user) {
-                    //         $userNames[] = $user["mvalue"];
-                    //     }
-                    // }
-                    // $users = implode(', ', $userNames);
-                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 3/4 thời gian duyệt/xác nhận từ lúc đặt, nhưng vẫn chưa được duyệt/xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người sử dụng: ".$mainUser["mvalue"]."<br/>- Loại xe: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approverRemindUrl."".$commonNote;
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 3/4 thời gian duyệt từ lúc đặt, nhưng vẫn chưa được duyệt:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Loại xe đề xuất: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approverRemindUrl."".$commonNote;
                 }
             ],
             'send_to_booking_user_approve_when_driver_reject_booking' => [
@@ -150,7 +129,7 @@ class MailTemplate {
                         }
                     }
                     $driverDeclineUser = implode(', ', $userNames);
-                    return "Chào bạn,<br/><br/>Rất tiếc đặt xe số ".$id." của bạn đã bị tài xế từ chối:<br/><br/>- Loại xe: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Người từ chối: ".$driverDeclineUser."<br/>- Lý do từ chối: ".$driverDeclineReason."" .$bookingUserUrl ." " .$sorry ."" .$commonNote;
+                    return "Chào bạn,<br/><br/>Rất tiếc đặt xe số ".$id." của bạn đã bị tài xế từ chối:<br/><br/>- Xe: ".$room["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Tài xế từ chối: ".$driverDeclineUser."<br/>- Lý do từ chối: ".$driverDeclineReason."" .$bookingUserUrl ." " .$sorry ."" .$commonNote;
                 }
             ],
             'send_to_booking_user_main_user_users_when_confirm_booking' => [
@@ -162,13 +141,40 @@ class MailTemplate {
                 }
             ],
             'send_to_driver_when_assign_booking' => [
-                'subject' => 'Yêu cầu đặt xe cần xác nhận',
+                'subject' => 'Yêu cầu đặt xe cần tài xế xác nhận',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     extract($currentItem);
                     $driverConfirmUrl = str_replace('%ID%', $id, $approversUrl);
                   
-                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đang cần xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người sử dụng: ".$mainUser["mvalue"]."<br/>- Loại xe: ".$roomType["mvalue"]." - Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$approversUrl."".$commonNote;
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đang cần xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Xe: ".$room["mvalue"]." - Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$driverConfirmUrl."".$commonNote;
+                }
+            ],
+             'send_to_confirm_when_booking_meet_condition_1' => [
+                'subject' => 'Yêu cầu xác nhận đặt xe đã qua 1/4 thời gian từ lúc phân công',
+                'content' => function($currentItem) use ($additionalMessages) {
+                    extract($additionalMessages);
+                    extract($currentItem);
+                    $driverConfirmUrl = str_replace('%ID%', $id, $driverConfirmUrl);
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 1/4 thời gian xác nhận từ lúc phân công, nhưng vẫn chưa được xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Xe: ".$room["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$driverConfirmUrl."".$commonNote;
+                }
+            ],
+            'send_to_confirm_when_booking_meet_condition_2' => [
+                'subject' => 'Yêu cầu xác nhận đặt xe đã qua 1/2 thời gian từ lúc phân công',
+                'content' => function($currentItem) use ($additionalMessages) {
+                    extract($additionalMessages);
+                    extract($currentItem);
+                    $driverConfirmUrl = str_replace('%ID%', $id, $driverConfirmUrl);
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 1/2 thời gian xác nhận từ lúc phân công, nhưng vẫn chưa được xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Xe: ".$room["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$driverConfirmUrl."".$commonNote;
+                }
+            ],
+            'send_to_confirm_when_booking_meet_condition_loop' => [
+                'subject' => '[GẤP] Yêu cầu xác nhận đặt xe đã qua 3/4 thời gian từ lúc phân công',
+                'content' => function($currentItem) use ($additionalMessages) {
+                    extract($additionalMessages);
+                    extract($currentItem);
+                    $driverConfirmUrl = str_replace('%ID%', $id, $driverConfirmUrl);
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 3/4 thời gian xác nhận từ lúc phân công, nhưng vẫn chưa được xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Xe: ".$room["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$driverConfirmUrl."".$commonNote;
                 }
             ],
         ];

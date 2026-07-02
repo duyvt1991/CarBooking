@@ -73,7 +73,7 @@
     "Trạng thái": "Trạng thái",
     "Phòng ban": "Phòng ban",
     "Người đặt": "Người đặt",
-    "Người sử dụng": "Người sử dụng",
+    "Người phụ trách": "Người phụ trách",
     "Tên nhân viên tham gia": "Tên nhân viên tham gia",
     "Toà nhà": "Chi nhánh",
     "Loại xe": "Loại xe",
@@ -306,8 +306,8 @@
     "Tên xe không được để trống": "Tên xe không được để trống",
     "Có": "Có",
     "Không": "Không",
-    "Xe đặt ngoài": "Xe đặt ngoài",
-    "Xe đặt ngoài không được để trống": "Xe đặt ngoài không được để trống",
+    "Xe ngoài": "Xe ngoài",
+    "Xe ngoài không được để trống": "Xe ngoài không được để trống",
     "Biển số": "Biển số",
     "Biển số không được để trống": "Biển số không được để trống"
   },
@@ -327,7 +327,7 @@
     "Diện tích": "Mẫu xe",
     "Sức chứa": "Sức chứa",
     "Người đặt": "Người đặt",
-    "Người sử dụng": "Người sử dụng",
+    "Người phụ trách": "Người phụ trách",
     "Xe": "Xe",
     "Ngày sử dụng": "Ngày sử dụng",
     "Khung giờ sử dụng": "Khung giờ sử dụng",
@@ -352,7 +352,7 @@
     "Số lượng khách ngoài": "Số lượng khách ngoài",
     "Đánh giá": "Đánh giá",
     "Loại xe không được để trống": "Loại xe không được để trống",
-    "Người sử dụng không được để trống": "Người sử dụng không được để trống",
+    "Người phụ trách không được để trống": "Người phụ trách không được để trống",
     "Xe không được để trống": "Xe không được để trống",
     "Toà nhà không được để trống": "Chi nhánh không được để trống",
     "Phòng ban không được để trống": "Phòng ban không được để trống",
@@ -457,7 +457,8 @@
     "Số điện thoại tài xế không được để trống": "Số điện thoại tài xế không được để trống",
     "Biển số xe không được để trống": "Biển số xe không được để trống",
     "Đã duyệt": "Đã duyệt",
-    "Đã phân công": "Đã phân công"
+    "Đã phân công": "Đã phân công",
+    "Số lượng người": "Số lượng người"
 
   },
   "report": {

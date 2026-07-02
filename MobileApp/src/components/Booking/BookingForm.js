@@ -152,13 +152,13 @@ export const initForm = {
   mainUser: { 
     column: 2,
     value: '', 
-    label: 'booking.Người sử dụng', 
+    label: 'booking.Người phụ trách', 
     type: 'suggest', 
     suggestionApi: suggestionUsers,
     suggestionDisplayField: 'mvalue',
     suggestionMappingField: [['*', 'mainUser']],
     formatter: (value) => formatUser(value),
-    validate: (value, t) => !value ? t('booking.Người sử dụng không được để trống') : ''
+    validate: (value, t) => !value ? t('booking.Người phụ trách không được để trống') : ''
   },
   department: { 
     column: 2,

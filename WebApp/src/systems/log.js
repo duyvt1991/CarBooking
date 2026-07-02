@@ -240,7 +240,7 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                 case "department":
                     return "Phòng ban";
                 case "mainUser":
-                    return "Người sử dụng";
+                    return "Người phụ trách";
                 case "carLine":
                     return "Dòng xe đề xuất";
                 case "startDate":
@@ -291,8 +291,10 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Tài xế từ chối";
                 case "driverDeclineDate":
                     return "Ngày tài xế từ chối";
-                 case "driverDeclineReason":
+                case "driverDeclineReason":
                     return "Lý do tài xế từ chối";
+                case "employeeNumber":
+                    return "Số lượng người";
                 default:
                     return key.toUpperCase();
             }

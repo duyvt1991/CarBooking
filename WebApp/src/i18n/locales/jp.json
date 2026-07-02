@@ -73,7 +73,7 @@
     "Trạng thái": "ステータス",
     "Phòng ban": "部門",
     "Người đặt": "予約者",
-    "Người sử dụng": "使用者",
+    "Người phụ trách": "使用者",
     "Tên nhân viên tham gia": "参加する従業員の名前",
     "Toà nhà": "支店",
     "Loại xe": "車の種類",
@@ -306,8 +306,8 @@
     "Tên xe không được để trống": "車名は必須です",
     "Có": "はい",
     "Không": "いいえ",
-    "Xe đặt ngoài": "外部車両",
-    "Xe đặt ngoài không được để trống": "外部車両は必須です",
+    "Xe ngoài": "外部車両",
+    "Xe ngoài không được để trống": "外部車両は必須です",
     "Biển số": "ナンバープレート",
     "Biển số không được để trống": "ナンバープレートは必須です"
   },
@@ -327,7 +327,7 @@
     "Diện tích": "車のモデル",
     "Sức chứa": "収容人数",
     "Người đặt": "予約者",
-    "Người sử dụng": "使用者",
+    "Người phụ trách": "使用者",
     "Xe": "車",
     "Ngày sử dụng": "使用日",
     "Khung giờ sử dụng": "使用時間帯",
@@ -351,7 +351,7 @@
     "Phân loại khách ngoài": "外部ゲストの分類",
     "Số lượng khách ngoài": "外部ゲスト数",
     "Đánh giá": "評価",
-    "Người sử dụng không được để trống": "使用者は必須です",
+    "Người phụ trách không được để trống": "使用者は必須です",
     "Loại xe không được để trống": "車の種類は必須です",
     "Xe không được để trống": "車は必須です",
     "Toà nhà không được để trống": "支店は必須です",
@@ -456,7 +456,8 @@
     "Số điện thoại tài xế không được để trống": "運転手の電話番号は必須です",
     "Biển số xe không được để trống": "車両番号は必須です",
     "Đã duyệt": "承認済み",
-    "Đã phân công": "割り当て済み"
+    "Đã phân công": "割り当て済み",
+    "Số lượng người": "ゲスト数"
 
   },
   "report": {

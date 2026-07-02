@@ -20,7 +20,8 @@ export const defaultFilters = {
     oldValue: '',
     newValue: '',
     forceReload: 0,
-    userReviewScore: ''
+    userReviewScore: '',
+    driverPhoneNumber: ''
 };
 
 export const routes = {

@@ -240,7 +240,7 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                 case "department":
                     return "Phòng ban";
                 case "mainUser":
-                    return "Người sử dụng";
+                    return "Người phụ trách";
                 case "carLine":
                     return "Dòng xe đề xuất";
                 case "startDate":

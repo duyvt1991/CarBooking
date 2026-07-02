@@ -145,7 +145,7 @@ class Cron {
         $bookingQuery = \Booking\Query::getInstance("car_booking_requests", true);
         $bookingQuery->setSelect(['*']);
         $bookingQuery->setFilter([
-            '@isApproved' => [0, 2, -2], // Chờ duyệt, Chờ tài xế xác nhận, Tài xế từ chối
+            '@isApproved' => [0, 1, 2, -1, -2], // Chờ duyệt, Chờ tài xế xác nhận, Tài xế từ chối
             'isCancelled' => 0,
             [
                 'LOGIC' => 'OR',
@@ -168,8 +168,7 @@ class Cron {
                     'isCancelled' => 1, 
                     'cancelledReason' => "Huỷ tự động bởi hệ thống do quá thời gian sử dụng.",
                     'isApproved' => -1,
-                    'rejectedDate' => new \Bitrix\Main\Type\DateTime(),
-                    'isSyncedThirdParty' => 2 // set về 2 để biết có update của booking này.
+                    'rejectedDate' => new \Bitrix\Main\Type\DateTime()
                 ]
             );
             \Booking\Page\Item::logBooking($booking['id'], $booking, 0);
@@ -221,18 +220,8 @@ class Cron {
         $upcomingBookingQuery->setFilter([
             'isCancelled' => 0,
             [
-                'LOGIC' => 'OR',
                 [
-                    'isApproved' => 2, // Chờ tài xế xác nhận
-                    [
-                        'LOGIC' => 'OR',
-                        ['notificationDriverDate' => NULL],
-                        ['<notificationDriverDate' => new \Bitrix\Main\Type\DateTime(date('Y-m-d') . ' 00:00:00', "Y-m-d H:i:s")],
-                        ['<=notificationDriverCount' => 2]
-                    ]
-                ],
-                [
-                    '@isApproved' => [0, 1, -2], // Chờ duyệt, Đã duyệt, Tài xế từ chối
+                    '@isApproved' => [0], // Chờ duyệt, Đã duyệt, Tài xế từ chối
                     [
                         'LOGIC' => 'OR',
                         ['notificationDate' => NULL],
@@ -263,61 +252,123 @@ class Cron {
             $waitingHoursBetweenCreateAndStart = ($startDateTime->getTimestamp() - $createdDateTime->getTimestamp()) / 3600;
             $waitingHoursBetweenCurrentAndStart = ($startDateTime->getTimestamp() - $currentDateTime->getTimestamp()) / 3600;
 
-                $isDriverConfirm = ($upcomingBooking['isApproved'] == 2);
-                $currentNotificationCount = $isDriverConfirm ? (int)$upcomingBooking['notificationDriverCount'] : (int)$upcomingBooking['notificationCount'];
+                $currentNotificationCount = (int)$upcomingBooking['notificationCount'];
                 
                 $percentRemaining = ($waitingHoursBetweenCurrentAndStart / $waitingHoursBetweenCreateAndStart) * 100;
                 if ($percentRemaining <= 25) { // Gửi thông báo LOOP
-                    if ($isDriverConfirm) {
-                        \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
-                            'notificationDriverCount' => $currentNotificationCount + 1,
-                            'notificationDriverDate' => new \Bitrix\Main\Type\DateTime()
-                        ]);
-                    } else {
                         \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
                             'notificationCount' => $currentNotificationCount + 1,
                             'notificationDate' => new \Bitrix\Main\Type\DateTime()
                         ]);
-                    }
                     $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_booking_meet_condition_loop', $upcomingBooking['id']);
-                    $targetUsers = $isDriverConfirm ? $mailContent['driverUser'] : ($mailContent['approvers']);
+                    $targetUsers = ($mailContent['approvers']);
                     foreach($targetUsers as $userId) {
                         \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
                     }
                 } else if ($percentRemaining <= 50) { // Gửi thông báo lần 2
                     if ($currentNotificationCount <= 1) {
-                        if ($isDriverConfirm) {
-                            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
-                                'notificationDriverCount' => 2,
-                                'notificationDriverDate' => new \Bitrix\Main\Type\DateTime()
-                            ]);
-                        } else {
+                      
                             \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
                                 'notificationCount' => 2,
                                 'notificationDate' => new \Bitrix\Main\Type\DateTime()
                             ]);
-                        }
                         $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_booking_meet_condition_2', $upcomingBooking['id']);
-                        $targetUsers = $isDriverConfirm ? $mailContent['driverUser'] : ($mailContent['approvers']);
+                        $targetUsers =  ($mailContent['approvers']);
                         foreach($targetUsers as $userId) {
                             \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
                         }
                     }
                 } else if ($percentRemaining <= 75) { // Gửi thông báo lần 1
                     if ($currentNotificationCount == 0) {
-                        if ($isDriverConfirm) {
-                            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
-                                'notificationDriverCount' => 1,
-                                'notificationDriverDate' => new \Bitrix\Main\Type\DateTime()
-                            ]);
-                        } else {
+                       
                             \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
                                 'notificationCount' => 1,
                                 'notificationDate' => new \Bitrix\Main\Type\DateTime()
                             ]);
-                        }
                         $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_booking_meet_condition_1', $upcomingBooking['id']);
-                        $targetUsers = $isDriverConfirm ? $mailContent['driverUser'] : $mailContent['approvers'];
+                        $targetUsers =  $mailContent['approvers'];
+                        foreach($targetUsers as $userId) {
+                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                        }
+                    }
+                }
+        }
+        // End
+
+        // Phần gửi noti cho tài xế
+         $upcomingBookingQuery = \Booking\Query::getInstance("car_booking_requests", true);
+        $upcomingBookingQuery->setSelect(['*']);
+        $upcomingBookingQuery->setFilter([
+            'isCancelled' => 0,
+            [
+                [
+                    'isApproved' => 2, // Chờ tài xế xác nhận
+                    [
+                        'LOGIC' => 'OR',
+                        ['notificationDriverDate' => NULL],
+                        ['<notificationDriverDate' => new \Bitrix\Main\Type\DateTime(date('Y-m-d') . ' 00:00:00', "Y-m-d H:i:s")],
+                        ['<=notificationDriverCount' => 2]
+                    ]
+                ],
+            ],
+            [
+                'LOGIC' => 'OR',
+                [
+                    '>startDate' => $currentDateTime
+                ],
+                [
+                    '=startDate' => $currentDateTime,
+                    '>startTime' => $currentTime
+                ]
+            ]
+        ]);
+
+        $upcomingBookings = $upcomingBookingQuery->exec()->fetchAll();
+        foreach ($upcomingBookings as $upcomingBooking) {
+            // Tính toán thời gian từ assignmentDate đến startDate + startTime
+            $createdDateTime = new \Bitrix\Main\Type\DateTime($upcomingBooking['assignmentDate'], "Y-m-d H:i:s");
+            $currentDateTime = new \Bitrix\Main\Type\DateTime();
+            $startDateTime = new \Bitrix\Main\Type\DateTime($upcomingBooking['startDate'] . ' ' . $upcomingBooking['startTime'], "Y-m-d H:i:s");
+
+            $waitingHoursBetweenCreateAndStart = ($startDateTime->getTimestamp() - $createdDateTime->getTimestamp()) / 3600;
+            $waitingHoursBetweenCurrentAndStart = ($startDateTime->getTimestamp() - $currentDateTime->getTimestamp()) / 3600;
+
+                $currentNotificationCount = (int)$upcomingBooking['notificationDriverCount'] ;
+                
+                $percentRemaining = ($waitingHoursBetweenCurrentAndStart / $waitingHoursBetweenCreateAndStart) * 100;
+                if ($percentRemaining <= 25) { // Gửi thông báo LOOP
+                        \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
+                            'notificationDriverCount' => $currentNotificationCount + 1,
+                            'notificationDriverDate' => new \Bitrix\Main\Type\DateTime()
+                        ]);
+                   
+                    $mailContent = \Booking\MailTemplate::generateMailContent('send_to_confirm_when_booking_meet_condition_loop', $upcomingBooking['id']);
+                    $targetUsers = $mailContent['driverUser'];
+                    foreach($targetUsers as $userId) {
+                        \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    }
+                } else if ($percentRemaining <= 50) { // Gửi thông báo lần 2
+                    if ($currentNotificationCount <= 1) {
+                            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
+                                'notificationDriverCount' => 2,
+                                'notificationDriverDate' => new \Bitrix\Main\Type\DateTime()
+                            ]);
+                        
+                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_confirm_when_booking_meet_condition_2', $upcomingBooking['id']);
+                        $targetUsers = $mailContent['driverUser'];
+                        foreach($targetUsers as $userId) {
+                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                        }
+                    }
+                } else if ($percentRemaining <= 75) { // Gửi thông báo lần 1
+                    if ($currentNotificationCount == 0) {
+                            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
+                                'notificationDriverCount' => 1,
+                                'notificationDriverDate' => new \Bitrix\Main\Type\DateTime()
+                            ]);
+                       
+                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_confirm_when_booking_meet_condition_1', $upcomingBooking['id']);
+                        $targetUsers = $mailContent['driverUser'];
                         foreach($targetUsers as $userId) {
                             \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
                         }

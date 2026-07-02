@@ -27,38 +27,16 @@ const initForm = {
     label: 'room.Tên xe', 
     validate: (value, t) => !value ? t('room.Tên xe không được để trống') : '' 
   },
-  // approvers: { 
-  //   value: [], 
-  //   label: 'room.Người phê duyệt', 
-  //   type: 'tags', 
-  //   optionsMasterDataKey: 'approvers',
-  //   tagsDisplayField: 'mvalue',
-  //   tagsMappingField: [['mkey', 'approvers']],
-  //   formatter: formatApprovers
-  // },
-  // priorityApprovers: {
-  //   value: [], 
-  //   label: 'room.Người phê duyệt ưu tiên', 
-  //   type: 'tags', 
-  //   maxItems: 1,
-  //   optionsMasterDataKey: 'priorityApprovers',
-  //   tagsDisplayField: 'mvalue',
-  //   tagsMappingField: [['mkey', 'priorityApprovers']],
-  //   formatter: formatPriorityApprovers
-  // },
-  // equipments: { 
-  //   value: [], 
-  //   label: 'room.Thiết bị', 
-  //   type: 'tags', 
-  //   optionsMasterDataKey: 'equipments',
-  //   tagsDisplayField: 'mvalue',
-  //   tagsMappingField: [['mkey', 'equipments']],
-  //   formatter: formatEquipments
+  // licensePlateNumber: { 
+  //   value: '', 
+  //   label: 'room.Biển số',
+  //   validate: (value, t, request) => String(request?.hasServiceCar) === '1' && !value ? t('room.Biển số không được để trống') : '' 
   // },
   licensePlateNumber: { 
     value: '', 
     label: 'room.Biển số',
-    validate: (value, t, request) => String(request?.hasServiceCar) === '1' && !value ? t('room.Biển số không được để trống') : '' 
+    required: (request) => String(request?.hasServiceCar) !== '1',
+    validate: (value, t, request) => String(request?.hasServiceCar) !== '1' && !value ? t('room.Biển số không được để trống') : '' 
   },
   persons: { 
     value: '', 
@@ -76,13 +54,13 @@ const initForm = {
   },
   hasServiceCar: { 
     value: '', 
-    label: 'room.Xe đặt ngoài', 
+    label: 'room.Xe ngoài', 
     type: 'select', 
     options: [
       { mkey: '1', mvalue: ('room.Có') },
       { mkey: '0', mvalue: ('room.Không') }
     ],
-    validate: (value, t) => value === '' ? t('room.Xe đặt ngoài không được để trống') : '' 
+    validate: (value, t) => value === '' ? t('room.Xe ngoài không được để trống') : '' 
   },
   isSync: {
     value: 0,

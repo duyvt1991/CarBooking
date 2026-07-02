@@ -343,7 +343,7 @@ export const getFieldsBookingDetail = (request, masterData, t) => {
     { label: t('common.Ngày sử dụng'), value: formatDate(request.startDate) },
     { label: t('common.Khung giờ sử dụng'), value: `${formatTime(request.startTime).replace(":00", "")} - ${formatTime(request.endTime).replace(":00", "")}` },
     { label: t('common.Người đặt'), value: <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{request.bookingUser?.mvalue}</span> },
-    { label: t('common.Người sử dụng'), value: <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{request.mainUser?.mvalue}</span> },
+    { label: t('common.Người phụ trách'), value: <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{request.mainUser?.mvalue}</span> },
     { label: t('common.Phòng ban'), value: request.department?.mvalue},
     { label: t('common.Phân loại khách'), value: request.usagePurpose?.mvalue},
     request.clients > 0 && { label: t('common.Số lượng khách'), value: formatPersons(request.clients, null, t) },

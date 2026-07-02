@@ -133,12 +133,10 @@ const Calendar = ({ events, myCalendar = false, onMyCalendarClick, onCalendarCha
         }
       });
     }
-    const startHour = 7;
-    const endHour = 22; // end boundary (22:00 not included as a slot start)
-    const totalSlots = (endHour - startHour) * 2 + 1; // half-hour slots between 07:00 and 22:00
+    const totalSlots = 48; // half-hour slots between 00:00 and 23:30 (inclusive)
 
     Array.from({ length: totalSlots }, (_, i) => {
-      const minutesFromMidnight = startHour * 60 + i * 30;
+      const minutesFromMidnight = i * 30;
       return addMinutes(startOfDay(day), minutesFromMidnight);
     }).forEach((timeSlot, index) => {
       loopDayEvents((e, i) => {
@@ -250,15 +248,11 @@ const Calendar = ({ events, myCalendar = false, onMyCalendarClick, onCalendarCha
 
   const renderCurrentTimeLine = (start) => {
     const now = new Date();
-    const startHour = 7;
-    const endHour = 22;
     const matchesView = (mode === "week" && isSameWeek(now, start, { weekStartsOn: 1 }))
       || (mode === "day" && isSameDay(now, start));
-    const inRange = now.getHours() >= startHour && now.getHours() < endHour;
-    if (matchesView && inRange) {
+    if (matchesView) {
       const minutesSinceStartOfDay = now.getHours() * 60 + now.getMinutes();
-      const minutesSinceCalendarStart = minutesSinceStartOfDay - startHour * 60;
-      const topPosition = (minutesSinceCalendarStart / 30) * halfHourPixels;
+      const topPosition = (minutesSinceStartOfDay / 30) * halfHourPixels;
       return <div className={`current-time-line ${mode}`} style={{ top: `${topPosition + 55}px` }}></div>;
     }
     return null;
@@ -318,11 +312,9 @@ const Calendar = ({ events, myCalendar = false, onMyCalendarClick, onCalendarCha
 
     const start = mode === 'week' ? startOfWeek(currentDate, { weekStartsOn: 1 }) : startOfDay(currentDate);
     const days = mode === 'week' ? 7 : 1;
-    const startHour = 7;
-    const endHour = 22; // end label (22:00). Remove +1 below if you want to exclude 22:00.
-    const slotCount = (endHour - startHour) * 2; // half-hour steps incl. 22:00
+    const slotCount = 48; // half-hour steps between 00:00 and 23:30 (inclusive)
     const timeSlots = Array.from({ length: slotCount }, (_, i) =>
-      addMinutes(startOfDay(start), startHour * 60 + i * 30)
+      addMinutes(startOfDay(start), i * 30)
     );
 
     return (

@@ -16,11 +16,11 @@ register_shutdown_function(function() use ($fallbackLog) {
         $logData .= "File: " . $error['file'] . "\n";
         $logData .= "Line: " . $error['line'] . "\n";
         // @file_put_contents($logFile, $logData, FILE_APPEND);
-        @file_put_contents($fallbackLog, $logData, FILE_APPEND);
+        // @file_put_contents($fallbackLog, $logData, FILE_APPEND);
     } else if (!$scriptCompleted) {
         $logData = "=== SCRIPT EXITED PREMATURELY (exit or die called) ===\n";
         // @file_put_contents($logFile, $logData, FILE_APPEND);
-        @file_put_contents($fallbackLog, $logData, FILE_APPEND);
+        // @file_put_contents($fallbackLog, $logData, FILE_APPEND);
     }
 });
 
@@ -32,7 +32,7 @@ set_exception_handler(function($exception) use ( $fallbackLog) {
     $logData .= "Line: " . $exception->getLine() . "\n";
     $logData .= "Stack trace:\n" . $exception->getTraceAsString() . "\n";
     // @file_put_contents($logFile, $logData, FILE_APPEND);
-    @file_put_contents($fallbackLog, $logData, FILE_APPEND);
+    // @file_put_contents($fallbackLog, $logData, FILE_APPEND);
 });
 
 // Log Request Info
@@ -44,9 +44,9 @@ $logData .= "POST Keys: " . print_r(array_keys($_POST), true) . "\n";
 $logData .= "Cookies: " . print_r($_COOKIE, true) . "\n";
 $logData .= "User Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'N/A') . "\n";
 // @file_put_contents($logFile, $logData, FILE_APPEND);
-@file_put_contents($fallbackLog, $logData, FILE_APPEND);
+// @file_put_contents($fallbackLog, $logData, FILE_APPEND);
 // @file_put_contents($logFile, "Trace: 1 (Starting mask)\n", FILE_APPEND);
-@file_put_contents($fallbackLog, "Trace: 1 (Starting mask)\n", FILE_APPEND);
+// @file_put_contents($fallbackLog, "Trace: 1 (Starting mask)\n", FILE_APPEND);
 
 // Backup entire request context to bypass Bitrix kernel REST & CSRF checks during prolog
 $originalPost = $_POST;
@@ -85,13 +85,13 @@ if ($isMobileApp) {
 }
 
 // @file_put_contents($logFile, "Trace: 2 (Before prolog)\n", FILE_APPEND);
-@file_put_contents($fallbackLog, "Trace: 2 (Before prolog)\n", FILE_APPEND);
+// @file_put_contents($fallbackLog, "Trace: 2 (Before prolog)\n", FILE_APPEND);
 
 define("NOT_CHECK_PERMISSIONS", true);
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
 
 // @file_put_contents($logFile, "Trace: 3 (After prolog)\n", FILE_APPEND);
-@file_put_contents($fallbackLog, "Trace: 3 (After prolog)\n", FILE_APPEND);
+// @file_put_contents($fallbackLog, "Trace: 3 (After prolog)\n", FILE_APPEND);
 
 if ($isMobileApp) {
     // Restore entire request context
@@ -103,7 +103,7 @@ if ($isMobileApp) {
 }
 
 // @file_put_contents($logFile, "Trace: 4 (After restore)\n", FILE_APPEND);
-@file_put_contents($fallbackLog, "Trace: 4 (After restore)\n", FILE_APPEND);
+// @file_put_contents($fallbackLog, "Trace: 4 (After restore)\n", FILE_APPEND);
 
 global $USER;
 
@@ -140,12 +140,38 @@ if (is_object($USER) && !$USER->IsAuthorized() && $authId && $domain) {
 }
 
 // @file_put_contents($logFile, $logData, FILE_APPEND);
-@file_put_contents($fallbackLog, $logData, FILE_APPEND);
+// @file_put_contents($fallbackLog, $logData, FILE_APPEND);
 
 // @file_put_contents($logFile, "Trace: 5 (Before header)\n", FILE_APPEND);
-@file_put_contents($fallbackLog, "Trace: 5 (Before header)\n", FILE_APPEND);
+// @file_put_contents($fallbackLog, "Trace: 5 (Before header)\n", FILE_APPEND);
 
-require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
+function isMobileDevice() {
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $mobileKeywords = ['Mobile', 'Android', 'iPhone', 'iPad', 'iPod', 'webOS', 'BlackBerry', 'Windows Phone', 'Opera Mini', 'IEMobile', 'BitrixMobile'];
+    foreach ($mobileKeywords as $keyword) {
+        if (stripos($userAgent, $keyword) !== false) {
+            return true;
+        }
+    }
+    return false;
+}
+$isDesktop = !isMobileDevice();
+
+if ($isDesktop) {
+    require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
+} else {
+    // Mobile mode: Output clean HTML header without Bitrix wrapper for a 100% full screen view
+    ?>
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <meta name="theme-color" content="#2c4a6e">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <title>Đặt xe</title>
+    <?php
+}
 
 $logDataAfter = "=== After header.php ===\n";
 if (is_object($USER)) {
@@ -155,7 +181,7 @@ if (is_object($USER)) {
     $logDataAfter .= "USER object is not defined\n";
 }
 // @file_put_contents($logFile, $logDataAfter, FILE_APPEND);
-@file_put_contents($fallbackLog, $logDataAfter, FILE_APPEND);
+// @file_put_contents($fallbackLog, $logDataAfter, FILE_APPEND);
 
 $APPLICATION->SetTitle("Đặt xe");
 
@@ -195,6 +221,10 @@ window.onerror = function(message, source, lineno, colno, error) {
 <?php foreach ($cssFiles as $cssFile): ?>
   <link rel="stylesheet" href="<?php echo str_replace($_SERVER["DOCUMENT_ROOT"], '', $cssFile); ?>" />
 <?php endforeach; ?>
+<?php if (!$isDesktop): ?>
+</head>
+<body>
+<?php endif; ?>
 <div id="root"></div>
 <!-- Include the JS file -->
 <?php foreach ($jsFiles as $jsFile): ?>
@@ -203,5 +233,13 @@ window.onerror = function(message, source, lineno, colno, error) {
 <?php
 global $scriptCompleted;
 $scriptCompleted = true;
-require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");
+
+if ($isDesktop) {
+    require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");
+} else {
+    ?>
+    </body>
+    </html>
+    <?php
+}
 ?>

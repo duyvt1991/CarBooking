@@ -361,7 +361,12 @@ class Lists {
                 $queryFilters = array_merge($queryFilters, ['mtype' => 'carLines']);
                 break;
             case 'driverList':
-                $queryFilters = array_merge($queryFilters, ['mtype' => 'drivers']);
+                 $queryFilters = array_merge($queryFilters, ['mtype' => 'drivers']);
+                $driverPhoneNumber = $filters['driverPhoneNumber'] ?? '';
+                if ($driverPhoneNumber != "") {
+                    // Lọc tìm kiếm số điện thoại tương đối trong options
+                    $queryFilters = array_merge($queryFilters, ['%options' => '"driverPhoneNumber":"' . $driverPhoneNumber]);
+                }
                 break;
         }
 
