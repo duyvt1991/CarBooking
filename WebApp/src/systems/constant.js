@@ -1,5 +1,5 @@
 export const API_ENDPOINT = window.location.origin.includes('localhost') ? process.env.REACT_APP_URL : `${window.location.origin}/datxe`;
-export const DEBUG_WITH_MOCK_DATA = false;
+export const DEBUG_WITH_MOCK_DATA = true;
 
 export const defaultFilters = {
     id: '',
@@ -72,8 +72,8 @@ export const routes = {
     driverList: { component: 'driverList', path: '/driver-list', label: 'Tài xế', permissions: ['Permission [Car_Booking_Admin]'] },
     driverForm: { component: 'driverForm', path: '/driver-form', label: 'Tài xế', permissions: ['Permission [Car_Booking_Admin]'] },
     approveAssignBookingForm: { component: 'approveAssignBookingForm', path: '/approve-assign-booking', label: 'Duyệt và phân công', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]'] },
-    driverConfirmBookingList: { component: 'driverConfirmBookingList', path: '/driver-confirm-booking-list', label: 'Tài xế tiếp nhận', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Driver_Confirm]'] },
-    driverRejectBookingForm: { component: 'driverRejectBookingForm', path: '/driver-reject-booking', label: 'Từ chối đặt xe', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Driver_Confirm]'] },
-    driverReviewForm: { component: 'driverReviewForm', path: '/driver-review-form', label: 'Tài xế đánh giá', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Driver_Confirm]'] },
+    driverConfirmBookingList: { component: 'driverConfirmBookingList', path: '/driver-confirm-booking-list', label: 'Tài xế tiếp nhận', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Driver_Confirm]'] },
+    driverRejectBookingForm: { component: 'driverRejectBookingForm', path: '/driver-reject-booking', label: 'Từ chối đặt xe', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Driver_Confirm]'] },
+    driverReviewForm: { component: 'driverReviewForm', path: '/driver-review-form', label: 'Tài xế đánh giá', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Driver_Confirm]'] },
 
 };

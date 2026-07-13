@@ -77,13 +77,13 @@ function BookingList({
     const isPastBooking = currentTime > bookingEndTime;
     const approvedStatus = Number(request?.isApproved);
     const canEdit = [0, -1].includes(approvedStatus);
-    const canCancel = [0, -1].includes(approvedStatus);
+    const canCancel = [0, -1, 2, 3].includes(approvedStatus);
 
     const defaultButton = { component: <span className="inline-flex items-center justify-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-500"><FaClock /></span> };
     const buttons = [];
 
     if (request?.isCancelled) {
-      return [{ component: <span className="flex items-center justify-center gap-1"><FaMinusCircle className="text-red-500" /> {t('booking.Đã huỷ')}</span> }];
+      return [{ component: <span className="flex items-center justify-center gap-1"><FaMinusCircle className="text-red-500" /> </span> }];
     }
 
     if (isPastBooking) {

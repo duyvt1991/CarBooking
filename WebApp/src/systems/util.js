@@ -254,6 +254,7 @@ export const getFieldsBookingDetail = (request, masterData, t) => {
   const safeClientNames = Array.isArray(request.clientNames) ? request.clientNames : [];
   const safeDepartureLocations = Array.isArray(request.departureLocation) ? request.departureLocation : [request.departureLocation].filter(Boolean);
   const rejectedCount = safeRejectedUsers.length;
+  const safeEmployeeList = Array.isArray(request.employeeList) ? request.employeeList : [];
 
   // 1. Xác định Trạng thái tổng thể của booking dựa vào isApproved
   let statusIcon, statusText, statusBgColor, statusUser = [];
@@ -352,7 +353,13 @@ export const getFieldsBookingDetail = (request, masterData, t) => {
         <span key={index} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{name}</span>
       ))
     },
-    { label: t('booking.Tên nhân viên tham gia'), value: request.employees },
+    // { label: t('booking.Tên nhân viên tham gia'), value: request.employees },
+    safeEmployeeList.length > 0 && {
+      label: t('booking.Tên nhân viên tham gia'), value: safeEmployeeList.map(user => (
+        <span key={user.mkey} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{user.mvalue}</span>
+      ))
+    },
+    // { label: t('booking.Số lượng người'), value: request.employeeNumber },
     { label: t('booking.Số hiệu chuyến bay'), value: request.flightNumber },
     { label: t('booking.Mục đích chuyến đi'), value: request.usagePurposeDetail },
     { label: t('booking.Lịch trình chi tiết'), value: request.detailedSchedule },

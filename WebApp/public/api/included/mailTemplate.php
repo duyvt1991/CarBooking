@@ -52,7 +52,7 @@ class MailTemplate {
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     extract($currentItem);
-                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của bạn đã được duyệt:<br/><br/>- Loại xe đề xuất: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."" .$noteWhenUsing ."" .$noteAfterUsing ."" .$commonNote;
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của bạn đã được duyệt:<br/><br/>- Loại xe đề xuất: ".$roomType["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."" .$commonNote;
                 }
             ],
             'send_to_booking_user_main_user_users_when_reject_booking' => [
@@ -145,7 +145,7 @@ class MailTemplate {
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     extract($currentItem);
-                    $driverConfirmUrl = str_replace('%ID%', $id, $approversUrl);
+                    $driverConfirmUrl = str_replace('%ID%', $id, $driverConfirmUrl);
                   
                     return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đang cần xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Xe: ".$room["mvalue"]." - Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$driverConfirmUrl."".$commonNote;
                 }
@@ -177,27 +177,36 @@ class MailTemplate {
                     return "Chào bạn,<br/><br/>Đặt xe số ".$id." của ".$bookingUser["mvalue"].", đã qua 3/4 thời gian xác nhận từ lúc phân công, nhưng vẫn chưa được xác nhận:<br/><br/>- Người đặt: ".$bookingUser["mvalue"]."<br/>- Người phụ trách: ".$mainUser["mvalue"]."<br/>- Xe: ".$room["mvalue"]." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."".$driverConfirmUrl."".$commonNote;
                 }
             ],
+            'send_to_booking_user_main_user_users_when_manager_confirm_booking' => [
+                'subject' => 'Lịch đặt xe của bạn đã được xác nhận',
+                'content' => function($currentItem) use ($additionalMessages) {
+                    extract($additionalMessages);
+                    extract($currentItem);
+                    return "Chào bạn,<br/><br/>Đặt xe số ".$id." của bạn đã được xác nhận:<br/><br/>- Loại dịch vụ: ".$serviceType["mvalue"]." <br/>- Biển số xe: ".$licensePlateNumber." <br/>- Số điện thoại tài xế: ".$driverPhoneNumber." <br/>- Thời gian sử dụng: ".preg_replace('/:00$/', '', $startTime)." - ".preg_replace('/:00$/', '', $endTime)." ngày ".implode("/", array_reverse(explode("-", $startDate)))."<br/>- Mục đích chuyến đi: ".$usagePurposeDetail."" .$noteWhenUsing ."" .$noteAfterUsing ."" .$commonNote;
+                }
+            ],
         ];
     }
 
     public static function generateMailContent($templateKey, $id, $userIdOverrides = null, $isPriority = null) {
         if (!$id) {
-            return ['subject' => '', 'content' => '', 'userIds' => [], 'approvers' => [], 'priorityApprovers' => [], 'driverUser' => [], 'assignmentUser' => []];
+            return ['subject' => '', 'content' => '', 'userIds' => [], 'approvers' => [], 'priorityApprovers' => [], 'driverUser' => [], 'assignmentUser' => [], 'employeeList' => []];
         }
         if (!isset(self::$mailTemplates[$templateKey])) {
-            return ['subject' => '', 'content' => '', 'userIds' => [], 'approvers' => [], 'priorityApprovers' => [], 'driverUser' => [], 'assignmentUser' => []];
+            return ['subject' => '', 'content' => '', 'userIds' => [], 'approvers' => [], 'priorityApprovers' => [], 'driverUser' => [], 'assignmentUser' => [], 'employeeList' => []];
         }
         $query = \Booking\Query::getInstance("car_booking_requests", true);
         $query->setSelect(['*']);
         $query->setFilter(['id' => $id]);
         $currentItem = $query->exec()->fetch();
         if (empty($currentItem)) {
-            return ['subject' => '', 'content' => '', 'userIds' => [], 'approvers' => [], 'priorityApprovers' => [], 'driverUser' => [], 'assignmentUser' => []];
+            return ['subject' => '', 'content' => '', 'userIds' => [], 'approvers' => [], 'priorityApprovers' => [], 'driverUser' => [], 'assignmentUser' => [], 'employeeList' => []];
         }
         $approvers = [];
         $priorityApprovers = [];
         $driverUser = [];
         $assignmentUser = [];
+        $employeeList = [];
         if (!empty($userIdOverrides)) {
             $currentItem['userIds'] = $userIdOverrides;
         } else {
@@ -256,6 +265,10 @@ class MailTemplate {
                         }
                     }
                 }
+
+                foreach ($currentItem['employeeList'] as $user) {
+                    $employeeList[] = str_replace('BitrixID-', '', $user['mkey']);
+                }
             } catch (\Throwable $th) {
                 //throw $th;
             }
@@ -275,6 +288,7 @@ class MailTemplate {
             'priorityApprovers' => $priorityApprovers,
             'driverUser' => $driverUser,
             'assignmentUser' => $assignmentUser, // Là user đã assign
+            'employeeList' => $employeeList,
             'subject' => $subject,
             'content' => call_user_func($content, $currentItem)
         ];

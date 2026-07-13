@@ -101,12 +101,18 @@ const mockMasterData = {
   serviceTypes : [
     { id: '1', mkey: 'ST001', mvalue: 'Xe nội bộ', isActive: true },
     { id: '2', mkey: 'ST002', mvalue: 'Xe dịch vụ', isActive: true },
-    { id: '3', mkey: 'ST003', mvalue: 'Xe Grab', isActive: true },
+    // { id: '3', mkey: 'ST003', mvalue: 'Xe Grab', isActive: true },
   ]
 
 };
 
 const users = [
+  { mkey: '111', mvalue: 'User 1 (user1@esuhai.com)' },
+  { mkey: '112', mvalue: 'User 2 (user2@esuhai.com)' },
+  { mkey: '113', mvalue: 'User 3 (user3@esuhai.com)' }
+];
+
+const employees = [
   { mkey: '111', mvalue: 'User 1 (user1@esuhai.com)' },
   { mkey: '112', mvalue: 'User 2 (user2@esuhai.com)' },
   { mkey: '113', mvalue: 'User 3 (user3@esuhai.com)' }
@@ -184,6 +190,7 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
       bookingUser: users[0],
       mainUser: users[0],
       // users: users,
+      employeeList: employees,
       department: randomDepartment,
       // building: randomBuilding,
       roomType: roomType,
@@ -227,7 +234,8 @@ const bookings = [
     id: '1',
     bookingUser: users[0],
     mainUser: users[0],
-    users: users,
+    // users: users,
+    employeeList: employees,
     department: mockMasterData.departments[0],
     building: mockMasterData.buildings[0],
     room: mockMasterData.rooms[0],
@@ -278,7 +286,7 @@ const bookings = [
     id: '2',
     bookingUser: users[1],
     mainUser: users[0],
-    users: users,
+    employeeList: employees,
     department: mockMasterData.departments[1],
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[1],
@@ -329,7 +337,7 @@ const bookings = [
     id: '3',
     bookingUser: users[2],
     mainUser: users[0],
-    users: users,
+    employeeList: employees,
     department: mockMasterData.departments[2],
     building: mockMasterData.buildings[2],
     room: mockMasterData.rooms[2],
@@ -380,7 +388,7 @@ const bookings = [
     id: '4',
     bookingUser: users[0],
     mainUser: users[0],
-    users: users,
+    employeeList: employees,
     department: mockMasterData.departments[0],
     building: mockMasterData.buildings[0],
     room: mockMasterData.rooms[3],
@@ -431,7 +439,7 @@ const bookings = [
     id: '5',
     bookingUser: users[1],
     mainUser: users[0],
-    users: users,
+    employeeList: employees,
     department: mockMasterData.departments[1],
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[4],
@@ -482,7 +490,7 @@ const bookings = [
     id: '6',
     bookingUser: users[1],
     mainUser: users[0],
-    users: users,
+    employeeList: employees,
     department: mockMasterData.departments[1],
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[1],
@@ -533,7 +541,7 @@ const bookings = [
     id: '7',
     bookingUser: users[1],
     mainUser: users[0],
-    users: users,
+    employeeList: employees,
     department: mockMasterData.departments[1],
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[1],
@@ -584,7 +592,7 @@ const bookings = [
     id: '8',
     bookingUser: users[1],
     mainUser: users[0],
-    users: users,
+    employeeList: employees,
     department: mockMasterData.departments[1],
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[1],
@@ -635,7 +643,7 @@ const bookings = [
     id: '9',
     bookingUser: users[1],
     mainUser: users[0],
-    users: users,
+    employeeList: employees,
     department: mockMasterData.departments[1],
     building: mockMasterData.buildings[1],
     room: mockMasterData.rooms[4],
@@ -976,7 +984,7 @@ const calculateManagerReviewScores = (bookings) => {
 
 const mockReportManagerReview = calculateManagerReviewScores(bookings);
 
-const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room }) => 
+const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room, statusApproved }) => 
   [...normalizedBookings, ...additionalBookings.map(normalizeBookingByAssignmentStatus)].filter(booking => {
     const bookingDate = new Date(booking.startDate);
     const fromDateTime = new Date(fromDate);
@@ -992,6 +1000,12 @@ const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room }) =>
     }
     if (myCalendar && booking.room.mkey !== mockMasterData.rooms[0].mkey) {
       return false;
+    }
+
+    if (statusApproved !== null && statusApproved !== undefined) {
+            if(statusApproved == 1) {
+               isValid = isValid && booking.isApproved === 3 || booking.isApproved === 4;
+            } 
     }
 
     return isValid;
@@ -1034,8 +1048,8 @@ export const mockData = (action, data) => {
             : [];
         case 'bookingForm':
           return data.keyword
-            ? users.filter(user =>
-                user.mvalue.toLowerCase().includes(data.keyword.toLowerCase())
+            ? employees.filter(employee =>
+                employee.mvalue.toLowerCase().includes(data.keyword.toLowerCase())
               )
             : [];
         case 'driverForm':

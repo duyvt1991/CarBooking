@@ -118,7 +118,8 @@ class Install {
                 managerReviewUser TEXT NULL,     
                 notificationDriverCount INT DEFAULT 0,
                 notificationDriverDate DATETIME,           
-                employeeNumber INT DEFAULT 0
+                employeeNumber INT DEFAULT 0,
+                employeeList TEXT NULL
 
             )
         ";
@@ -185,8 +186,8 @@ class Install {
                 ],
                 "serviceTypes" => [
                     ["", "ST001", "Xe nội bộ", true, Json::encode(["isServiceCar" => "0"])],
-                    ["", "ST002", "Xe dịch vụ", true, Json::encode(["isServiceCar" => "1"])],
-                    ["", "ST003", "Xe Grab", true, Json::encode(["isServiceCar" => "1"])]
+                    ["", "ST002", "Xe dịch vụ", true, Json::encode(["isServiceCar" => "1"])]
+                    // ["", "ST003", "Xe Grab", true, Json::encode(["isServiceCar" => "1"])]
                 ]
             ];
             

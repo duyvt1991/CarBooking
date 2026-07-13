@@ -696,6 +696,21 @@ class booking_requestsTable extends DataManager {
                 }
             ], [
                 'default_value' => 0
+            ]),
+            new TextField('employeeList', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
             ]), 
 
         ];

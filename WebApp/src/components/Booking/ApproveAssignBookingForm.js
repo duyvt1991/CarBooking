@@ -55,21 +55,21 @@ const initForm = {
     value: '',
     label: 'booking.Số điện thoại tài xế',
     type: 'text',
-    required: (request) => getVal(request?.serviceType) === 'ST002',
-    validate: (value, t, request) => {
-      if (getVal(request?.serviceType) !== 'ST002') return '';
-      return !value ? t('booking.Số điện thoại tài xế không được để trống') : '';
-    },
+    // required: (request) => getVal(request?.serviceType) === 'ST002',
+    // validate: (value, t, request) => {
+    //   if (getVal(request?.serviceType) !== 'ST002') return '';
+    //   return !value ? t('booking.Số điện thoại tài xế không được để trống') : '';
+    // },
   },
   licensePlateNumber: {
     value: '',
     label: 'booking.Biển số xe',
     type: 'text',
-    required: (request) => getVal(request?.serviceType) === 'ST002',
-    validate: (value, t, request) => {
-      if (getVal(request?.serviceType) !== 'ST002') return '';
-      return !value ? t('booking.Biển số xe không được để trống' ) : '';
-    },
+    // required: (request) => getVal(request?.serviceType) === 'ST002',
+    // validate: (value, t, request) => {
+    //   if (getVal(request?.serviceType) !== 'ST002') return '';
+    //   return !value ? t('booking.Biển số xe không được để trống' ) : '';
+    // },
   }
 };
 
@@ -155,7 +155,6 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
       setAvailableRooms(freeRooms);
       setAvailableDrivers(freeDrivers);
     }).catch(err => {
-      console.error(err);
       if (isMounted) {
         setAvailableRooms(masterData.rooms || []);
         setAvailableDrivers(masterData.drivers || []);
@@ -168,20 +167,38 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
   const getRoomOptions = () => {
     const rooms = availableRooms !== null ? availableRooms : (masterData.rooms || []);
     const st = getVal(request?.serviceType);
+    const currentRoomKey = getVal(request?.room);
 
+    let filteredRooms = [];
     if (st === 'ST002') {
-      return rooms.filter(room => room?.hasServiceCar?.toString() === '1');
+      filteredRooms = rooms.filter(room => room?.hasServiceCar?.toString() === '1');
+    } else if (st === 'ST001') {
+      filteredRooms = rooms.filter(room => room?.hasServiceCar?.toString() !== '1');
     }
 
-    if (st === 'ST001') {
-      return rooms.filter(room => room?.hasServiceCar?.toString() !== '1');
+    if (currentRoomKey) {
+      const currentRoom = (masterData.rooms || []).find(r => r.mkey === currentRoomKey);
+      if (currentRoom && !filteredRooms.some(r => r.mkey === currentRoomKey)) {
+        filteredRooms.push(currentRoom);
+      }
     }
 
-    return [];
+    return filteredRooms;
   };
 
   const getDriverOptions = () => {
-    return availableDrivers !== null ? availableDrivers : (masterData.drivers || []);
+    const drivers = availableDrivers !== null ? availableDrivers : (masterData.drivers || []);
+    const currentDriverKey = getVal(request?.driverUser);
+
+    let filteredDrivers = [...drivers];
+    if (currentDriverKey) {
+      const currentDriver = (masterData.drivers || []).find(d => d.mkey === currentDriverKey);
+      if (currentDriver && !filteredDrivers.some(d => d.mkey === currentDriverKey)) {
+        filteredDrivers.push(currentDriver);
+      }
+    }
+
+    return filteredDrivers;
   };
 
   const toggleServiceTypeFieldsDisplay = useCallback((value) => {
@@ -212,21 +229,15 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
 
   const handleServiceTypeChange = (field, value) => {
     const st = getVal(value);
-    const isInternalServiceType = st === 'ST001';
-    const isServiceCar = st === 'ST002';
+    const currentSt = getVal(request?.serviceType);
 
-    if (isInternalServiceType) {
-      handleChange(field, st);
-    } else if (isServiceCar) {
-      handleChange(
-        ['serviceType', 'driverUser', 'driverPhoneNumber', 'licensePlateNumber'],
-        [st, '', '', '']
-      );
-    } else {
+    if (st !== currentSt) {
       handleChange(
         ['serviceType', 'room', 'driverUser', 'driverPhoneNumber', 'licensePlateNumber'],
         [st, '', '', '', '']
       );
+    } else {
+      handleChange(field, st);
     }
 
     toggleServiceTypeFieldsDisplay(st);
