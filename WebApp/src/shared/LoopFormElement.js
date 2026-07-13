@@ -8,6 +8,12 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
+const getVal = (val) => {
+    if (!val) return '';
+    if (typeof val === 'object') return val.mkey || val.id || '';
+    return String(val);
+};
+
 function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm, request, errors, handleChange }) {
     const { t } = useTranslation();
     const colorValue = /^#[0-9A-F]{6}$/i.test(request[field] ?? '') ? request[field] : '#000000';
@@ -119,7 +125,7 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
                     <>
                     <select
                         disabled={initForm[field].disabled?.(request)}
-                        value={initForm[field].isValueObject ? JSON.stringify(request[field]) : request[field]}
+                        value={initForm[field].isValueObject ? JSON.stringify(request[field]) : getVal(request[field])}
                         onChange={(e) => handleChange(field, initForm[field].isValueObject && e.target.value ? JSON.parse(e.target.value) : e.target.value)}
                         className={`w-full px-2 py-2 border rounded-lg ${errors[field] ? 'border-red-500' : ''}`}
                     >

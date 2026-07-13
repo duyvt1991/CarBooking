@@ -96,12 +96,23 @@ export const initForm = {
     type: 'number',
     // validate: (value, t) => !value ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
   },
-  employees: { 
+  // employees: { 
+  //   column: 1,
+  //   value: '', 
+  //   label: 'booking.Tên nhân viên tham gia', 
+  //   type: 'textarea',
+  //   // validate: (value, t) => !value ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
+  // },
+  employeeList: { 
     column: 1,
-    value: '', 
+    value: [], 
     label: 'booking.Tên nhân viên tham gia', 
-    type: 'textarea',
-    // validate: (value, t) => !value ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
+    type: 'tags', 
+    tagsApi: suggestionUsers,
+    tagsDisplayField: 'mvalue',
+    tagsMappingField: [['*', 'employeeList']],
+    tagsSchema: { key: 'mkey', value: 'mvalue' },
+    // validate: (value, t) => !value.length ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
   },
   usagePurposeDetail: { 
     column: 1,

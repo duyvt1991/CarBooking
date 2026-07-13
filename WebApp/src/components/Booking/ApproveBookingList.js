@@ -129,11 +129,13 @@ function ApproveBookingList({
       case 1:
         return [actionDefs.assignBlue, actionDefs.reject];
       case 2:
-        return [actionDefs.reject];
+        return [actionDefs.assignBlue, actionDefs.reject];
       case 3:
-        return [actionDefs.reject];
+        return [actionDefs.assignBlue, actionDefs.reject];
       case -2:
         return [actionDefs.assignBlue, actionDefs.reject];
+      case 4:
+        return [statusButtons.done];
       default:
         return [actionDefs.approve, actionDefs.approveAndAssign, actionDefs.reject];
     }

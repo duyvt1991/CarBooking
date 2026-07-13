@@ -119,7 +119,8 @@ function DriverConfirmBookingList({
     if (isPastBooking) return [statusButtons.done];
 
     // Xử lý các trạng thái chờ hành động
-    if (isDriver && approvedStatus === 2) {
+    // if (isDriver && approvedStatus === 2) {
+    if (approvedStatus === 2) {
       return [actionDefs.approve, actionDefs.reject];
     }
 

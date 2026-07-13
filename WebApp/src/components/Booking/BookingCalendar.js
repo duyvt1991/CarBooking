@@ -69,16 +69,8 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
   }, []);
   
   useEffect(() => {
-    if (!keepRoomTypeState() && isHome && masterData.roomTypes?.length > 0 && !request.roomType) {
-      handleRoomTypeChange('roomType', masterData.roomTypes[0]);
-    }
-  }, [masterData.roomTypes]);
-
-  useEffect(() => {
-    if (!keepRoomTypeState() && request.id && !request.roomType) {
-      handleRoomTypeChange('roomType', masterData.roomTypes[0]); 
-    }
-  }, [request.id]);
+    keepRoomTypeState();
+  }, [masterData.roomTypes, request.id]);
 
 const keepRoomTypeState = () => {
   let hasRoomTypeState = false;
@@ -138,7 +130,7 @@ const handleRoomTypeChange = (field, value) => {
     // const endDateFormatted = format(endDate, 'yyyy-MM-dd HH:mm:ss');
     const fromDateFormatted = format(new Date(`${fromDate}`), 'yyyy-MM-dd HH:mm:ss');
     const endDateFormatted = format(new Date(`${endDate}`), 'yyyy-MM-dd HH:mm:ss');
-    getBookings(mode, { myCalendar: myCalendar ? 1 : 0, fromDate: fromDateFormatted, endDate: endDateFormatted, roomType: roomType === undefined ? request?.roomType?.mkey : roomType?.mkey, room: room === undefined ? request?.room?.mkey : room?.mkey }).then(data => {
+    getBookings(mode, { myCalendar: myCalendar ? 1 : 0, fromDate: fromDateFormatted, endDate: endDateFormatted, roomType: roomType === undefined ? request?.roomType?.mkey : roomType?.mkey, room: room === undefined ? request?.room?.mkey : room?.mkey, statusApproved: 1 }).then(data => {
       setTempRequests(data);
       const formattedEvents = data.filter(booking => booking.room?.mkey)
       .map(booking => ({
@@ -164,14 +156,14 @@ const handleRoomTypeChange = (field, value) => {
             <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Khung giờ sử dụng')}</td>
             <td className="px-3 py-2 text-gray-600">{`${formatTime(booking.startTime).replace(":00", "")} - ${formatTime(booking.endTime).replace(":00", "")}`}</td>
           </tr>
-          <tr>
+          {/* <tr>
             <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Loại xe')}</td>
             <td className="px-3 py-2 text-gray-600">{booking.roomType?.mvalue}</td>
           </tr>
           <tr>
             <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Dòng xe đề xuất')}</td>
             <td className="px-3 py-2 text-gray-600">{booking.carLine?.mvalue}</td>
-          </tr>
+          </tr> */}
           <tr>
             <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người đặt')}</td>
             <td className="px-3 py-2 text-gray-600">{booking.bookingUser?.mvalue}</td>
@@ -180,9 +172,13 @@ const handleRoomTypeChange = (field, value) => {
             <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Người phụ trách')}</td>
             <td className="px-3 py-2 text-gray-600">{booking.mainUser?.mvalue}</td>
           </tr>
-           <tr>
+          <tr>
             <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Mục đích')}</td>
             <td className="px-3 py-2 text-gray-600">{booking.usagePurposeDetail}</td>
+          </tr>
+          <tr>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('booking.Phân loại khách')}</td>
+            <td className="px-3 py-2 text-gray-600">{booking.usagePurpose?.mvalue}</td>
           </tr>
           {booking.clients > 0 && <tr>
             <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Số lượng khách')}</td>

@@ -112,6 +112,7 @@ class Bookings {
         // $building = $building ?? '';
         $roomType = $roomType ?? '';
         $room = $room ?? '';
+        $statusApproved = $statusApproved ?? null;
         $userId = $USER->GetID();
 
         $query = \Booking\Query::getInstance("car_booking_requests");
@@ -166,6 +167,12 @@ class Bookings {
                     '%mainUser' => '"mkey":"BitrixID-'.$userId.'"'
                 ]
             ];
+        }
+
+        if($statusApproved !== null) {
+            if($statusApproved == 1) {
+                $queryFilters = array_merge($queryFilters, ['@isApproved' => [ 3, 4]]); // Chỉ load những booking đã được xác nhận hoặc hoàn thành
+            } 
         }
 
         $query->setFilter($queryFilters);
