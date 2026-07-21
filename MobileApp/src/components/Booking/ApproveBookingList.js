@@ -87,6 +87,7 @@ function ApproveBookingList({
     const isBookingInProgress = currentTime >= bookingStartTime && currentTime <= bookingEndTime;
     const isPastBooking = currentTime > bookingEndTime;
     const approvedStatus = Number(request?.isApproved);
+    const isPriorityBooking = request?.isPriority === 1;
 
     // Button templates
     const statusButtons = {
@@ -106,6 +107,25 @@ function ApproveBookingList({
     };
 
     // Early exits for time-based or cancelled status
+    if (isPriorityBooking)
+      { 
+         switch (approvedStatus) {
+          case 0:
+            return [actionDefs.approve, actionDefs.approveAndAssign, actionDefs.reject];
+          case 1:
+            return [actionDefs.assignBlue, actionDefs.reject];
+          case 2:
+            return [actionDefs.assignBlue, actionDefs.reject];
+          case 3:
+            return [actionDefs.assignBlue, actionDefs.reject];
+          case -2:
+            return [actionDefs.assignBlue, actionDefs.reject];
+          case 4:
+            return [statusButtons.done];
+          default:
+            return [actionDefs.approve, actionDefs.approveAndAssign, actionDefs.reject];
+        }
+      }
     if (request?.isCancelled) return [statusButtons.cancelled];
     if (isBookingInProgress) return [statusButtons.inProgress, ...(approvedStatus === 3 ? [actionDefs.end] : [])];
     if (isPastBooking) return [statusButtons.done];
@@ -130,11 +150,13 @@ function ApproveBookingList({
       case 1:
         return [actionDefs.assignBlue, actionDefs.reject];
       case 2:
-        return [actionDefs.reject];
+        return [actionDefs.assignBlue, actionDefs.reject];
       case 3:
-        return [actionDefs.reject];
+        return [actionDefs.assignBlue, actionDefs.reject];
       case -2:
         return [actionDefs.assignBlue, actionDefs.reject];
+      case 4:
+        return [statusButtons.done];
       default:
         return [actionDefs.approve, actionDefs.approveAndAssign, actionDefs.reject];
     }

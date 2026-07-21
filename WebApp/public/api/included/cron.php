@@ -81,63 +81,48 @@ class Cron {
             return ['status' => 'error', 'message' => 'Unauthorized'];
         }
 
-        // Lấy tất cả booking thỏa điều kiện có thể đánh giá và đã quá maxDayToReview kể từ startDate
-        $connection = Application::getConnection();
-        $query = \Booking\Query::getInstance("car_booking_masterdata", true);
-        $query->setSelect(['*']);
-        $query->setFilter(['mkey' => 'maxDayToReview']);
-        $maxDayToReview = $query->exec()->fetch();
-        $maxDays = intval($maxDayToReview['mvalue'] ?? 3); // Mặc định 3 ngày nếu không có cấu hình
+        // // Lấy tất cả booking thỏa điều kiện có thể đánh giá và đã quá maxDayToReview kể từ startDate
+        // $connection = Application::getConnection();
+        // $query = \Booking\Query::getInstance("car_booking_masterdata", true);
+        // $query->setSelect(['*']);
+        // $query->setFilter(['mkey' => 'maxDayToReview']);
+        // $maxDayToReview = $query->exec()->fetch();
+        // $maxDays = intval($maxDayToReview['mvalue'] ?? 3); // Mặc định 3 ngày nếu không có cấu hình
         
-        // Đánh giá tự động (Người sử dụng, Quản lý, Tài xế) gom chung 1 query
-        $bookingQuery = \Booking\Query::getInstance("car_booking_requests", true);
-        $bookingQuery->setSelect(['*']);
-        $bookingQuery->setFilter([
-            'isApproved' => 4, // Đã hoàn thành
-            'isCancelled' => 0,
-            '<=startDate' => new \Bitrix\Main\Type\DateTime(date('Y-m-d', strtotime("-{$maxDays} days")), "Y-m-d"),
-            [
-                'LOGIC' => 'OR',
-                ['userReviewScore' => 0],
-                ['managerReviewScore' => 0],
-                ['driverReviewScore' => 0]
-            ]
-        ]);
+        // // Đánh giá tự động (Người sử dụng, Quản lý, Tài xế) gom chung 1 query
+        // $bookingQuery = \Booking\Query::getInstance("car_booking_requests", true);
+        // $bookingQuery->setSelect(['*']);
+        // $bookingQuery->setFilter([
+        //     'isApproved' => 4, // Đã hoàn thành
+        //     'isCancelled' => 0,
+        //     '<=startDate' => new \Bitrix\Main\Type\DateTime(date('Y-m-d', strtotime("-{$maxDays} days")), "Y-m-d"),
+        //     [
+        //         'LOGIC' => 'OR',
+        //         ['managerReviewScore' => 0]
+        //     ]
+        // ]);
         
-        $expiredBookings = $bookingQuery->exec()->fetchAll();
+        // $expiredBookings = $bookingQuery->exec()->fetchAll();
         
-        foreach ($expiredBookings as $booking) {
-            $updateData = [];
+        // foreach ($expiredBookings as $booking) {
+        //     $updateData = [];
             
-            if ($booking['userReviewScore'] == 0) {
-                $updateData['userReviewScore'] = 5;
-                $updateData['userReviewCommentMost'] = 'Đánh giá tự động';
-                $updateData['userReviewCommentBad'] = 'Đánh giá tự động';
-            }
+        //     if ($booking['managerReviewScore'] == 0) {
+        //         $updateData['managerReviewScore'] = 5;
+        //         $updateData['managerReviewCommentMost'] = 'Đánh giá tự động';
+        //         $updateData['managerReviewCommentBad'] = 'Đánh giá tự động';
+        //         $updateData['managerReviewCommentRequest'] = 'Đánh giá tự động';
+        //     }
             
-            if ($booking['managerReviewScore'] == 0) {
-                $updateData['managerReviewScore'] = 5;
-                $updateData['managerReviewCommentMost'] = 'Đánh giá tự động';
-                $updateData['managerReviewCommentBad'] = 'Đánh giá tự động';
-                $updateData['managerReviewCommentRequest'] = 'Đánh giá tự động';
-            }
-            
-            if ($booking['driverReviewScore'] == 0) {
-                $updateData['driverReviewScore'] = 5;
-                $updateData['driverReviewCommentMost'] = 'Đánh giá tự động';
-                $updateData['driverReviewCommentBad'] = 'Đánh giá tự động';
-                $updateData['driverReviewCommentRequest'] = 'Đánh giá tự động';
-            }
-
-            if (!empty($updateData)) {
-                // Thực hiện 1 lệnh update duy nhất cho mỗi booking
-                \Booking\Query::updateRecordsWithConditions('car_booking_requests', 
-                    ['id' => $booking['id']], 
-                    $updateData
-                );
-            }
-        }
-        // end
+        //     if (!empty($updateData)) {
+        //         // Thực hiện 1 lệnh update duy nhất cho mỗi booking
+        //         \Booking\Query::updateRecordsWithConditions('car_booking_requests', 
+        //             ['id' => $booking['id']], 
+        //             $updateData
+        //         );
+        //     }
+        // }
+        // // end
         
         // Tìm tất cả booking chưa đến thời điểm sử dụng và đã quá thời gian startTime của ngày sử dụng để huỷ tự động
         $currentDateTime = new \Bitrix\Main\Type\DateTime();
@@ -147,6 +132,7 @@ class Cron {
         $bookingQuery->setFilter([
             '@isApproved' => [0, 1, 2, -1, -2], // Chờ duyệt, Chờ tài xế xác nhận, Tài xế từ chối
             'isCancelled' => 0,
+            'isPriority' => 0,
             [
                 'LOGIC' => 'OR',
                 [
@@ -219,6 +205,7 @@ class Cron {
         $upcomingBookingQuery->setSelect(['*']);
         $upcomingBookingQuery->setFilter([
             'isCancelled' => 0,
+            'isPriority' => 0,
             [
                 [
                     '@isApproved' => [0], // Chờ duyệt, Đã duyệt, Tài xế từ chối
@@ -279,27 +266,28 @@ class Cron {
                         }
                     }
                 } else if ($percentRemaining <= 75) { // Gửi thông báo lần 1
-                    if ($currentNotificationCount == 0) {
+                    // if ($currentNotificationCount == 0) {
                        
-                            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
-                                'notificationCount' => 1,
-                                'notificationDate' => new \Bitrix\Main\Type\DateTime()
-                            ]);
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_booking_meet_condition_1', $upcomingBooking['id']);
-                        $targetUsers =  $mailContent['approvers'];
-                        foreach($targetUsers as $userId) {
-                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
-                        }
-                    }
+                    //         \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
+                    //             'notificationCount' => 1,
+                    //             'notificationDate' => new \Bitrix\Main\Type\DateTime()
+                    //         ]);
+                    //     $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_booking_meet_condition_1', $upcomingBooking['id']);
+                    //     $targetUsers =  $mailContent['approvers'];
+                    //     foreach($targetUsers as $userId) {
+                    //         \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    //     }
+                    // }
                 }
         }
         // End
 
         // Phần gửi noti cho tài xế
-         $upcomingBookingQuery = \Booking\Query::getInstance("car_booking_requests", true);
+        $upcomingBookingQuery = \Booking\Query::getInstance("car_booking_requests", true);
         $upcomingBookingQuery->setSelect(['*']);
         $upcomingBookingQuery->setFilter([
             'isCancelled' => 0,
+            'isPriority' => 0,
             [
                 [
                     'isApproved' => 2, // Chờ tài xế xác nhận
@@ -361,22 +349,63 @@ class Cron {
                         }
                     }
                 } else if ($percentRemaining <= 75) { // Gửi thông báo lần 1
-                    if ($currentNotificationCount == 0) {
-                            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
-                                'notificationDriverCount' => 1,
-                                'notificationDriverDate' => new \Bitrix\Main\Type\DateTime()
-                            ]);
+                    // if ($currentNotificationCount == 0) {
+                    //         \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $upcomingBooking['id']], [
+                    //             'notificationDriverCount' => 1,
+                    //             'notificationDriverDate' => new \Bitrix\Main\Type\DateTime()
+                    //         ]);
                        
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_confirm_when_booking_meet_condition_1', $upcomingBooking['id']);
-                        $targetUsers = $mailContent['driverUser'];
-                        foreach($targetUsers as $userId) {
-                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
-                        }
-                    }
+                    //     $mailContent = \Booking\MailTemplate::generateMailContent('send_to_confirm_when_booking_meet_condition_1', $upcomingBooking['id']);
+                    //     $targetUsers = $mailContent['driverUser'];
+                    //     foreach($targetUsers as $userId) {
+                    //         \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    //     }
+                    // }
                 }
         }
         // End
 
+        // --- NHẮC LỊCH KHỞI HÀNH TRƯỚC 30 PHÚT (Dòng 24, 25) ---
+        try {
+            $today = new \Bitrix\Main\Type\Date();
+            $remindQuery = \Booking\Query::getInstance("car_booking_requests", true);
+            $remindQuery->setSelect(['*']);
+            $remindQuery->setFilter([
+                'isApproved' => 3,
+                'isPriority' => 0,
+                'isCancelled' => 0,
+                'isNotification30MinSent' => 0,
+                '=startDate' => $today
+            ]);
+            $remindBookings = $remindQuery->exec()->fetchAll();
+
+            $nowTimestamp = time();
+            foreach ($remindBookings as $booking) {
+                $startDateTimeStr = $booking['startDate'] . ' ' . $booking['startTime'];
+                $startDateTime = new \Bitrix\Main\Type\DateTime($startDateTimeStr, "Y-m-d H:i:s");
+                $startTimestamp = $startDateTime->getTimestamp();
+                
+                $diffSeconds = $startTimestamp - $nowTimestamp;
+                $diffMinutes = $diffSeconds / 60;
+                
+                // Nếu còn <= 30 phút và chưa quá giờ khởi hành (hoặc quá giờ không quá 5 phút để tránh lỡ)
+                if ($diffMinutes > -5 && $diffMinutes <= 30) {
+                    // 1. Gửi cho người đặt xe và người đi cùng (Dòng 24)
+                    $mailContentUser = \Booking\MailTemplate::generateMailContent('send_to_booking_user_departure_remind_30min', $booking['id']);
+                    $userRecipients = array_unique(array_merge($mailContentUser['userIds'], $mailContentUser['employeeList'], $mailContentUser['driverUser']));
+                    foreach ($userRecipients as $uid) {
+                        \Booking\Notification::sendNotificationToUser($uid, $mailContentUser['subject'], $mailContentUser['content']);
+                    }
+                    
+                    // 3. Đánh dấu đã gửi thông báo để tránh trùng lặp
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $booking['id']], [
+                        'isNotification30MinSent' => 1
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ghi log lỗi nếu có nhưng không làm gián đoạn cron chính
+        }
 
         \CEvent::ExecuteEvents();
     

@@ -6,7 +6,7 @@ import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
 import { FaCheck } from 'react-icons/fa';
-import { formatDateTime, formatDate, formatTime, formatManagerReviewScore, formatIdDetail } from '../../systems/util';
+import { formatDateTime, formatDate, formatTime, formatManagerReviewScore, formatUserReviewScore, formatDriverReviewScore, formatIdDetail } from '../../systems/util';
 import { RequestContext } from '../../App';
 import FilterTableLayout from '../../shared/FilterTableLayout';
 import { useTranslation } from 'react-i18next';
@@ -35,19 +35,21 @@ function ManagerReviewList({
     // { name: 'building', placeholder: t('booking.Toà nhà'), type: 'select', options: masterData.buildings.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'room', placeholder: t('booking.Xe'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
-    { name: 'managerReviewScore', placeholder: t('booking.Điểm đánh giá'), type: 'select', options: [
-        { value: '1', label: t('booking.Đánh giá: 1 sao') },
-        { value: '2', label: t('booking.Đánh giá: 2 sao') },
-        { value: '3', label: t('booking.Đánh giá: 3 sao') },
-        { value: '4', label: t('booking.Đánh giá: 4 sao') },
-        { value: '5', label: t('booking.Đánh giá: 5 sao') }
-      ] 
-    },
+    // { name: 'managerReviewScore', placeholder: t('booking.Điểm đánh giá'), type: 'select', options: [
+    //     { value: '1', label: t('booking.Đánh giá: 1 sao') },
+    //     { value: '2', label: t('booking.Đánh giá: 2 sao') },
+    //     { value: '3', label: t('booking.Đánh giá: 3 sao') },
+    //     { value: '4', label: t('booking.Đánh giá: 4 sao') },
+    //     { value: '5', label: t('booking.Đánh giá: 5 sao') }
+    //   ] 
+    // },
   ];
 
   const requestFields = [
     { name: 'id', label: 'ID', render: (field, request) => formatIdDetail(request, masterData, setModal, t) },
-    { name: 'managerReviewScore', align: 'center',  label: t('booking.Điểm đánh giá'), render: (field, request) => formatManagerReviewScore(request, setModal, t) },
+    { name: 'managerReviewScore', align: 'center',  label: t('review.Quản lý đánh giá'), render: (field, request) => formatManagerReviewScore(request, setModal, t) },
+    { name: 'userReviewScore', align: 'center',  label: t('review.Người dùng đánh giá'), render: (field, request) => formatUserReviewScore(request, setModal, t) },
+    { name: 'driverReviewScore', align: 'center', label: t('review.Tài xế đánh giá'), render: (field, request) => formatDriverReviewScore(request, setModal, t) },
     { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
     // { name: 'building', label: t('booking.Toà nhà'), render: (field, request) => request[field].mvalue },
     { name: 'startDate', align: 'center',  label: t('booking.Ngày sử dụng'), render: (field, request) => formatDate(request[field]) },

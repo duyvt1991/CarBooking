@@ -44,14 +44,6 @@ function UserReviewList({
     // { name: 'building', placeholder: t('booking.Toà nhà'), type: 'select', options: masterData.buildings.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'room', placeholder: t('booking.Xe'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
-    { name: 'userReviewScore', placeholder: t('booking.Người sử dụng đánh giá'), type: 'select', options: [
-        { value: '1', label: t('booking.Vệ sinh: 1 sao') },
-        { value: '2', label: t('booking.Vệ sinh: 2 sao') },
-        { value: '3', label: t('booking.Vệ sinh: 3 sao') },
-        { value: '4', label: t('booking.Vệ sinh: 4 sao') },
-        { value: '5', label: t('booking.Vệ sinh: 5 sao') }
-      ] 
-    },
   ];
 
   const requestFields = [

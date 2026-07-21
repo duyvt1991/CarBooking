@@ -1,4 +1,4 @@
-﻿import { FaCheck, FaClock, FaStar, FaTimes, FaMinusCircle, FaBan, FaCar } from "react-icons/fa";
+import { FaCheck, FaClock, FaStar, FaTimes, FaMinusCircle, FaBan, FaCar } from "react-icons/fa";
 import ModalContent from "../shared/ModalContent";
 import { logMasterDataKeyMapping, logMasterDataTypeMapping } from "./log";
 
@@ -467,19 +467,48 @@ const { fields, fieldLogs } = getFieldsBookingDetail(request, masterData, t);
 };
 
 export const formatUserReviewScore = (request, setModal, t) => {
+  let expData = {};
+  let qcdData = {};
+  try {
+    expData = typeof request.userReviewExperience === 'string' ? JSON.parse(request.userReviewExperience) : (request.userReviewExperience || {});
+    qcdData = typeof request.userReviewQcd === 'string' ? JSON.parse(request.userReviewQcd) : (request.userReviewQcd || {});
+  } catch (e) {}
+
   const fields = [
-    { label: t('booking.Điều hài lòng nhất'), value: request.userReviewCommentMost || '-' },
-    { label: t('booking.Điều cần cải thiện'), value: request.userReviewCommentBad || '-' },
+    { label: t('review.A. ĐÁNH GIÁ TRẢI NGHIỆM DỊCH VỤ'), value: '', isHeader: true },
+    { label: t('review.Tài xế đúng giờ'), value: expData.onTime ? `${expData.onTime} / 5` : '-' },
+    { label: t('review.Thái độ lễ phép'), value: expData.polite ? `${expData.polite} / 5` : '-' },
+    { label: t('review.Xe sạch sẽ'), value: expData.clean ? `${expData.clean} / 5` : '-' },
+    { label: t('review.Lái xe an toàn, êm'), value: expData.safe ? `${expData.safe} / 5` : '-' },
+    { label: t('review.Chủ động hỗ trợ'), value: expData.support ? `${expData.support} / 5` : '-' },
+    { label: t('review.Bảo mật/tế nhị'), value: expData.privacy ? `${expData.privacy} / 5` : '-' },
+    { label: t('review.Phản hồi nhanh'), value: expData.response ? `${expData.response} / 5` : '-' },
+    { label: t('review.Trải nghiệm tổng thể'), value: expData.overall ? `${expData.overall} / 5` : '-' },
+    
+    { label: t('review.B. ĐÁNH GIÁ QCD'), value: '', isHeader: true },
+    { label: t('review.Q - Chất lượng phục vụ'), value: qcdData.q ? `${qcdData.q} / 5` : '-' },
+    { label: t('review.C - Hiệu quả & không lãng phí'), value: qcdData.c ? `${qcdData.c} / 5` : '-' },
+    { label: t('review.D - Đúng giờ & đúng yêu cầu'), value: qcdData.d ? `${qcdData.d} / 5` : '-' },
+    
+    { label: t('review.C. NHẬN XÉT NHANH'), value: '', isHeader: true },
+    { label: t('review.Điều hài lòng nhất'), value: request.userReviewCommentMost || '-' },
+    { label: t('review.Điều cần cải thiện'), value: request.userReviewCommentBad || '-' },
+    { label: t('review.Có muốn tiếp tục sử dụng tài xế này không?'), value: (request.userWantsToContinue === true || request.userWantsToContinue === 'true' || request.userWantsToContinue === 1 || request.userWantsToContinue === '1') ? t('review.Có') : ((request.userWantsToContinue === false || request.userWantsToContinue === 'false' || request.userWantsToContinue === 0 || request.userWantsToContinue === '0') ? t('review.Không') : '-') }
   ];
 
-  return request.userReviewScore > 0 ? (
+  const hasReview = 
+    Object.values(expData).some(val => val > 0) ||
+    Object.values(qcdData).some(val => val > 0) ||
+    !!request.userReviewCommentMost ||
+    !!request.userReviewCommentBad ||
+    (request.userWantsToContinue !== null && request.userWantsToContinue !== '');
+
+  return hasReview ? (
     <span
-      className="cursor-pointer flex gap-1 justify-center"
+      className="cursor-pointer text-blue-600 hover:text-blue-800 underline font-medium"
       onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
     >
-      {Array.from({ length: 5 }, (_, i) => (
-        <FaStar key={i} className={i < request.userReviewScore ? 'text-yellow-500' : 'text-gray-300'} />
-      ))}
+      {t('review.Chi tiết')}
     </span>
   ) : <span className="flex justify-center">-</span>;
 }
@@ -505,20 +534,70 @@ export const formatManagerReviewScore = (request, setModal, t) => {
 };
 
 export const formatDriverReviewScore = (request, setModal, t) => {
-  const fields = [
-    { label: t('booking.Việc làm tốt hôm nay'), value: request.driverReviewCommentMost || '-' },
-    { label: t('booking.Việc chưa tốt cần cải thiện'), value: request.driverReviewCommentBad || '-' },
-    { label: t('booking.Đề xuất hỗ trợ từ quản lý'), value: request.driverReviewCommentRequest || '-' },
+  let prepData = {};
+  let qcdData = {};
+  try {
+    prepData = typeof request.driverReviewPrep === 'string' ? JSON.parse(request.driverReviewPrep) : (request.driverReviewPrep || {});
+    qcdData = typeof request.driverReviewQcd === 'string' ? JSON.parse(request.driverReviewQcd) : (request.driverReviewQcd || {});
+  } catch (e) {}
+
+  const prepList = [
+    { label: t('review.Đồng phục đúng chuẩn'), key: 'uniform' },
+    { label: t('review.Giày sạch'), key: 'shoes' },
+    { label: t('review.Xe sạch nội thất'), key: 'interior' },
+    { label: t('review.Điều hòa làm mát sẵn'), key: 'aircon' },
+    { label: t('review.Nước/khăn giấy đầy đủ'), key: 'water' },
+    { label: t('review.Camera hành trình hoạt động'), key: 'dashcam' },
+    { label: t('review.Xe đủ nhiên liệu'), key: 'fuel' },
+    { label: t('review.Không có mùi khó chịu'), key: 'odor' }
   ];
 
-  return request.driverReviewScore > 0 ? (
+  const qcdList = [
+    { label: t('review.An toàn khi lái xe'), key: 'safety' },
+    { label: t('review.Đúng giờ đón/trả'), key: 'onTime' },
+    { label: t('review.Tác phong phục vụ'), key: 'service' },
+    { label: t('review.Chủ động hỗ trợ'), key: 'support' },
+    { label: t('review.Bảo mật thông tin'), key: 'privacy' },
+    { label: t('review.Quản lý xe & chi phí'), key: 'management' },
+    { label: t('review.Sẵn sàng OT'), key: 'overtime' }
+  ];
+
+  const fields = [
+    { label: t('review.A. CHUẨN BỊ XE & HÌNH ẢNH CÁ NHÂN'), value: '', isHeader: true },
+    ...prepList.map(item => ({
+      label: item.label,
+      value: prepData[item.key] ? `${prepData[item.key].value === 'Có' ? t('review.Có') : prepData[item.key].value === 'Không' ? t('review.Không') : (prepData[item.key].value || '-')} (${t('review.Ghi chú')}: ${prepData[item.key].note || t('review.Không')})` : '-'
+    })),
+
+    { label: t('review.B. TỰ ĐÁNH GIÁ QCD'), value: '', isHeader: true },
+    ...qcdList.map(item => ({
+      label: item.label,
+      value: qcdData[item.key] ? `Q: ${qcdData[item.key].q || 0}/5, C: ${qcdData[item.key].c || 0}/5, D: ${qcdData[item.key].d || 0}/5 (${t('review.Ghi chú')}: ${qcdData[item.key].note || t('review.Không')})` : '-'
+    })),
+
+    { label: t('review.C. TỰ NHẬN XÉT'), value: '', isHeader: true },
+    { label: t('review.1. Việc làm tốt trong chuyến đi'), value: request.driverReviewCommentMost || '-' },
+    { label: t('review.2. Việc chưa tốt cần cải tiến'), value: request.driverReviewCommentBad || '-' },
+    { label: t('review.3. Góp ý/đánh giá dành cho nhân viên/khách hàng tham gia chuyến đi'), value: request.driverReviewCommentFeedback || '-' },
+    { label: t('review.4. Đề xuất hỗ trợ từ quản lý'), value: request.driverReviewCommentRequest || '-' }
+  ];
+
+  const hasPrepData = Object.values(prepData).some(item => item && item.value);
+  const hasQcdData = Object.values(qcdData).some(item => item && (item.q || item.c || item.d));
+  const hasReview = 
+    hasPrepData ||
+    hasQcdData ||
+    !!request.driverReviewCommentMost ||
+    !!request.driverReviewCommentBad ||
+    !!request.driverReviewCommentFeedback ||
+    !!request.driverReviewCommentRequest;
+
+  return hasReview ? (
     <span
-      className="cursor-pointer flex gap-1 justify-center"
+      className="cursor-pointer text-blue-600 hover:text-blue-800 underline font-medium"
       onClick={() => setModal(<ModalContent title={t("common.Thông tin đánh giá")} fields={fields} />)}
     >
-      {Array.from({ length: 5 }, (_, i) => (
-        <FaStar key={i} className={i < request.driverReviewScore ? 'text-yellow-500' : 'text-gray-300'} />
-      ))}
+      {t('review.Chi tiết')}
     </span>
   ) : <span className="flex justify-center">-</span>;
 };

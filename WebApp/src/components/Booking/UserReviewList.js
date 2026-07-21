@@ -44,19 +44,11 @@ function UserReviewList({
     // { name: 'building', placeholder: t('booking.Toà nhà'), type: 'select', options: masterData.buildings.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'room', placeholder: t('booking.Xe'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
-    { name: 'userReviewScore', placeholder: t('booking.Người sử dụng đánh giá'), type: 'select', options: [
-        { value: '1', label: t('booking.Vệ sinh: 1 sao') },
-        { value: '2', label: t('booking.Vệ sinh: 2 sao') },
-        { value: '3', label: t('booking.Vệ sinh: 3 sao') },
-        { value: '4', label: t('booking.Vệ sinh: 4 sao') },
-        { value: '5', label: t('booking.Vệ sinh: 5 sao') }
-      ] 
-    },
   ];
 
   const requestFields = [
     { name: 'id', label: 'ID', render: (field, request) => formatIdDetail(request, masterData, setModal, t) },
-    { name: 'userReviewScore', align: 'center',  label: t('booking.Điểm dịch vụ'), render: (field, request) => formatUserReviewScore(request, setModal, t) },
+    { name: 'userReviewScore', align: 'center',  label: t('review.Chi tiết đánh giá'), render: (field, request) => formatUserReviewScore(request, setModal, t) },
     // { name: 'userReviewEquipmentScore', align: 'center',  label: t('booking.Đánh giá thiết bị'), render: (field, request) => formatUserReviewEquipmentScore(request, setModal, t) },
     // { name: 'userReviewFacilityScore', align: 'center',  label: t('booking.Đánh giá cơ sở vật chất'), render: (field, request) => formatUserReviewFacilityScore(request, setModal, t) },
     { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
@@ -74,11 +66,29 @@ function UserReviewList({
   ];
 
   const actionButtons = (request) => { 
-    return request?.userReviewScore > 0 ? 
+    let hasReview = false;
+    try {
+      let expData = {};
+      let qcdData = {};
+      if (request?.userReviewExperience) {
+        expData = typeof request.userReviewExperience === 'string' ? JSON.parse(request.userReviewExperience) : request.userReviewExperience;
+      }
+      if (request?.userReviewQcd) {
+        qcdData = typeof request.userReviewQcd === 'string' ? JSON.parse(request.userReviewQcd) : request.userReviewQcd;
+      }
+      hasReview = 
+        Object.values(expData).some(val => val > 0) ||
+        Object.values(qcdData).some(val => val > 0) ||
+        !!request.userReviewCommentMost ||
+        !!request.userReviewCommentBad ||
+        (request.userWantsToContinue !== null && request.userWantsToContinue !== '');
+    } catch (e) {}
+
+    return hasReview ? 
       [{ component: <span className="flex items-center justify-center gap-1"><FaCheck className="text-green-500" /></span> }]
       : [
           { label: t('booking.Đánh giá'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.userReviewForm.path) }
-      ]
+      ];
   };
 
   return (
