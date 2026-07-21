@@ -231,7 +231,7 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Người duyệt";
                 case "rejectedUsers":
                     return "Người từ chối";
-                case "employees":
+                case "employeeList":
                     return "Tên nhân viên tham gia";
                 case "flightNumber":
                     return "Số hiệu chuyến bay";

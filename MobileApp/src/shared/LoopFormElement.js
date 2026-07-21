@@ -9,6 +9,12 @@ import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import CustomSelect from './CustomSelect';
 
+const getVal = (val) => {
+    if (!val) return '';
+    if (typeof val === 'object') return val.mkey || val.id || '';
+    return String(val);
+};
+
 function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm, request, errors, handleChange }) {
     const { t } = useTranslation();
     const colorValue = /^#[0-9A-F]{6}$/i.test(request[field] ?? '') ? request[field] : '#000000';
@@ -156,7 +162,7 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
                         return (
                             <CustomSelect
                                 disabled={initForm[field].disabled?.(request)}
-                                value={initForm[field].isValueObject ? JSON.stringify(request[field]) : request[field]}
+                                value={initForm[field].isValueObject ? JSON.stringify(request[field]) : getVal(request[field])}
                                 onChange={(e) => {
                                     const val = e.target.value;
                                     handleChange(field, initForm[field].isValueObject && val ? (typeof val === 'string' ? JSON.parse(val) : val) : val);

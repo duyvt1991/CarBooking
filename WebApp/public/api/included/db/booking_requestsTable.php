@@ -542,20 +542,51 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
-            new IntegerField('userReviewScore', [
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            return is_numeric($value) ? $value * 1 : $value;
-                        }
-                    ];
-                }
-            ]),
             new TextField('userReviewCommentMost', [
                 'default_value' => ''
             ]),
             new TextField('userReviewCommentBad', [
                'default_value' => ''
+            ]),
+            new TextField('userReviewExperience', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new TextField('userReviewQcd', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+            new BooleanField('userWantsToContinue', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value === null || $value === "") return null;
+                            return $value ? true : false;
+                        }
+                    ];
+                }
             ]),
             new DateTimeField('userReviewDate', [
                 'fetch_data_modification' => function() {
@@ -584,15 +615,6 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
-            new IntegerField('driverReviewScore', [
-                'fetch_data_modification' => function() {
-                    return [
-                        function ($value) {
-                            return is_numeric($value) ? $value * 1 : $value;
-                        }
-                    ];
-                }
-            ]),
             new TextField('driverReviewCommentMost', [
                 'default_value' => ''
             ]),
@@ -601,6 +623,39 @@ class booking_requestsTable extends DataManager {
             ]),
             new TextField('driverReviewCommentRequest', [
                 'default_value' => ''
+            ]),
+            new TextField('driverReviewCommentFeedback', [
+                'default_value' => ''
+            ]),
+             new TextField('driverReviewPrep', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
+             new TextField('driverReviewQcd', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
             ]),
              new DateTimeField('driverReviewDate', [
                 'fetch_data_modification' => function() {
@@ -708,6 +763,16 @@ class booking_requestsTable extends DataManager {
                             } catch (\Throwable $th) {
                                 return [];
                             }
+                        }
+                    ];
+                }
+            ]),
+            new IntegerField('isNotification30MinSent', [
+                'default_value' => 0,
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            return is_numeric($value) ? $value * 1 : $value;
                         }
                     ];
                 }

@@ -35,11 +35,24 @@ function ModalContent({ title, fields, fieldLogs = [], tabs = [] }) {
             <h2 className="text-xl font-bold mb-4 flex align-middle justify-start">{title}</h2>
             <table className="min-w-full bg-white table-fixed mb-4">
                 <tbody>
-                    {fields.map((field, index) => <tr key={index}>
-                        <td className="border px-4 py-2 w-[36%] font-bold">{field.label}:</td>
-                        <td className="border px-4 py-2 w-[64%]">{field.value}</td>
-                    </tr>
-                    )}
+                   {fields.map((field, index) => {
+                        const isHeader = !!field.isHeader;
+                        if (isHeader) {
+                            return (
+                                <tr key={index} className="bg-gray-100/80">
+                                    <td colSpan={2} className="border px-4 py-2 font-semibold text-gray-700 text-center">
+                                        {field.label}
+                                    </td>
+                                </tr>
+                            );
+                        }
+                        return (
+                            <tr key={index}>
+                                <td className="border px-4 py-2 w-[36%] font-bold">{field.label}:</td>
+                                <td className="border px-4 py-2 w-[64%]">{field.value}</td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
             </>}

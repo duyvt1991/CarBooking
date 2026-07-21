@@ -54,7 +54,7 @@ function DriverConfirmBookingList({
     { name: 'id', label: 'ID', render: (field, request) => request[field] },
     { name: 'status', align: 'center',  label: t('common.Trạng thái'), render: (field, request) => formatBookingStatus(request, masterData, setModal, t) },
     ...(tempFilters?.tab === 'review' ? [
-      { name: 'driverReviewScore', align: 'center', label: t('booking.Đánh giá'), render: (field, request) => formatDriverReviewScore(request, setModal, t) },
+      { name: 'driverReviewScore', align: 'center', label: t('review.Chi tiết đánh giá'), render: (field, request) => formatDriverReviewScore(request, setModal, t) },
     ] : []),
     // { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
     // { name: 'bookingUser', label: t('booking.Người đặt'), render: (field, request) => formatUser(request[field]) },
@@ -80,6 +80,7 @@ function DriverConfirmBookingList({
     const isPastBooking = currentTime > bookingEndTime;
     const approvedStatus = Number(request?.isApproved);
     const isDriver = request?.driverUser?.mkey === masterData.userId;
+    const isPriorityBooking = request?.isPriority === 1;
 
     // Button templates
     const statusButtons = {
@@ -96,7 +97,30 @@ function DriverConfirmBookingList({
 
     if (tempFilters?.tab === 'review')
     {
-       return (isDriver && request?.driverReviewScore === 0 && request?.isApproved === 4) ? 
+       let hasReview = false;
+       try {
+         let prepData = {};
+         let qcdData = {};
+         if (request?.driverReviewPrep) {
+           prepData = typeof request.driverReviewPrep === 'string' ? JSON.parse(request.driverReviewPrep) : request.driverReviewPrep;
+         }
+         if (request?.driverReviewQcd) {
+           qcdData = typeof request.driverReviewQcd === 'string' ? JSON.parse(request.driverReviewQcd) : request.driverReviewQcd;
+         }
+         const hasPrepData = Object.values(prepData).some(item => item && item.value);
+         const hasQcdData = Object.values(qcdData).some(item => item && (item.q || item.c || item.d));
+         hasReview = 
+           hasPrepData ||
+           hasQcdData ||
+           !!request.driverReviewCommentMost ||
+           !!request.driverReviewCommentBad ||
+           !!request.driverReviewCommentFeedback ||
+           !!request.driverReviewCommentRequest;
+       } catch (e) {}
+
+       const isEligibleForReview = approvedStatus === 4 || (approvedStatus === 3 && currentTime >= bookingStartTime);
+
+       return (isDriver && !hasReview && isEligibleForReview) ?
              [
                 { label: t('booking.Đánh giá'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverReviewForm.path) }
             ] : 
@@ -106,12 +130,20 @@ function DriverConfirmBookingList({
     // Ưu tiên kiểm tra các trạng thái Hủy / Từ chối trước
     if (approvedStatus === -1 || approvedStatus === -2) return [statusButtons.rejected];
 
+    if (isPriorityBooking)
+      {
+         if (approvedStatus === 2) {
+            return [actionDefs.approve, actionDefs.reject];
+          }
+      }
+
+
     // Sau đó mới kiểm tra tiến độ thời gian
     if (isBookingInProgress) return [statusButtons.inProgress];
     if (isPastBooking) return [statusButtons.done];
 
     // Xử lý các trạng thái chờ hành động
-    if (isDriver && approvedStatus === 2) {
+    if (approvedStatus === 2) {
       return [actionDefs.approve, actionDefs.reject];
     }
 

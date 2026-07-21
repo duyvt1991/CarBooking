@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 
-function CustomSelect({ value, onChange, options, placeholder, className, disabled, isValueObject }) {
+function CustomSelect({ value, onChange, options, placeholder, className, style, disabled, isValueObject }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -32,12 +32,12 @@ function CustomSelect({ value, onChange, options, placeholder, className, disabl
   };
 
   return (
-    <div ref={containerRef} className={`relative shrink-0 ${className || ''}`} style={{ minWidth: '120px' }}>
+    <div ref={containerRef} className={`relative shrink-0 ${className || ''}`} style={{ minWidth: '120px', ...style }}>
       <button
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-full flex justify-between items-center px-3 py-2 border rounded-lg bg-white text-left text-sm disabled:opacity-50"
+        className="w-full h-full flex justify-between items-center px-2 py-1 border rounded-lg bg-white text-left text-sm disabled:opacity-50"
       >
         <span className={!selectedOption ? 'text-gray-400' : 'text-gray-800'}>
           {selectedOption ? selectedOption.label : placeholder || '-'}

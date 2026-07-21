@@ -258,7 +258,7 @@ class Lists {
                 }
                 $roomType = $filters['roomType'] ?? '';
                 if ($roomType != "") {
-                    $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
+                    $queryFilters = array_merge($queryFilters, ['%room' => '"roomType":"'.$roomType.'"']);
                 }
                 $room = $filters['room'] ?? '';
                 if ($room != "") {
@@ -282,12 +282,36 @@ class Lists {
                 }
                 break;
             case 'userReviewList':
+                $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
                 $queryFilters = array_merge($queryFilters, ['%bookingUser' => '"mkey":"BitrixID-'.$userId.'"']);
                 $queryFilters = array_merge($queryFilters, ['@isApproved' => [3, 4]]); // Chỉ lấy: Tài xế đã xác nhận và đã hoàn thành
+                $roomType = $filters['roomType'] ?? '';
+                if ($roomType != "") {
+                    $queryFilters = array_merge($queryFilters, ['%room' => '"roomType":"'.$roomType.'"']);
+                }
+                $room = $filters['room'] ?? '';
+                if ($room != "") {
+                    $queryFilters = array_merge($queryFilters, ['%room' => '"mkey":"'.$room.'"']);
+                }
+
+                $todayDate = new \Bitrix\Main\Type\Date();
+                $currentDateTime = new \Bitrix\Main\Type\DateTime();
+                $currentTime = $currentDateTime->format('H:i:s');
+                $queryFilters[] =  [
+                    'LOGIC' => 'OR',
+                    [
+                        '<startDate' => $todayDate
+                    ],
+                    [
+                        '=startDate' => $todayDate,
+                        '<=startTime' => $currentTime
+                    ]
+                ];
+                break;
             case 'managerReviewList':
                 $roomType = $filters['roomType'] ?? '';
                 if ($roomType != "") {
-                    $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
+                    $queryFilters = array_merge($queryFilters, ['%room' => '"roomType":"'.$roomType.'"']);
                 }
                 $room = $filters['room'] ?? '';
                 if ($room != "") {
@@ -301,18 +325,18 @@ class Lists {
              
 
                 $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
-                // $queryFilters = array_merge($queryFilters, ['isApproved' => 1]);
                 $queryFilters = array_merge($queryFilters, ['@isApproved' => [3, 4]]); // Chỉ lấy: Tài xế đã xác nhận và đã hoàn thành
+                $todayDate = new \Bitrix\Main\Type\Date();
                 $currentDateTime = new \Bitrix\Main\Type\DateTime();
                 $currentTime = $currentDateTime->format('H:i:s');
                 $queryFilters[] =  [
                     'LOGIC' => 'OR',
                     [
-                        '<startDate' => $currentDateTime
+                        '<startDate' => $todayDate
                     ],
                     [
-                        '=startDate' => $currentDateTime,
-                        '<endTime' => $currentTime
+                        '=startDate' => $todayDate,
+                        '<=startTime' => $currentTime
                     ]
                 ];
                 break;

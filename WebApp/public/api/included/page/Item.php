@@ -538,7 +538,7 @@ class Item {
                 self::logBooking($id, $currentItem, $userId);
 
                 // Gửi thông báo cho người dùng khi booking được duyệt, chỉ gửi khi booking không phải là ưu tiên
-                if( $currentItem['isPriority'] == 0 ) {
+                if( $currentItem['isPriority'] === 0 ) {
                     $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_approve_booking', $id);
                     foreach($mailContent['userIds'] as $userId) {
                         \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
@@ -896,7 +896,31 @@ class Item {
 
             case 'userReviewForm':
                 if ($id != "") {
-                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'], ['userReviewScore' => $userReviewScore ?? "5", 'userReviewCommentMost' => $userReviewCommentMost ?? "", 'userReviewCommentBad' => $userReviewCommentBad ?? ""]);
+                    $userReviewUser = [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]];
+                    
+                    $wantsToContinueVal = null;
+                    if (isset($userWantsToContinue) && $userWantsToContinue !== '') {
+                        $wantsToContinueVal = ($userWantsToContinue === 'true' || $userWantsToContinue === '1' || $userWantsToContinue === true) ? 1 : 0;
+                    }
+
+                    $updateData = [
+                        'userReviewCommentMost' => $userReviewCommentMost ?? "",
+                        'userReviewCommentBad' => $userReviewCommentBad ?? "",
+                        'userWantsToContinue' => $wantsToContinueVal,
+                        'userReviewExperience' => isset($userReviewExperience) && $userReviewExperience ? Json::encode(Json::decode($userReviewExperience)) : null,
+                        'userReviewQcd' => isset($userReviewQcd) && $userReviewQcd ? Json::encode(Json::decode($userReviewQcd)) : null,
+                        'userReviewUser' => Json::encode($userReviewUser),
+                        'userReviewDate' => new \Bitrix\Main\Type\DateTime()
+                    ];
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'], $updateData);
+                    self::logBooking($id, $currentItem, $userId);
+
+                    if( $currentItem['isPriority'] === 0 ) {
+                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_user_review', $id);
+                        foreach($mailContent['approvers'] as $uid) {
+                            \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                        }
+                    }
                 }
                 break;
 
@@ -913,28 +937,12 @@ class Item {
                 ) {
                     return ['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin'];
                 }
-                // try {
-                //     $roomType = Json::decode($roomType) ?: [];
-                // } catch (\Throwable $th) {
-                //     return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
-                // }
-
+              
                 $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                 $queryMasterData->setSelect(['*']);
                 $queryMasterData->setFilter(['mkey' => 'maxDayToBooking']);
                 $maxDayToBooking = $queryMasterData->exec()->fetch();
 
-                // $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
-                // $queryMasterData->setSelect(['*']);
-                // $queryMasterData->setFilter(['mkey' => $roomType['mkey'] ?? '', 'mtype' => 'roomTypes']);
-                // $roomType = $queryMasterData->exec()->fetch();
-
-                // if (!empty($roomType)) {
-                //     $roomType = array_merge($roomType, \Booking\Util::setDefaultValueIfNullMasterDataItem('roomTypes', $roomType['options']));
-                //     unset($roomType['options']);
-                // }
-
-                // $roomKey = $room['mkey'] ?? '';
                 $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
                 $startTimeCondition = $startDateCondition->format('H:i:s');
                 $endDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $endTime, "Y-m-d H:i:s");
@@ -946,14 +954,23 @@ class Item {
                 $maxAllowedDate = clone $currentDate;
                 $maxAllowedDate->add("$maxBookingDays days");
 
+                $userRoles = \Booking\Page\MasterData::getUserRoles($userId);
+                $hasApprovalRole = in_array('Permission [Car_Booking_Approval]', $userRoles);
+
                 if (!$isEndBooking) {
                     if ($startDateCondition < $currentDate) {
-                        return ['status' => 'error', 'message' => 'Không thể đặt xe trong quá khứ'];
+                        if (!$hasApprovalRole) {
+                            return ['status' => 'error', 'message' => 'Không thể đặt xe trong quá khứ'];
+                        }
                     }
 
                     if ($startDateCondition > $maxAllowedDate) {
-                        return ['status' => 'error', 'message' => 'Không thể đặt xe quá ' . $maxBookingDays . ' ngày kể từ hôm nay'];
+                        if (!$hasApprovalRole) {
+                             return ['status' => 'error', 'message' => 'Không thể đặt xe quá ' . $maxBookingDays . ' ngày kể từ hôm nay'];
+                        }
                     }
+                    
+                    $isPriority = ($startDateCondition < $currentDate && $hasApprovalRole) ? 1 : 0;
 
                     try {
                         $data = [
@@ -961,13 +978,10 @@ class Item {
                             'notificationCount' => 0,
                             "bookingUser" => Json::encode(["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]),	
                             "departureLocation" => Json::encode(Json::decode($departureLocation)),
-                            // "roomType" => Json::encode($roomType),	
                              "roomType" => Json::encode(Json::decode($roomType)),
                             "startDate" => new \Bitrix\Main\Type\DateTime($startDate, "Y-m-d"),
                             "startTime" => new \Bitrix\Main\Type\DateTime($startTime, "H:i:s"),
                             "endTime" => new \Bitrix\Main\Type\DateTime($endTime, "H:i:s"),
-                            // "employees" => $employees ?? "",
-                            // "employeeList" => $employeeList ? Json::encode(Json::decode($employeeList)) : Json::encode([]),
                             "employeeList" => Json::encode(Json::decode($employeeList)),	
                             "flightNumber" => $flightNumber ?? "",
                             "usagePurposeDetail" => $usagePurposeDetail ?? "",	
@@ -981,7 +995,7 @@ class Item {
                             "detailedSchedule" => $detailedSchedule ?? "",
                             "note" => $note ?? "",
                             "employeeNumber" => $employeeNumber ?? 0,
-                            "isPriority" => 0,
+                            "isPriority" => $isPriority,
                             
                             "isApproved" => 0,
                             "approvedUsers" => "[]",
@@ -995,11 +1009,9 @@ class Item {
                             "driverDeclineUser" => "[]",
                             "driverDeclineDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
                             "driverDeclineReason" => "",
-                            "userReviewScore" => 0,
                             "userReviewCommentMost" => "",	
                             "userReviewCommentBad" => "",	
                             "userReviewDate" => new \Bitrix\Main\Type\DateTime("0000-00-00 00:00:00", "Y-m-d H:i:s"),
-                            "driverReviewScore" => 0,
                             "driverReviewCommentMost" => "",	
                             "driverReviewCommentBad" => "",	
                             "driverReviewCommentRequest" => "",
@@ -1026,12 +1038,23 @@ class Item {
                         self::logBooking($id, $currentItem, $userId);
                     } else {
                         $id = \Booking\Query::insertRecord('car_booking_requests', $data);
+
+                        if ($isPriority === 0) {
+                            $mailContentUser = \Booking\MailTemplate::generateMailContent('send_to_booking_user_when_create_booking', $id);
+                            $recipients = $mailContentUser['userIds'];
+                            foreach ($recipients as $uid) {
+                                \Booking\Notification::sendNotificationToUser($uid, $mailContentUser['subject'], $mailContentUser['content']);
+                            }
+                        }
                     }
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_create_booking', $id, null, $isPriority);
+                    
+                    if ($isPriority === 0) {
+                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_create_booking', $id);
                         $approversOrPriorityApprovers = $mailContent['approvers'];
                         foreach($approversOrPriorityApprovers as $userId) {
                             \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
                         }
+                    }
                 } else {
                     try {
                         $data = [
@@ -1064,12 +1087,71 @@ class Item {
 
             case 'cancelBookingForm':
                 if ($id != "") {
-                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'], ['isCancelled' => 1, 'cancelledReason' => $cancelledReason ?? ""]);
+                    $bookingUserBitrixId = $currentItem['bookingUser']['mkey'] ?? '';
+                    $isBookingUser = ($bookingUserBitrixId === 'BitrixID-' . $userId);
+
+                    if ($isBookingUser) {
+                        \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'], ['isCancelled' => 1, 'cancelledReason' => $cancelledReason ?? ""]);
+                    } else {
+                        \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], ['isCancelled' => 1, 'cancelledReason' => $cancelledReason ?? ""]);
+                    }
                     self::logBooking($id, $currentItem, $userId);
 
-                    $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_cancel_booking', $id);
-                    foreach($mailContent['userIds'] as $userId) {
-                        \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    if( $currentItem['isPriority'] === 0 ) {
+                        $isAssigned = ($currentItem['isApproved'] == 2 || $currentItem['isApproved'] == 3);
+
+                        if ($isBookingUser) {
+                            // --- NGƯỜI ĐẶT HỦY ---
+                            // // 1. Gửi mail thông báo hủy cho người đặt, người phụ trách và nhân viên đi cùng (Dòng 17)
+                            // $mailContentUser = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_cancel_booking', $id);
+                            // $userRecipients = array_unique(array_merge($mailContentUser['userIds'], $mailContentUser['employeeList']));
+                            // foreach($userRecipients as $uid) {
+                            //     \Booking\Notification::sendNotificationToUser($uid, $mailContentUser['subject'], $mailContentUser['content']);
+                            // }
+
+                            if ($isAssigned) {
+                                // 2. Nếu đã phân xe: Gửi mail "Người dùng đã hủy chuyến" cho người duyệt/quản lý (Dòng 15)
+                                $mailContentApprover = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_user_cancel_assigned', $id);
+                                foreach($mailContentApprover['approvers'] as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContentApprover['subject'], $mailContentApprover['content']);
+                                }
+
+                                // 3. Nếu đã phân xe: Gửi mail "Chuyến xe đã bị hủy" cho tài xế (Dòng 16)
+                                $mailContentDriver = \Booking\MailTemplate::generateMailContent('send_to_driver_when_user_cancel_assigned', $id);
+                                foreach($mailContentDriver['driverUser'] as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContentDriver['subject'], $mailContentDriver['content']);
+                                }
+                            } else {
+                                // 2. Nếu chưa phân xe: Gửi mail "Yêu cầu đã bị hủy" cho người duyệt/quản lý (Dòng 14)
+                                $mailContentApprover = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_user_cancel_unassigned', $id);
+                                foreach($mailContentApprover['approvers'] as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContentApprover['subject'], $mailContentApprover['content']);
+                                }
+                            }
+                        } else {
+                            // --- NGƯỜI DUYỆT HỦY ---
+                            if ($isAssigned) {
+                                // Dòng 19: Gửi mail "Chuyến xe đã bị hủy" cho Người đặt (lý do hủy)
+                                $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_reject_booking_after_approved', $id);
+                                $userRecipients = $mailContent['userIds'];
+                                foreach($userRecipients as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                                }
+
+                                // Dòng 20: Gửi mail "Chuyến xe đã bị hủy" cho Tài xế
+                                $mailContentDriver = \Booking\MailTemplate::generateMailContent('send_to_driver_when_manager_reject_assigned', $id);
+                                foreach($mailContentDriver['driverUser'] as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContentDriver['subject'], $mailContentDriver['content']);
+                                }
+                            } else {
+                                // Dòng 18: Gửi mail "Chuyến xe đã bị hủy" cho Người đặt (lý do hủy)
+                                $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_reject_booking', $id);
+                                $userRecipients = $mailContent['userIds'];
+                                foreach($userRecipients as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                                }
+                            }
+                        }
                     }
                 }
                 break;
@@ -1082,14 +1164,6 @@ class Item {
                     $currentItem = $query->exec()->fetch();
                 }
                 if ($currentItem) {
-                    // if ($currentItem['isPriority'] && is_array($hasPermission) && !in_array("Permission [Car_Booking_Priority_Approval]", $hasPermission)) {
-                    //     return ['status' => 'error', 'message' => 'Bạn không có quyền từ chối đặt xe ưu tiên'];
-                    // }
-                    // $currentRejectedUsers = [];
-                    // if (!empty($currentItem['rejectedUsers'])) {
-                    //     $currentRejectedUsers = is_string($currentItem['rejectedUsers']) ? Json::decode($currentItem['rejectedUsers']) : (array)$currentItem['rejectedUsers'];
-                    // }
-                    // $rejectedUsers = array_merge($currentRejectedUsers, [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]]);
                     $rejectedUsers =  [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]];
                     
                     \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], [
@@ -1100,20 +1174,31 @@ class Item {
                         , 'serviceType' => null, 'licensePlateNumber' => null, 'driverUser' => null, 'driverPhoneNumber' => null, 'room' => null
                         ]);
                     self::logBooking($id, $currentItem, $userId);
-                    if ($currentItem['isApproved'] == 1) {
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_reject_booking_after_approved', $id);
-                    } else {
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_reject_booking', $id);
-                    }
-                    foreach($mailContent['userIds'] as $userId) {
-                        \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    if( $currentItem['isPriority'] === 0 ) {
+                            // Dòng 19: Người đặt nhận thông báo chuyến xe đã hủy
+                            $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_reject_booking_after_approved', $id);
+                            $userRecipients = $mailContent['userIds'];
+                            foreach($userRecipients as $uid) {
+                                \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                            }
                     }
                 }
                 break;
             
             case 'driverReviewForm':
                 if ($id != "") {
-                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"'], ['driverReviewScore' => $driverReviewScore ?? "5", 'driverReviewCommentMost' => $driverReviewCommentMost ?? "", 'driverReviewCommentBad' => $driverReviewCommentBad ?? "", 'driverReviewCommentRequest' => $driverReviewCommentRequest ?? ""]);
+                    $driverReviewUser = [["mkey" => "BitrixID-".$userId, "mvalue" =>  \Booking\Query::getUserFullname($userId, true)]];
+                    $updateData = [
+                        'driverReviewCommentMost' => $driverReviewCommentMost ?? "",
+                        'driverReviewCommentBad' => $driverReviewCommentBad ?? "",
+                        'driverReviewCommentRequest' => $driverReviewCommentRequest ?? "",
+                        'driverReviewCommentFeedback' => $driverReviewCommentFeedback ?? "",
+                        'driverReviewPrep' => isset($driverReviewPrep) && $driverReviewPrep ? Json::encode(Json::decode($driverReviewPrep)) : null,
+                        'driverReviewQcd' => isset($driverReviewQcd) && $driverReviewQcd ? Json::encode(Json::decode($driverReviewQcd)) : null,
+                        'driverReviewUser' => Json::encode($driverReviewUser),
+                        'driverReviewDate' => new \Bitrix\Main\Type\DateTime()
+                    ];
+                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"'], $updateData);
                 }
                 break;
             
@@ -1127,7 +1212,6 @@ class Item {
                     $query->setSelect(['*']);
                     // $query->setFilter(['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"']);
                     $query->setFilter(['id' => $id]);
-                     // Chỉ cho phép tài xế từ chối khi họ là người được phân công lái xe, tránh trường hợp người dùng khác cố tình từ chối
                     $currentItem = $query->exec()->fetch();
                     if (!$currentItem) {
                         return ['status' => 'error', 'message' => 'Chuyến xe không tồn tại.'];
@@ -1143,15 +1227,20 @@ class Item {
                       'driverDeclineDate' => new \Bitrix\Main\Type\DateTime()
                       ]);
                     self::logBooking($id, $currentItem, $userId);
-                    // Gửi thông báo cho quản lý và những người liên quan về việc tài xế từ chối đặt xe
-                    $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_approve_when_driver_reject_booking', $id);
-                    // Gửi cho user
-                    // foreach($mailContent['userIds'] as $userId) {
-                    //     \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
-                    // }
-                    // Gửi cho quản lý
-                    foreach($mailContent['assignmentUser'] as $userId) {
-                        \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    
+                    if( $currentItem['isPriority'] === 0 ) {
+                        // Gửi thông báo cho quản lý về việc tài xế từ chối đặt xe
+                        $mailContentApprover = \Booking\MailTemplate::generateMailContent('send_to_booking_user_approve_when_driver_reject_booking', $id);
+                        foreach($mailContentApprover['approvers'] as $uid) {
+                            \Booking\Notification::sendNotificationToUser($uid, $mailContentApprover['subject'], $mailContentApprover['content']);
+                        }
+
+                        // Gửi thông báo cho người đặt xe và người liên quan
+                        $mailContentUser = \Booking\MailTemplate::generateMailContent('send_to_booking_user_when_driver_reject_booking', $id);
+                        $userRecipients = $mailContentUser['userIds'];
+                        foreach($userRecipients as $uid) {
+                            \Booking\Notification::sendNotificationToUser($uid, $mailContentUser['subject'], $mailContentUser['content']);
+                        }
                     }
                 }
                 break;
@@ -1314,37 +1403,86 @@ class Item {
                     \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], $updateData);
                     self::logBooking($id, $currentItem, $userId);
 
-                      // Gửi email cho tài xế được phân công
-                    if ($isInternalServiceType) {
-                         // Gửi mail cho user và main user khi quản lý duyệt và phân công tài xế
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_approve_booking', $id);
-                        foreach($mailContent['userIds'] as $userId) {
-                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                    if( $currentItem['isPriority'] === 0 ) {
+                        $oldDriverKey = $currentItem['driverUser']['mkey'] ?? '';
+                        $newDriverKey = $driverItem['mkey'] ?? '';
+                        $oldRoomKey = $currentItem['room']['mkey'] ?? '';
+                        $newRoomKey = $roomItem['mkey'] ?? '';
+                        
+                        $isDriverChanged = (!empty($oldDriverKey) && $oldDriverKey !== $newDriverKey);
+                        $isRoomChanged = (!empty($oldRoomKey) && $oldRoomKey !== $newRoomKey);
+                        
+                        if ($isDriverChanged) {
+                            // 1. Gửi Hủy phân công cho tài xế cũ
+                            $oldDriverId = str_replace('BitrixID-', '', $oldDriverKey);
+                            if ($oldDriverId) {
+                                $mailContentOldDriver = \Booking\MailTemplate::generateMailContent('send_to_old_driver_when_change_driver', $id);
+                                \Booking\Notification::sendNotificationToUser($oldDriverId, $mailContentOldDriver['subject'], $mailContentOldDriver['content']);
+                            }
+                            
+                            // 2. Gửi Phân công phục vụ chuyến xe cho tài xế mới
+                            if ($isInternalServiceType) {
+                                $mailContentNewDriver = \Booking\MailTemplate::generateMailContent('send_to_driver_when_assign_booking', $id);
+                                foreach($mailContentNewDriver['driverUser'] as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContentNewDriver['subject'], $mailContentNewDriver['content']);
+                                }
+                            }
+                            
+                            // 3. Gửi thông báo đổi tài xế cho người đặt và những người liên quan
+                            $mailContentUser = \Booking\MailTemplate::generateMailContent('send_to_booking_user_when_change_driver', $id);
+                            $userRecipients = $mailContentUser['userIds'];
+                            foreach ($userRecipients as $uid) {
+                                \Booking\Notification::sendNotificationToUser($uid, $mailContentUser['subject'], $mailContentUser['content']);
+                            }
                         }
-
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_driver_when_assign_booking', $id);
-                        foreach($mailContent['driverUser'] as $uid) {
-                            \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                        
+                        if ($isRoomChanged) {
+                            // 1. Gửi thông tin xe đã thay đổi cho người đặt và những người liên quan
+                            $mailContentUser = \Booking\MailTemplate::generateMailContent('send_to_booking_user_when_change_car', $id);
+                            $userRecipients = $mailContentUser['userIds'];
+                            foreach ($userRecipients as $uid) {
+                                \Booking\Notification::sendNotificationToUser($uid, $mailContentUser['subject'], $mailContentUser['content']);
+                            }
+                            
+                            // 2. Gửi thông tin xe đã thay đổi cho tài xế
+                            if ($isInternalServiceType) {
+                                $mailContentDriver = \Booking\MailTemplate::generateMailContent('send_to_driver_when_change_car', $id);
+                                foreach($mailContentDriver['driverUser'] as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContentDriver['subject'], $mailContentDriver['content']);
+                                }
+                            }
                         }
-                    }
-
-                    if ($isApproved == 3) { // Gửi mail cho user và main user khi quản lý duyệt và phân công tài xế
-                        $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_manager_confirm_booking', $id);
-
-                        foreach($mailContent['userIds'] as $userId) {
-                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
-                        }
-
-                        foreach($mailContent['employeeList'] as $userId) {
-                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                        
+                        // Nếu không phải là thay đổi tài xế hoặc xe (tức là phân công lần đầu)
+                        if (!$isDriverChanged && !$isRoomChanged) {
+                            if ($isInternalServiceType) {
+                                // Gửi mail cho user, main user và những người liên quan thông báo đã duyệt
+                                $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_approve_booking', $id);
+                                $userRecipients = $mailContent['userIds'];
+                                foreach($userRecipients as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                                }
+                                
+                                // Gửi mail cho tài xế được phân công
+                                $mailContentDriver = \Booking\MailTemplate::generateMailContent('send_to_driver_when_assign_booking', $id);
+                                foreach($mailContentDriver['driverUser'] as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContentDriver['subject'], $mailContentDriver['content']);
+                                }
+                            }
+                            
+                            if ($isApproved == 3) {
+                                // Gửi mail cho user, main user và những người liên quan thông báo đã phân công xong (xe dịch vụ/Grab)
+                                $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_manager_confirm_booking', $id);
+                                $userRecipients = array_unique(array_merge($mailContent['userIds'], $mailContent['employeeList']));
+                                foreach($userRecipients as $uid) {
+                                    \Booking\Notification::sendNotificationToUser($uid, $mailContent['subject'], $mailContent['content']);
+                                }
+                            }
                         }
                     }
                     
                 }
                 break;
-
-            
-
         }
         return ['status' => 'success', 'message' => $id ? 'Chỉnh sửa thành công' : 'Thêm mới thành công'];
     }
@@ -1372,19 +1510,18 @@ class Item {
                 \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], ['isApproved' => 3, 'driverConfirmationUser' => Json::encode($driverConfirmationUser), 'driverConfirmationDate' => new \Bitrix\Main\Type\DateTime()]);
                 self::logBooking($id, $currentItem, $userId);
                 
-                if( $currentItem['isPriority'] == 0 ) {
-                    // Gửi mail cho user và main user khi tài xế xác nhận
-                    $mailContent = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_confirm_booking', $id);
-                    foreach($mailContent['userIds'] as $userId) {
-                        \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+                if( $currentItem['isPriority'] === 0 ) {
+                    // Gửi mail cho user, main user và những người liên quan khi tài xế xác nhận
+                    $mailContentUser = \Booking\MailTemplate::generateMailContent('send_to_booking_user_main_user_users_when_confirm_booking', $id);
+                    $userRecipients = array_unique(array_merge($mailContentUser['userIds'], $mailContentUser['employeeList']));
+                    foreach($userRecipients as $uid) {
+                        \Booking\Notification::sendNotificationToUser($uid, $mailContentUser['subject'], $mailContentUser['content']);
                     }
-                    // Gửi mail cho những người liên quan khi tài xế xác nhận
-                    foreach($mailContent['employeeList'] as $userId) {
-                            \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
-                    }
-                    // Gửi cho quản lý khi tài xế xác nhận
-                    foreach($mailContent['approvers'] as $userId) {
-                        \Booking\Notification::sendNotificationToUser($userId, $mailContent['subject'], $mailContent['content']);
+
+                    // Gửi mail cho quản lý khi tài xế xác nhận
+                    $mailContentApprover = \Booking\MailTemplate::generateMailContent('send_to_approvers_when_driver_confirm', $id);
+                    foreach($mailContentApprover['approvers'] as $uid) {
+                        \Booking\Notification::sendNotificationToUser($uid, $mailContentApprover['subject'], $mailContentApprover['content']);
                     }
                 }
             }
