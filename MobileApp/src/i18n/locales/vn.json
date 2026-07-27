@@ -102,7 +102,9 @@
     "Biển số xe": "Biển số xe",
     "Số điện thoại tài xế": "Số điện thoại tài xế",
     "Tài xế": "Tài xế",
-    "Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?": "Bạn có chắc chắn muốn xác nhận đặt xe có ID = {{id}} không?"
+    "Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?": "Bạn có chắc chắn muốn xác nhận đặt xe có ID = {{id}} không?",
+    "Bộ lọc": "Bộ lọc",
+    "Thu gọn": "Thu gọn"
 
   },
   "routes": {

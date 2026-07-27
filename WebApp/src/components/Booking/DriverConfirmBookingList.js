@@ -43,7 +43,8 @@ function DriverConfirmBookingList({
 
   const filterFields = [
     { name: 'id', placeholder: 'ID' },
-    { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
+    // { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
+    { name: 'driverUser', placeholder: t('booking.Tài xế'), type: 'select', options: masterData.drivers.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'room', placeholder: t('booking.Xe'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
     { name: 'startDate', placeholder: t('booking.Ngày sử dụng'), type: 'date' },
     // { name: 'isApproved', placeholder: t('common.Trạng thái'), type: 'select', 
