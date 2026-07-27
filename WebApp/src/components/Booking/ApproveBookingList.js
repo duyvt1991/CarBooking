@@ -44,7 +44,8 @@ function ApproveBookingList({
 
   const filterFields = [
     { name: 'id', placeholder: 'ID' },
-    { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
+    // { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: masterData.roomTypes.map(type => ({ value: type.mkey, label: type.mvalue })) },
+    { name: 'driverUser', placeholder: t('booking.Tài xế'), type: 'select', options: masterData.drivers.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'room', placeholder: t('booking.Xe'), type: 'select', options: masterData.rooms.map(room => ({ value: room.mkey, label: room.mvalue })) },
     { name: 'startDate', placeholder: t('booking.Ngày sử dụng'), type: 'date' },
     { name: 'isApproved', placeholder: t('common.Trạng thái'), type: 'select', 
@@ -91,7 +92,7 @@ function ApproveBookingList({
     const statusButtons = {
       default: { component: <span className="inline-flex items-center justify-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-500"><FaClock /></span> },
       inProgress: { component: <span className="flex items-center justify-center gap-1"><FaRegHourglass className="text-yellow-500" /> {t('booking.Đang sử dụng')}</span> },
-      cancelled: { component: <span className="flex items-center justify-center gap-1"><FaMinusCircle className="text-red-500" /> {t('booking.Đã huỷ')}</span> },
+      cancelled: { component: <span className="flex items-center justify-center gap-1"><FaMinusCircle className="text-red-500" /></span> },
       done: { component: <span className="flex items-center justify-center gap-1"><FaCheck className="text-green-500" /></span> },
       rejected: { component: <span className="flex items-center justify-center gap-1"><FaBan className="text-red-500" /></span> },
     };

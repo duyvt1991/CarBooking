@@ -181,10 +181,17 @@ class Lists {
                 } else {
                     return [ 'currentItems' => [], 'totalPages' => 0, 'totalItems' => 0 ];
                 }
-                $roomType = $filters['roomType'] ?? '';
-                if ($roomType != "") {
-                    $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
+
+                // $roomType = $filters['roomType'] ?? '';
+                // if ($roomType != "") {
+                //     $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
+                // }
+
+                $driverUser = $filters['driverUser'] ?? '';
+                if ($driverUser != "") {
+                    $queryFilters = array_merge($queryFilters, ['%driverUser' => '"mkey":"'.$driverUser.'"']);
                 }
+
                 $room = $filters['room'] ?? '';
                 if ($room != "") {
                     $queryFilters = array_merge($queryFilters, ['%room' => '"mkey":"'.$room.'"']);
@@ -256,10 +263,15 @@ class Lists {
                 } else {
                     return [ 'currentItems' => [], 'totalPages' => 0, 'totalItems' => 0 ];
                 }
-                $roomType = $filters['roomType'] ?? '';
-                if ($roomType != "") {
-                    $queryFilters = array_merge($queryFilters, ['%room' => '"roomType":"'.$roomType.'"']);
+                // $roomType = $filters['roomType'] ?? '';
+                // if ($roomType != "") {
+                //     $queryFilters = array_merge($queryFilters, ['%room' => '"roomType":"'.$roomType.'"']);
+                // }
+                $driverUser = $filters['driverUser'] ?? '';
+                if ($driverUser != "") {
+                    $queryFilters = array_merge($queryFilters, ['%driverUser' => '"mkey":"'.$driverUser.'"']);
                 }
+
                 $room = $filters['room'] ?? '';
                 if ($room != "") {
                     $queryFilters = array_merge($queryFilters, ['%room' => '"mkey":"'.$room.'"']);

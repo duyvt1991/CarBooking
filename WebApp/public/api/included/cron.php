@@ -199,7 +199,6 @@ class Cron {
         }
         //ENd
 
-
         // Tìm tất cả booking chưa đến thời điểm sử dụng để gửi thông báo nhắc nhở hoặc duyệt tự động nếu thỏa điều kiện
         $upcomingBookingQuery = \Booking\Query::getInstance("car_booking_requests", true);
         $upcomingBookingQuery->setSelect(['*']);

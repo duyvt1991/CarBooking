@@ -1,11 +1,11 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import withRequestData from '../../hoc/withRequestData';
 import { defaultFilters, routes } from '../../systems/constant';
 import HeaderTableLayout from '../../shared/HeaderTableLayout';
 import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
-import { FaBan, FaCheck, FaClock, FaInfoCircle, FaTimes, FaRegHourglass, FaMinusCircle, FaFilter, FaRedo } from 'react-icons/fa';
+import { FaBan, FaCheck, FaClock, FaInfoCircle, FaTimes, FaRegHourglass, FaMinusCircle, FaFilter, FaRedo, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { formatDateTime, formatDate, formatTime, formatUser, formatBookingStatus, formatDriverReviewScore } from '../../systems/util';
 import { RequestContext } from '../../App';
 import DatePicker from "react-datepicker";
@@ -20,6 +20,7 @@ function DriverConfirmBookingList({
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const [isOpenFilter, setIsOpenFilter] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -45,7 +46,8 @@ function DriverConfirmBookingList({
 
   const filterFields = [
     { name: 'id', placeholder: 'ID' },
-    { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: (masterData?.roomTypes || []).map(type => ({ value: type.mkey, label: type.mvalue })) },
+    // { name: 'roomType', placeholder: t('booking.Loại xe'), type: 'select', options: (masterData?.roomTypes || []).map(type => ({ value: type.mkey, label: type.mvalue })) },
+    { name: 'driverUser', placeholder: t('booking.Tài xế'), type: 'select', options: masterData.drivers.map(type => ({ value: type.mkey, label: type.mvalue })) },
     { name: 'room', placeholder: t('booking.Xe'), type: 'select', options: (masterData?.rooms || []).map(room => ({ value: room.mkey, label: room.mvalue })) },
     { name: 'startDate', placeholder: t('booking.Ngày sử dụng'), type: 'date' },
   ];
@@ -166,82 +168,95 @@ function DriverConfirmBookingList({
               <span className="badge bg-red-600 ml-1">{totalItems}</span>
             </div>
             <div className="flex gap-2">
+              {isOpenFilter && (
+                <>
+                  <button 
+                    className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center text-sm font-medium transition duration-200"
+                    onClick={applyFilters}
+                  >
+                    <FaFilter className="mr-2" />
+                    {t('common.Lọc')}
+                  </button>
+                  <button 
+                    className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg flex items-center text-sm font-medium transition duration-200"
+                    onClick={resetFilters}
+                  >
+                    <FaRedo />
+                  </button>
+                </>
+              )}
               <button 
-                className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center text-sm font-medium transition duration-200"
-                onClick={applyFilters}
+                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center text-sm font-medium transition duration-200"
+                onClick={() => setIsOpenFilter(!isOpenFilter)}
               >
-                <FaFilter className="mr-2" />
-                {t('common.Lọc')}
-              </button>
-              <button 
-                className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg flex items-center text-sm font-medium transition duration-200"
-                onClick={resetFilters}
-              >
-                <FaRedo />
+                <span className="mr-1.5">{isOpenFilter ? t('common.Thu gọn') || 'Thu gọn' : t('common.Bộ lọc') || 'Bộ lọc'}</span>
+                {isOpenFilter ? <FaChevronUp /> : <FaChevronDown />}
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {filterFields.map(field => (
-              <div key={field.name} className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-gray-500" htmlFor={field.name}>
-                  {field.placeholder}
-                </label>
-                {field.type === 'select' ? (
-                  <CustomSelect
-                    value={tempFilters[field.name]}
-                    onChange={(e) => {
-                      const mockEvent = { target: { name: field.name, value: e.target.value } };
-                      handleFilterChange(mockEvent);
-                    }}
-                    options={field.options}
-                    placeholder={`- ${field.placeholder} -`}
-                    className="w-full h-[38px]"
-                  />
-                ) : field.type === 'date' ? (
-                  <div className="relative w-full">
-                    <DatePicker 
-                      id={field.name}
-                      name={field.name}
-                      placeholderText={field.placeholder}
-                      selected={(() => {
-                        try {
-                          const date = parseISO(tempFilters[field.name] ?? "");
-                          return !isNaN(date) ? date : null;
-                        } catch (error) {
-                          return null;
-                        }
-                      })()}
-                      onChange={(date) => {
-                        try {
-                          const e = { target: { name: field.name, value: date ? format(date, 'yyyy-MM-dd') : '' } };
-                          handleFilterChange(e);
-                        } catch (error) {
-                          const e = { target: { name: field.name, value: '' } };
-                          handleFilterChange(e);
-                        }
+          {isOpenFilter && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {filterFields.map(field => (
+                <div key={field.name} className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-gray-500" htmlFor={field.name}>
+                    {field.placeholder}
+                  </label>
+                  {field.type === 'select' ? (
+                    <CustomSelect
+                      value={tempFilters[field.name]}
+                      onChange={(e) => {
+                        const mockEvent = { target: { name: field.name, value: e.target.value } };
+                        handleFilterChange(mockEvent);
                       }}
-                      dateFormat="dd/MM/yyyy"
-                      className="h-[38px] px-3 py-1.5 border rounded-lg bg-white text-sm w-full focus:outline-none focus:ring-1 focus:ring-green-500"
-                      wrapperClassName="w-full"
-                      required
+                      options={field.options}
+                      placeholder={`- ${field.placeholder} -`}
+                      className="w-full h-[38px]"
                     />
-                  </div>
-                ) : (
-                  <input
-                    id={field.name}
-                    type={field.type || 'text'}
-                    className="h-[38px] px-3 py-1.5 border rounded-lg bg-white text-sm w-full focus:outline-none focus:ring-1 focus:ring-green-500"
-                    name={field.name}
-                    placeholder={field.placeholder}
-                    onChange={handleFilterChange}
-                    value={tempFilters[field.name] ?? ''}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+                  ) : field.type === 'date' ? (
+                    <div className="relative w-full">
+                      <DatePicker 
+                        id={field.name}
+                        name={field.name}
+                        placeholderText={field.placeholder}
+                        selected={(() => {
+                          try {
+                            const date = parseISO(tempFilters[field.name] ?? "");
+                            return !isNaN(date) ? date : null;
+                          } catch (error) {
+                            return null;
+                          }
+                        })()}
+                        onChange={(date) => {
+                          try {
+                            const e = { target: { name: field.name, value: date ? format(date, 'yyyy-MM-dd') : '' } };
+                            handleFilterChange(e);
+                          } catch (error) {
+                            const e = { target: { name: field.name, value: '' } };
+                            handleFilterChange(e);
+                          }
+                        }}
+                        dateFormat="dd/MM/yyyy"
+                        className="h-[38px] px-3 py-1.5 border rounded-lg bg-white text-sm w-full focus:outline-none focus:ring-1 focus:ring-green-500"
+                        wrapperClassName="w-full"
+                        required
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      id={field.name}
+                      type={field.type || 'text'}
+                      className="h-[38px] px-3 py-1.5 border rounded-lg bg-white text-sm w-full focus:outline-none focus:ring-1 focus:ring-green-500"
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      onChange={handleFilterChange}
+                      value={tempFilters[field.name] ?? ''}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="w-full">

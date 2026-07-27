@@ -115,16 +115,16 @@ class MailTemplate {
         self::$mailTemplates = [
             // Dòng 2: Người đặt -> Đặt xe -> Người đặt
             'send_to_booking_user_when_create_booking' => [
-                'subject' => 'ĐẶT XE - Đặt xe thành công',
+                'subject' => '[ĐẶT XE] - Đặt xe thành công',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
                     return "Chào bạn,<br/><br/>Xác nhận đã tiếp nhận yêu cầu đặt xe theo thông tin bên dưới:<br/>" . $details . $commonNote;
                 }
             ],
-            // Dòng 3: Người đặt -> Đặt xe -> Người duyệt
+            // Dòng 3: Người đặt -> [ĐẶT XE] -> Người duyệt
             'send_to_approvers_when_create_booking' => [
-                'subject' => 'ĐẶT XE - Chờ phê duyệt',
+                'subject' => '[ĐẶT XE] - Chờ phê duyệt',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $approversUrl = str_replace('%ID%', $currentItem['id'], $approversUrl);
@@ -134,7 +134,7 @@ class MailTemplate {
             ],
             // Dòng 4: Người duyệt -> Phân công tài xế -> Tài xế
             'send_to_driver_when_assign_booking' => [
-                'subject' => 'ĐẶT XE - Phân công phục vụ chuyến xe',
+                'subject' => '[ĐẶT XE] - Phân công phục vụ chuyến xe',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $driverConfirmUrl = str_replace('%ID%', $currentItem['id'], $driverConfirmUrl);
@@ -144,7 +144,7 @@ class MailTemplate {
             ],
             // Dòng 5: Tài xế -> Nhận chuyến -> Người duyệt
             'send_to_approvers_when_driver_confirm' => [
-                'subject' => 'ĐẶT XE - Tài xế đã nhận chuyến',
+                'subject' => '[ĐẶT XE] - Tài xế đã nhận chuyến',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -153,7 +153,7 @@ class MailTemplate {
             ],
             // Dòng 6: Tài xế -> Nhận chuyến -> Người đặt
             'send_to_booking_user_main_user_users_when_confirm_booking' => [
-                'subject' => 'ĐẶT XE - Đã phân công xe',
+                'subject' => '[ĐẶT XE] - Đã phân công xe',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -162,7 +162,7 @@ class MailTemplate {
             ],
             // Dòng 7: Người duyệt -> Thay đổi tài xế -> Tài xế cũ
             'send_to_old_driver_when_change_driver' => [
-                'subject' => 'ĐẶT XE - Hủy phân công',
+                'subject' => '[ĐẶT XE] - Hủy phân công',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -171,7 +171,7 @@ class MailTemplate {
             ],
             // Dòng 9: Người duyệt -> Thay đổi tài xế -> Người đặt xe
             'send_to_booking_user_when_change_driver' => [
-                'subject' => 'ĐẶT XE - Chuyến xe đã được đổi tài xế',
+                'subject' => '[ĐẶT XE] - Chuyến xe đã được đổi tài xế',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -180,7 +180,7 @@ class MailTemplate {
             ],
             // Dòng 10: Người duyệt -> Thay đổi xe -> Người đặt xe
             'send_to_booking_user_when_change_car' => [
-                'subject' => 'ĐẶT XE - Thông tin xe đã thay đổi',
+                'subject' => '[ĐẶT XE] - Thông tin xe đã thay đổi',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -189,7 +189,7 @@ class MailTemplate {
             ],
             // Dòng 11: Người duyệt -> Thay đổi xe -> Tài xế
             'send_to_driver_when_change_car' => [
-                'subject' => 'ĐẶT XE - Thông tin xe đã thay đổi',
+                'subject' => '[ĐẶT XE] - Thông tin xe đã thay đổi',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -198,7 +198,7 @@ class MailTemplate {
             ],
             // Dòng 12: Người duyệt -> Điều chỉnh lịch -> Người đặt xe
             'send_to_booking_user_when_schedule_updated' => [
-                'subject' => 'ĐẶT XE - Lịch trình đã được cập nhật',
+                'subject' => '[ĐẶT XE] - Lịch trình đã được cập nhật',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -207,7 +207,7 @@ class MailTemplate {
             ],
             // Dòng 13: Người duyệt -> Điều chỉnh lịch -> Tài xế
             'send_to_driver_when_schedule_updated' => [
-                'subject' => 'ĐẶT XE - Lịch trình chuyến xe đã thay đổi',
+                'subject' => '[ĐẶT XE] - Lịch trình chuyến xe đã thay đổi',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -216,7 +216,7 @@ class MailTemplate {
             ],
             // Dòng 14, 15, 16, 18, 19, 20: Các trường hợp Hủy yêu cầu đặt xe
             'send_to_booking_user_main_user_users_when_cancel_booking' => [
-                'subject' => 'ĐẶT XE - Chuyến xe đã bị hủy',
+                'subject' => '[ĐẶT XE] - Chuyến xe đã bị hủy',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $bookingUserUrl = str_replace('%ID%', $currentItem['id'], $bookingUserUrl);
@@ -232,7 +232,7 @@ class MailTemplate {
             ],
             // Dòng 14: Người đặt -> Hủy yêu cầu (chưa phân xe) -> Người duyệt
             'send_to_approvers_when_user_cancel_unassigned' => [
-                'subject' => 'ĐẶT XE - Yêu cầu đã bị hủy',
+                'subject' => '[ĐẶT XE] - Yêu cầu đã bị hủy',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -241,7 +241,7 @@ class MailTemplate {
             ],
             // Dòng 15: Người đặt -> Hủy yêu cầu (đã có tài xế) -> Người duyệt
             'send_to_approvers_when_user_cancel_assigned' => [
-                'subject' => 'ĐẶT XE - Người dùng đã hủy chuyến',
+                'subject' => '[ĐẶT XE] - Người dùng đã hủy chuyến',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -250,7 +250,7 @@ class MailTemplate {
             ],
             // Dòng 16: Người đặt -> Hủy yêu cầu (đã có tài xế) -> Tài xế
             'send_to_driver_when_user_cancel_assigned' => [
-                'subject' => 'ĐẶT XE - Chuyến xe đã bị hủy',
+                'subject' => '[ĐẶT XE] - Chuyến xe đã bị hủy',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -259,7 +259,7 @@ class MailTemplate {
             ],
             // Dùng chung cho từ chối duyệt (Dòng 18)
             'send_to_booking_user_main_user_users_when_reject_booking' => [
-                'subject' => 'ĐẶT XE - Chuyến xe đã bị hủy',
+                'subject' => '[ĐẶT XE] - Chuyến xe đã bị hủy',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $bookingUserUrl = str_replace('%ID%', $currentItem['id'], $bookingUserUrl);
@@ -273,7 +273,7 @@ class MailTemplate {
             ],
             // Dùng chung cho từ chối duyệt sau khi đã duyệt (Dòng 19)
             'send_to_booking_user_main_user_users_when_reject_booking_after_approved' => [
-                'subject' => 'ĐẶT XE - Chuyến xe đã bị hủy',
+                'subject' => '[ĐẶT XE] - Chuyến xe đã bị hủy',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $bookingUserUrl = str_replace('%ID%', $currentItem['id'], $bookingUserUrl);
@@ -287,7 +287,7 @@ class MailTemplate {
             ],
             // Dòng 20: Người duyệt -> Hủy yêu cầu (đã có tài xế) -> Tài xế
             'send_to_driver_when_manager_reject_assigned' => [
-                'subject' => 'ĐẶT XE - Chuyến xe đã bị hủy',
+                'subject' => '[ĐẶT XE] - Chuyến xe đã bị hủy',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -296,7 +296,7 @@ class MailTemplate {
             ],
             // Dòng 23: Người đặt -> Đánh giá chuyến -> Người duyệt
             'send_to_approvers_when_user_review' => [
-                'subject' => 'ĐẶT XE - Có đánh giá mới từ người dùng',
+                'subject' => '[ĐẶT XE] - Có đánh giá mới từ người dùng',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -417,7 +417,7 @@ class MailTemplate {
             ],
             // Dòng 24: Hệ thống -> Nhắc lịch trước 30 phút -> Người đặt xe
             'send_to_booking_user_departure_remind_30min' => [
-                'subject' => 'ĐẶT XE - Sắp đến giờ khởi hành',
+                'subject' => '[ĐẶT XE] - Sắp đến giờ khởi hành',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -426,7 +426,7 @@ class MailTemplate {
             ],
             // Gửi khi phê duyệt xe nội bộ
             'send_to_booking_user_main_user_users_when_approve_booking' => [
-                'subject' => 'ĐẶT XE - Lịch đặt xe của bạn đã được duyệt',
+                'subject' => '[ĐẶT XE] - Lịch đặt xe của bạn đã được duyệt',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -435,7 +435,7 @@ class MailTemplate {
             ],
             // Cảnh báo người duyệt (1/4 thời gian)
             'send_to_approvers_when_booking_meet_condition_1' => [
-                'subject' => 'ĐẶT XE - Cảnh báo! Yêu cầu duyệt đặt xe mới đã qua 1/4 thời gian từ lúc đặt',
+                'subject' => '[ĐẶT XE] - Cảnh báo! Yêu cầu duyệt đặt xe mới đã qua 1/4 thời gian từ lúc đặt',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $approverRemindUrl = str_replace('%ID%', $currentItem['id'], $approverRemindUrl);
@@ -445,7 +445,7 @@ class MailTemplate {
             ],
             // Cảnh báo người duyệt (1/2 thời gian)
             'send_to_approvers_when_booking_meet_condition_2' => [
-                'subject' => 'ĐẶT XE - Cảnh báo! Yêu cầu duyệt đặt xe mới đã qua 1/2 thời gian từ lúc đặt',
+                'subject' => '[ĐẶT XE] - Cảnh báo! Yêu cầu duyệt đặt xe mới đã qua 1/2 thời gian từ lúc đặt',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $approverRemindUrl = str_replace('%ID%', $currentItem['id'], $approverRemindUrl);
@@ -455,7 +455,7 @@ class MailTemplate {
             ],
             // Cảnh báo người duyệt [GẤP] (3/4 thời gian)
             'send_to_approvers_when_booking_meet_condition_loop' => [
-                'subject' => 'ĐẶT XE - [GẤP] Yêu cầu duyệt đặt xe mới đã qua 3/4 thời gian từ lúc đặt',
+                'subject' => '[ĐẶT XE] - [GẤP] Yêu cầu duyệt đặt xe mới đã qua 3/4 thời gian từ lúc đặt',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $approverRemindUrl = str_replace('%ID%', $currentItem['id'], $approverRemindUrl);
@@ -465,7 +465,7 @@ class MailTemplate {
             ],
             // Dòng 21: Tài xế từ chối chuyến -> gửi người duyệt/quản lý
             'send_to_booking_user_approve_when_driver_reject_booking' => [
-                'subject' => 'ĐẶT XE - Tài xế từ chối chuyến',
+                'subject' => '[ĐẶT XE] - Tài xế từ chối chuyến',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -478,7 +478,7 @@ class MailTemplate {
             ],
             // Dòng 22: Tài xế từ chối chuyến -> gửi người đặt
             'send_to_booking_user_when_driver_reject_booking' => [
-                'subject' => 'ĐẶT XE - Tài xế từ chối chuyến',
+                'subject' => '[ĐẶT XE] - Tài xế từ chối chuyến',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -487,7 +487,7 @@ class MailTemplate {
             ],
             // Cảnh báo tài xế (1/4 thời gian)
             'send_to_confirm_when_booking_meet_condition_1' => [
-                'subject' => 'ĐẶT XE - Tài xế chưa xác nhận chuyến',
+                'subject' => '[ĐẶT XE] - Tài xế chưa xác nhận chuyến',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $driverConfirmUrl = str_replace('%ID%', $currentItem['id'], $driverConfirmUrl);
@@ -497,7 +497,7 @@ class MailTemplate {
             ],
             // Cảnh báo tài xế (1/2 thời gian)
             'send_to_confirm_when_booking_meet_condition_2' => [
-                'subject' => 'ĐẶT XE - Cảnh báo! Tài xế chưa xác nhận chuyến (1/2 thời gian)',
+                'subject' => '[ĐẶT XE] - Cảnh báo! Tài xế chưa xác nhận chuyến (1/2 thời gian)',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $driverConfirmUrl = str_replace('%ID%', $currentItem['id'], $driverConfirmUrl);
@@ -507,7 +507,7 @@ class MailTemplate {
             ],
             // Cảnh báo tài xế [GẤP] (3/4 thời gian)
             'send_to_confirm_when_booking_meet_condition_loop' => [
-                'subject' => 'ĐẶT XE - [GẤP] Tài xế chưa xác nhận chuyến (3/4 thời gian)',
+                'subject' => '[ĐẶT XE] - [GẤP] Tài xế chưa xác nhận chuyến (3/4 thời gian)',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $driverConfirmUrl = str_replace('%ID%', $currentItem['id'], $driverConfirmUrl);
@@ -517,7 +517,7 @@ class MailTemplate {
             ],
             // Xe Grab hoặc xe dịch vụ (ST002) được duyệt/phân công xong
             'send_to_booking_user_main_user_users_when_manager_confirm_booking' => [
-                'subject' => 'ĐẶT XE - Đã phân công xe',
+                'subject' => '[ĐẶT XE] - Đã phân công xe',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -527,7 +527,7 @@ class MailTemplate {
           
             // Dòng 24: Hệ thống -> Nhắc lịch trước 30 phút -> Người đặt xe
             'send_to_booking_user_before_departure' => [
-                'subject' => 'ĐẶT XE - Sắp đến giờ khởi hành',
+                'subject' => '[ĐẶT XE] - Sắp đến giờ khởi hành',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
@@ -536,7 +536,7 @@ class MailTemplate {
             ],
             // Dòng 25: Hệ thống -> Nhắc lịch trước 30 phút -> Tài xế
             'send_to_driver_before_departure' => [
-                'subject' => 'ĐẶT XE - Sắp đến giờ khởi hành',
+                'subject' => '[ĐẶT XE] - Sắp đến giờ khởi hành',
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
