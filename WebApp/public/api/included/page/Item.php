@@ -209,29 +209,35 @@ class Item {
                 $queryBookingFilter = array_merge($queryBookingFilter, ['isCancelled' => 0]);
             }
         }
-        $queryBookingFilter[] =  [
-            'LOGIC' => 'OR',
-            [
-                '=startDate' => $startDateCondition,
-                '>=startTime' => $startTimeCondition,
-                '<startTime' => $endTimeCondition
-            ],
-            [
-                '=startDate' => $startDateCondition,
-                '>endTime' => $startTimeCondition,
-                '<=endTime' => $endTimeCondition
-            ],
-            [
-                '=startDate' => $startDateCondition,
-                '<=startTime' => $startTimeCondition,
-                '>=endTime' => $endTimeCondition
-            ]
-        ];
 
         $queryBooking = \Booking\Query::getInstance("car_booking_requests", true);
         $queryBooking->setSelect(['*']);
         $queryBooking->setFilter($queryBookingFilter);
-        return $queryBooking->exec()->fetchAll();
+        $candidates = $queryBooking->exec()->fetchAll();
+
+        $reqStart = $startDateCondition instanceof \Bitrix\Main\Type\DateTime ? $startDateCondition->getTimestamp() : strtotime($startDateCondition . " " . $startTimeCondition);
+        $reqEndStr = is_object($endTimeCondition) ? $endTimeCondition->format('H:i:s') : $endTimeCondition;
+        $reqStartDateStr = $startDateCondition instanceof \Bitrix\Main\Type\DateTime ? $startDateCondition->format('Y-m-d') : explode(' ', $startDateCondition)[0];
+        $reqEnd = strtotime($reqStartDateStr . " " . $reqEndStr);
+        if ($reqEnd <= $reqStart) {
+            $reqEnd += 86400;
+        }
+
+        $result = [];
+        foreach ($candidates as $b) {
+            $bStartStr = is_object($b['startDate']) ? $b['startDate']->format('Y-m-d') : explode(' ', $b['startDate'] ?? '')[0];
+            $bEndStr = !empty($b['endDate']) ? (is_object($b['endDate']) ? $b['endDate']->format('Y-m-d') : explode(' ', $b['endDate'])[0]) : $bStartStr;
+            $bStartTimeStr = is_object($b['startTime']) ? $b['startTime']->format('H:i:s') : $b['startTime'];
+            $bEndTimeStr = is_object($b['endTime']) ? $b['endTime']->format('H:i:s') : $b['endTime'];
+
+            $bStart = strtotime($bStartStr . " " . $bStartTimeStr);
+            $bEnd = strtotime($bEndStr . " " . $bEndTimeStr);
+
+            if ($reqStart < $bEnd && $reqEnd > $bStart) {
+                $result[] = $b;
+            }
+        }
+        return $result;
     }
 
     public static function log($oldValue, $newValue, $logType, $userId) {
@@ -938,6 +944,8 @@ class Item {
                     return ['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin'];
                 }
               
+                $endDate = !empty($endDate) ? $endDate : $startDate;
+
                 $queryMasterData = \Booking\Query::getInstance("car_booking_masterdata", true);
                 $queryMasterData->setSelect(['*']);
                 $queryMasterData->setFilter(['mkey' => 'maxDayToBooking']);
@@ -945,7 +953,7 @@ class Item {
 
                 $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
                 $startTimeCondition = $startDateCondition->format('H:i:s');
-                $endDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $endTime, "Y-m-d H:i:s");
+                $endDateCondition = new \Bitrix\Main\Type\DateTime($endDate . " " . $endTime, "Y-m-d H:i:s");
                 $endTimeCondition = $endDateCondition->format('H:i:s');
 
                 // Check booking date range
@@ -969,6 +977,10 @@ class Item {
                              return ['status' => 'error', 'message' => 'Không thể đặt xe quá ' . $maxBookingDays . ' ngày kể từ hôm nay'];
                         }
                     }
+
+                    if ($endDateCondition < $startDateCondition) {
+                        return ['status' => 'error', 'message' => 'Thời gian kết thúc không thể nhỏ hơn thời gian bắt đầu'];
+                    }
                     
                     $isPriority = ($startDateCondition < $currentDate && $hasApprovalRole) ? 1 : 0;
 
@@ -980,6 +992,7 @@ class Item {
                             "departureLocation" => Json::encode(Json::decode($departureLocation)),
                              "roomType" => Json::encode(Json::decode($roomType)),
                             "startDate" => new \Bitrix\Main\Type\DateTime($startDate, "Y-m-d"),
+                            "endDate" => new \Bitrix\Main\Type\DateTime($endDate, "Y-m-d"),
                             "startTime" => new \Bitrix\Main\Type\DateTime($startTime, "H:i:s"),
                             "endTime" => new \Bitrix\Main\Type\DateTime($endTime, "H:i:s"),
                             "employeeList" => Json::encode(Json::decode($employeeList)),	
@@ -1373,14 +1386,13 @@ class Item {
                         // Check trùng booking với cùng tài xế hoặc cùng xe trong khung giờ: Check xem Xe hoặc tài xế có bị trùng lịch với booking khác hay không, 
                         // chỉ áp dụng cho các booking đã được phần công (isApproved = 2) hoặc đã được tài xế xác nhận (isApproved = 3) và chưa bị huỷ (isCancelled = 0)
                         $startDateStr = is_object($currentItem['startDate']) ? $currentItem['startDate']->format('Y-m-d') : explode(' ', $currentItem['startDate'] ?? '')[0];
+                        $endDateStr = !empty($currentItem['endDate']) ? (is_object($currentItem['endDate']) ? $currentItem['endDate']->format('Y-m-d') : explode(' ', $currentItem['endDate'])[0]) : $startDateStr;
                         $startTimeStr = is_object($currentItem['startTime']) ? $currentItem['startTime']->format('H:i:s') : $currentItem['startTime'];
                         $endTimeStr = is_object($currentItem['endTime']) ? $currentItem['endTime']->format('H:i:s') : $currentItem['endTime'];
 
                         $startDateCondition = new \Bitrix\Main\Type\DateTime($startDateStr . " " . $startTimeStr, "Y-m-d H:i:s");
-                        $startTimeCondition = $startDateCondition->format('H:i:s');
-                        $endDateCondition = new \Bitrix\Main\Type\DateTime($startDateStr . " " . $endTimeStr, "Y-m-d H:i:s");
-                        $endTimeCondition = $endDateCondition->format('H:i:s');
-                        $overlappingBookings = self::getDuplicatedBookingWithDriverAndCar($id, $roomKey, $driverUserKey, $startDateCondition, $startTimeCondition, $endTimeCondition);
+                        $endDateCondition = new \Bitrix\Main\Type\DateTime($endDateStr . " " . $endTimeStr, "Y-m-d H:i:s");
+                        $overlappingBookings = self::getDuplicatedBookingWithDriverAndCar($id, $roomKey, $driverUserKey, $startDateCondition, $endDateCondition);
                         if (!empty($overlappingBookings)) {
                             return ['status' => 'error', 'message' => 'Tài xế hoặc xe đã được phân công vào khung giờ này'];
                         }
@@ -1531,11 +1543,9 @@ class Item {
 
     // Check trùng booking với cùng tài xế hoặc cùng xe trong khung giờ: Check xem Xe hoặc tài xế có bị trùng lịch với booking khác hay không, 
     // chỉ áp dụng cho các booking đã được phần công (isApproved = 2) hoặc đã được tài xế xác nhận (isApproved = 3) và chưa bị huỷ (isCancelled = 0)
-    public static function getDuplicatedBookingWithDriverAndCar($id, $roomKey, $driverKey, $startDateCondition, $startTimeCondition, $endTimeCondition) {
+    public static function getDuplicatedBookingWithDriverAndCar($id, $roomKey, $driverKey, $startDateCondition, $endDateCondition) {
         $queryBookingFilter = [];
         $queryBookingFilter = array_merge($queryBookingFilter, ['!id' => $id]);
-        // $queryBookingFilter = array_merge($queryBookingFilter, ['%room' => '"mkey":"'.$roomKey.'"']);
-        // $queryBookingFilter = array_merge($queryBookingFilter, ['%driverUser' => '"mkey":"'.$driverKey.'"']);
         $queryBookingFilter = array_merge($queryBookingFilter, ['isCancelled' => 0]);
         $queryBookingFilter = array_merge($queryBookingFilter, ['@isApproved' => [2, 3, 4]]);
         
@@ -1551,30 +1561,30 @@ class Item {
         } else {
             return []; // Không có cả xe và tài xế thì không cần check trùng
         }
-        
-        $queryBookingFilter[] =  [
-            'LOGIC' => 'OR',
-            [
-                '=startDate' => $startDateCondition,
-                '>=startTime' => $startTimeCondition,
-                '<startTime' => $endTimeCondition
-            ],
-            [
-                '=startDate' => $startDateCondition,
-                '>endTime' => $startTimeCondition,
-                '<=endTime' => $endTimeCondition
-            ],
-            [
-                '=startDate' => $startDateCondition,
-                '<=startTime' => $startTimeCondition,
-                '>=endTime' => $endTimeCondition
-            ]
-        ];
 
         $queryBooking = \Booking\Query::getInstance("car_booking_requests", true);
         $queryBooking->setSelect(['*']);
         $queryBooking->setFilter($queryBookingFilter);
-        return $queryBooking->exec()->fetchAll();
+        $candidates = $queryBooking->exec()->fetchAll();
+
+        $reqStart = $startDateCondition instanceof \Bitrix\Main\Type\DateTime ? $startDateCondition->getTimestamp() : strtotime($startDateCondition);
+        $reqEnd = $endDateCondition instanceof \Bitrix\Main\Type\DateTime ? $endDateCondition->getTimestamp() : strtotime($endDateCondition);
+
+        $result = [];
+        foreach ($candidates as $b) {
+            $bStartStr = is_object($b['startDate']) ? $b['startDate']->format('Y-m-d') : explode(' ', $b['startDate'] ?? '')[0];
+            $bEndStr = !empty($b['endDate']) ? (is_object($b['endDate']) ? $b['endDate']->format('Y-m-d') : explode(' ', $b['endDate'])[0]) : $bStartStr;
+            $bStartTimeStr = is_object($b['startTime']) ? $b['startTime']->format('H:i:s') : $b['startTime'];
+            $bEndTimeStr = is_object($b['endTime']) ? $b['endTime']->format('H:i:s') : $b['endTime'];
+
+            $bStart = strtotime($bStartStr . " " . $bStartTimeStr);
+            $bEnd = strtotime($bEndStr . " " . $bEndTimeStr);
+
+            if ($reqStart < $bEnd && $reqEnd > $bStart) {
+                $result[] = $b;
+            }
+        }
+        return $result;
     }
 
 }

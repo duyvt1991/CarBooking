@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { format, addDays, startOfWeek, startOfDay, startOfMonth, endOfMonth, addMinutes, isSameDay, eachDayOfInterval, getDay, isSameWeek, isSameMonth } from 'date-fns';
+import { format, addDays, startOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth, addMinutes, isSameDay, eachDayOfInterval, getDay, isSameWeek, isSameMonth } from 'date-fns';
 import { vi, ja } from 'date-fns/locale';
 import { FaCalendarWeek, FaCalendarDay, FaCalendarAlt, FaArrowLeft, FaArrowRight, FaCalendar } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -118,91 +118,124 @@ const Calendar = ({ events, myCalendar = false, onMyCalendarClick, onCalendarCha
     setTooltip({ visible: false, x: 0, y: 0, event: null });
   };
 
-  const renderEvents = (day, timeSlot) => {
-    const dayEvents = events.filter(event => isSameDay(new Date(event.startDate), day));
-    let timeSlots = {};
-    const loopDayEvents = (callback, timeSlot) => {
-      dayEvents.forEach((e, i) => {
-        const eventStart = new Date(`${e.startDate} ${e.startTime}`);
-        const eventEnd = new Date(`${e.startDate} ${e.endTime}`);
-        if (
-          eventStart.getHours() * 60 + eventStart.getMinutes() <= timeSlot.getHours() * 60 + timeSlot.getMinutes()
-          && eventEnd.getHours() * 60 + eventEnd.getMinutes() > timeSlot.getHours() * 60 + timeSlot.getMinutes()
-        ) {
-          callback(e, i);
+  const parseDateTime = (d, t) => {
+    if (!d) return new Date();
+    const dateOnly = String(d).trim().split(' ')[0];
+    const timeOnly = t ? String(t).trim().slice(0, 8) : '00:00:00';
+    return new Date(`${dateOnly}T${timeOnly}`);
+  };
+
+  const computeDayEventsLayout = (dayEvents) => {
+    if (!dayEvents || dayEvents.length === 0) return [];
+
+    const sorted = [...dayEvents].sort((a, b) => {
+      if (a.segStart.getTime() !== b.segStart.getTime()) {
+        return a.segStart.getTime() - b.segStart.getTime();
+      }
+      return (b.segEnd.getTime() - b.segStart.getTime()) - (a.segEnd.getTime() - a.segStart.getTime());
+    });
+
+    const clusters = [];
+    let currentCluster = [];
+    let clusterEnd = 0;
+
+    sorted.forEach(event => {
+      const eStart = event.segStart.getTime();
+      const eEnd = event.segEnd.getTime();
+
+      if (currentCluster.length === 0) {
+        currentCluster.push(event);
+        clusterEnd = eEnd;
+      } else {
+        if (eStart < clusterEnd) {
+          currentCluster.push(event);
+          if (eEnd > clusterEnd) clusterEnd = eEnd;
+        } else {
+          clusters.push(currentCluster);
+          currentCluster = [event];
+          clusterEnd = eEnd;
         }
-      });
+      }
+    });
+    if (currentCluster.length > 0) {
+      clusters.push(currentCluster);
     }
-    const totalSlots = 48; // half-hour slots between 00:00 and 23:30 (inclusive)
 
-    Array.from({ length: totalSlots }, (_, i) => {
-      const minutesFromMidnight = i * 30;
-      return addMinutes(startOfDay(day), minutesFromMidnight);
-    }).forEach((timeSlot, index) => {
-      loopDayEvents((e, i) => {
-      timeSlots[index] = timeSlots[index] || {};
-      timeSlots[index].dayEventIndexs = timeSlots[index].dayEventIndexs || [];
-      timeSlots[index].dayEventIndexs.push(i);
-      }, timeSlot);
-    });
+    clusters.forEach(cluster => {
+      const columns = [];
 
-    Object.values(timeSlots).forEach(({ dayEventIndexs }) => {
-      dayEventIndexs.forEach(i => {
-        const newWidth = (100 - padding) / dayEventIndexs.length;
-        dayEvents[i].dayEventIndexs = dayEvents[i].dayEventIndexs || [];
-        dayEvents[i].dayEventIndexs.push(...dayEventIndexs);
-        dayEvents[i].dayEventIndexs = Array.from(new Set(dayEvents[i].dayEventIndexs));
-        dayEvents[i].width = Math.min(newWidth, dayEvents[i].width ?? 100);
-      });
-    });
-
-    loopDayEvents((e, i) => {
-      const dayEventIndexs = e.dayEventIndexs || [];
-      dayEventIndexs.forEach(j => {
-        if (j !== i) {
-          dayEvents[j].width = Math.min(dayEvents[i].width, dayEvents[j].width ?? 100);
-        }
-      });
-    }, timeSlot);
-    
-    loopDayEvents((e1, i1) => {
-      let emptys = [ {start: 0, end: 100} ];
-      loopDayEvents((e2, i2) => {
-        if (i1 !== i2) {
-          if (dayEvents[i2].offsetLeft !== undefined) {
-            emptys = emptys.reduce((acc, empty) => {
-              if (empty.start < dayEvents[i2].offsetLeft && empty.end > dayEvents[i2].offsetLeft) {
-                acc.push({start: empty.start, end: dayEvents[i2].offsetLeft});
-                if (empty.end > dayEvents[i2].offsetLeft + dayEvents[i2].width) {
-                  acc.push({start: dayEvents[i2].offsetLeft + dayEvents[i2].width, end: empty.end});
-                }
-              } else if (empty.start < dayEvents[i2].offsetLeft + dayEvents[i2].width && empty.end > dayEvents[i2].offsetLeft + dayEvents[i2].width) {
-                acc.push({start: dayEvents[i2].offsetLeft + dayEvents[i2].width, end: empty.end});
-                if (empty.start < dayEvents[i2].offsetLeft) {
-                  acc.push({start: empty.start, end: dayEvents[i2].offsetLeft});
-                }
-              } else if (empty.start >= dayEvents[i2].offsetLeft + dayEvents[i2].width || empty.end <= dayEvents[i2].offsetLeft) {
-                acc.push(empty);
-              }
-              return acc;
-            }, []);
+      cluster.forEach(event => {
+        let placed = false;
+        for (let i = 0; i < columns.length; i++) {
+          const colEvents = columns[i];
+          const lastEventInCol = colEvents[colEvents.length - 1];
+          if (lastEventInCol.segEnd.getTime() <= event.segStart.getTime()) {
+            colEvents.push(event);
+            event.colIndex = i;
+            placed = true;
+            break;
           }
         }
-      }, timeSlot);
-      emptys.forEach(empty => {
-        if (Math.round((empty.end - empty.start) * 100) >= Math.round(dayEvents[i1].width * 100) && dayEvents[i1].offsetLeft === undefined) {
-          dayEvents[i1].offsetLeft = empty.start;
-          return;
+        if (!placed) {
+          event.colIndex = columns.length;
+          columns.push([event]);
         }
       });
-    }, timeSlot);
+
+      const maxCols = columns.length;
+      cluster.forEach(event => {
+        event.maxCols = maxCols;
+        event.width = 100 / maxCols;
+        event.offsetLeft = event.colIndex * (100 / maxCols);
+      });
+    });
+
+    return sorted;
+  };
+
+  const renderEvents = (day, timeSlot) => {
+    const dayStart = startOfDay(day);
+    const nextDayStart = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+
+    const rawDayEvents = events.filter(e => {
+      const eStart = parseDateTime(e.startDate, e.startTime);
+      const eEnd = parseDateTime(e.endDate || e.startDate, e.endTime);
+      return eStart < nextDayStart && eEnd > dayStart;
+    }).map(e => {
+      const eStart = parseDateTime(e.startDate, e.startTime);
+      const eEnd = parseDateTime(e.endDate || e.startDate, e.endTime);
+      const isStartOfTrip = eStart >= dayStart;
+      const isEndOfTrip = eEnd <= nextDayStart;
+      const segStart = isStartOfTrip ? eStart : dayStart;
+      const segEnd = isEndOfTrip ? eEnd : nextDayStart;
+      return {
+        ...e,
+        eStart,
+        eEnd,
+        segStart,
+        segEnd,
+        isStartOfTrip,
+        isEndOfTrip
+      };
+    });
+
+    const dayEvents = computeDayEventsLayout(rawDayEvents);
 
     return dayEvents.map((event, index) => {
-      const shouldRenderEvent = new Date(`${event.startDate} ${event.startTime}`).getHours() === timeSlot.getHours()
-      && new Date(`${event.startDate} ${event.startTime}`).getMinutes() === timeSlot.getMinutes();
-      const eventStart = new Date(`${event.startDate} ${event.startTime}`);
-      const eventEnd = new Date(`${event.startDate} ${event.endTime}`);
-      const duration = (eventEnd - eventStart) / (1000 * 60 * 30) * halfHourPixels;
+      const shouldRenderEvent = event.segStart.getHours() === timeSlot.getHours()
+      && event.segStart.getMinutes() === timeSlot.getMinutes();
+      const duration = (event.segEnd.getTime() - event.segStart.getTime()) / (1000 * 60 * 30) * halfHourPixels;
+
+      let timeText = '';
+      if (event.isStartOfTrip && event.isEndOfTrip) {
+        timeText = `${format(event.eStart, 'HH:mm')} - ${format(event.eEnd, 'HH:mm')}`;
+      } else if (event.isStartOfTrip && !event.isEndOfTrip) {
+        timeText = `${format(event.eStart, 'HH:mm')} - 24:00`;
+      } else if (!event.isStartOfTrip && event.isEndOfTrip) {
+        timeText = `00:00 - ${format(event.eEnd, 'HH:mm')}`;
+      } else {
+        timeText = `00:00 - 24:00`;
+      }
 
       return shouldRenderEvent ? (
         <div key={index} 
@@ -214,13 +247,13 @@ const Calendar = ({ events, myCalendar = false, onMyCalendarClick, onCalendarCha
           style={{ 
             backgroundColor: hexToRgba(event.color, event.opacity ?? 1),
             color: constrast(event.color),
-            height: `${duration-1}px`,
+            height: `${Math.max(duration - 2, 18)}px`,
             width: `calc(${event.width}% - 1px)`,
             left: `${event.offsetLeft}%`,
             border: event.isPriority ? `2px solid ${event.color}` : 'none'
           }}>
-          <strong>{event.title}</strong>
-          <span className="event-timeslot">{format(eventStart, 'HH:mm')} - {format(eventEnd, 'HH:mm')}</span>
+          <strong>{event.title || 'Đặt xe'}</strong>
+          <span className="event-timeslot">{timeText}</span>
           {!!event.canPriorityBooking && <button className='btn-priority' onClick={(e) => {
             e.stopPropagation();
             onPriorityClick(event.id);
@@ -231,7 +264,13 @@ const Calendar = ({ events, myCalendar = false, onMyCalendarClick, onCalendarCha
   };
 
   const renderMonthEvents = (day) => {
-    const dayEvents = events.filter(event => isSameDay(new Date(event.startDate), day));
+    const dayStart = startOfDay(day);
+    const nextDayStart = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    const dayEvents = events.filter(e => {
+      const eStart = parseDateTime(e.startDate, e.startTime);
+      const eEnd = parseDateTime(e.endDate || e.startDate, e.endTime);
+      return eStart < nextDayStart && eEnd > dayStart;
+    });
     return (
       <div className="month-events">
         {dayEvents.length > 0 && <span onClick={() => handleDayEvent(day)}>{t('common.[count] đặt xe', { count: dayEvents.length })}</span>}

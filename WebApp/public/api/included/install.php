@@ -13,7 +13,7 @@ class Install {
         }
         $connection = Application::getConnection("car_booking_connection");
 
-        $RESET_DATA = true;
+        $RESET_DATA = false;
         if ($request->getPost("dropTable") && $RESET_DATA) { // TODO: Add false to prevent accidental deletion
             $connection->queryExecute("DROP TABLE IF EXISTS car_booking_masterdata");
             $connection->queryExecute("DROP TABLE IF EXISTS car_booking_requests");

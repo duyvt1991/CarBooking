@@ -160,6 +160,18 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]),
+            new DateField('endDate', [
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if ($value instanceof Date) {
+                                return $value->format('Y-m-d');
+                            }
+                            return $value;
+                        }
+                    ];
+                }
+            ]),
             new StringField('startTime'),
             new StringField('endTime'),
             new IntegerField('size', [

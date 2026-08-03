@@ -244,7 +244,9 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                 case "carLine":
                     return "Dòng xe đề xuất";
                 case "startDate":
-                    return "Ngày sử dụng";
+                    return "Ngày bắt đầu";
+                case "endDate":
+                    return "Ngày kết thúc";
                 case "startTime":
                     return "Bắt đầu lúc";
                 case "endTime":

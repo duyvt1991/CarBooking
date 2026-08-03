@@ -1,4 +1,4 @@
-import { startOfWeek, endOfWeek, eachDayOfInterval, format } from "date-fns";
+import { startOfWeek, endOfWeek, eachDayOfInterval, format, addDays } from "date-fns";
 import { vi } from "date-fns/locale";
 
 const mockMasterDataVersion = {
@@ -140,6 +140,11 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
   const randomBookingsCount = Math.floor(Math.random() * 4) + 3;
 
   for (let j = 0; j < randomBookingsCount; j++) {
+    const isMultiDay = (j % 3 === 0);
+    const extraDays = isMultiDay ? (j % 2 === 0 ? 2 : 1) : 0;
+    const endDateObj = addDays(date, extraDays);
+    const formattedEndDate = format(endDateObj, 'yyyy-MM-dd', { locale: vi });
+
     const randomDepartment = mockMasterData.departments[Math.floor(Math.random() * mockMasterData.departments.length)];
     const activeBuildings = mockMasterData.buildings.filter(building => building);
     const randomBuilding = activeBuildings[Math.floor(Math.random() * activeBuildings.length)];
@@ -196,6 +201,7 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
       roomType: roomType,
       createdDate: "2026-05-26 12:00:00",
       startDate: formattedDate,
+      endDate: formattedEndDate,
       startTime: startTime,
       endTime: endTime,
       // equipments: randomEquipments,
@@ -904,7 +910,7 @@ const mockLogList = [
   { id: '3', ...users[2], action: 'Action 3', createdDate: '2026-05-26 12:00:00' },
 ];
 
-const mockReviewList = normalizedBookings.filter(booking => booking.isCancelled === 0 && ((new Date() > new Date(`${booking.startDate} ${booking.endTime}`)) || booking.isApproved === 4));
+const mockReviewList = normalizedBookings.filter(booking => booking.isCancelled === 0 && ((new Date() > new Date(`${booking.endDate || booking.startDate} ${booking.endTime}`)) || booking.isApproved === 4));
 
 
 const calculateGuestCounts = (bookings) => {
@@ -1002,7 +1008,7 @@ const mockReportUsageDemand = calculateUsageDemand(bookings);
 
 
 const calculateManagerReviewScores = (bookings) => {
-  const managerReviewScores = { score1: 0, score2: 0, score3: 0, score4: 0, score5: 0 };
+const managerReviewScores = { score1: 0, score2: 0, score3: 0, score4: 0, score5: 0 };
 
   bookings.forEach(booking => {
     const { managerReviewScore } = booking;
@@ -1019,10 +1025,12 @@ const mockReportManagerReview = calculateManagerReviewScores(bookings);
 
 const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room, statusApproved }) => 
   [...normalizedBookings, ...additionalBookings.map(normalizeBookingByAssignmentStatus)].filter(booking => {
-    const bookingDate = new Date(booking.startDate);
+    const bookingStart = new Date(`${booking.startDate} ${booking.startTime}`);
+    const endDateStr = booking.endDate || booking.startDate;
+    const bookingEnd = new Date(`${endDateStr} ${booking.endTime}`);
     const fromDateTime = new Date(fromDate);
     const endDateTime = new Date(endDate);
-    let isValid = bookingDate >= fromDateTime && bookingDate <= endDateTime;
+    let isValid = bookingStart <= endDateTime && bookingEnd >= fromDateTime;
 
     if (roomType) {
       isValid = isValid && booking.roomType.mkey === roomType;
@@ -1128,9 +1136,9 @@ export const mockData = (action, data) => {
               tab = filters.tab;
             } catch(e) {}
             if (tab === 'cancelled') {
-              return booking.isCancelled === 1 && new Date() < new Date(`${booking.startDate} ${booking.endTime}`);
+              return booking.isCancelled === 1 && new Date() < new Date(`${booking.endDate || booking.startDate} ${booking.endTime}`);
             } else {
-              return booking.isCancelled === 0 && new Date() < new Date(`${booking.startDate} ${booking.endTime}`);
+              return booking.isCancelled === 0 && new Date() < new Date(`${booking.endDate || booking.startDate} ${booking.endTime}`);
             }
           }), page, limit);
         case 'approveBookingList':
@@ -1145,7 +1153,7 @@ export const mockData = (action, data) => {
                 || (booking.isApproved === 1 )
                 || (booking.isApproved === -2)
               ) 
-                && new Date() < new Date(`${booking.startDate} ${booking.endTime}`);
+                && new Date() < new Date(`${booking.endDate || booking.startDate} ${booking.endTime}`);
             } else {
               return true;
             }
@@ -1169,7 +1177,7 @@ export const mockData = (action, data) => {
             } catch(e) {}
             if (tab === 'pending') {
               return booking.isCancelled === 0 && (booking.isApproved === 2 ) 
-                && new Date() < new Date(`${booking.startDate} ${booking.endTime}`);
+                && new Date() < new Date(`${booking.endDate || booking.startDate} ${booking.endTime}`);
             } else if (tab === 'review') {
               return booking.isCancelled === 0 && (booking.isApproved === 4 );
             }  else {
