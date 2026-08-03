@@ -15,7 +15,7 @@ const getVal = (val) => {
     return String(val);
 };
 
-function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm, request, errors, handleChange }) {
+function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm, request, errors, handleChange, hideLabel = false, containerClassName = "mb-4" }) {
     const { t } = useTranslation();
     const colorValue = /^#[0-9A-F]{6}$/i.test(request[field] ?? '') ? request[field] : '#000000';
     const isRequired = typeof initForm[field].required === 'function'
@@ -102,10 +102,10 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
     };
 
     return (
-        <div className="mb-4 flex items-center">
-            <label className={`block text-gray-700 ${labelWidth}`} htmlFor={field}>
+        <div className={`${containerClassName} flex items-center`}>
+            {!hideLabel && <label className={`block text-gray-700 ${labelWidth}`} htmlFor={field}>
                 {isRequired && <span className="text-red-600">*</span>} {t(initForm[field].label)}:
-            </label>
+            </label>}
             <div className="w-full relative">
                 {initForm[field].type === 'suggest' ? (<>
                     <SuggestInput 
@@ -257,7 +257,11 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
                             }
                         }}
                         dateFormat="dd/MM/yyyy"
-                        minDate={initForm[field].disabledPast ? new Date() : null}
+                        minDate={
+                            typeof initForm[field].minDate === 'function'
+                                ? initForm[field].minDate(request)
+                                : (initForm[field].minDate ?? (initForm[field].disabledPast ? new Date() : null))
+                        }
                         className={`block w-full px-3 py-2 border rounded-lg placeholder-gray-400 ${errors[field] ? 'border-red-500' : ''}`}
                         required
                         />

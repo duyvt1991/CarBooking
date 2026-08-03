@@ -79,6 +79,11 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
     ? request.startDate.toISOString().split('T')[0] 
     : String(request?.startDate || '').split(' ')[0];
 
+  const endDateStr = typeof request?.endDate === 'object' && request?.endDate.toISOString 
+    ? request.endDate.toISOString().split('T')[0] 
+    : String(request?.endDate || request?.startDate || '').split(' ')[0];
+
+
   const reqStartTimeStr = typeof request?.startTime === 'object' && request?.startTime.toISOString 
     ? request.startTime.toISOString().split('T')[1].substring(0,8) 
     : String(request?.startTime || '');
@@ -92,7 +97,7 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
     
     let isMounted = true;
     const fromDateStr = `${startDateStr} 00:00:00`;
-    const toDateStr = `${startDateStr} 23:59:59`;
+    const toDateStr = `${endDateStr} 23:59:59`;
     
     getBookings('day', {
       fromDate: fromDateStr,
@@ -100,7 +105,7 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
     }).then(data => {
       if (!isMounted) return;
       const reqStart = new Date(`${startDateStr} ${reqStartTimeStr}`).getTime();
-      const reqEnd = new Date(`${startDateStr} ${reqEndTimeStr}`).getTime();
+      const reqEnd = new Date(`${endDateStr} ${reqEndTimeStr}`).getTime();
       
       const overlappingBookings = data.filter(b => {
         if (String(b.id) === String(request.id)) return false;
@@ -122,11 +127,12 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
         if (isServiceCarVal !== '0') return false;
         
         const bStartStr = typeof b.startDate === 'object' && b.startDate.toISOString ? b.startDate.toISOString().split('T')[0] : String(b.startDate).split(' ')[0];
+        const bEndStr = b.endDate ? (typeof b.endDate === 'object' && b.endDate.toISOString ? b.endDate.toISOString().split('T')[0] : String(b.endDate).split(' ')[0]) : bStartStr;
         const bStartTimeStr = typeof b.startTime === 'object' && b.startTime.toISOString ? b.startTime.toISOString().split('T')[1].substring(0,8) : String(b.startTime);
         const bEndTimeStr = typeof b.endTime === 'object' && b.endTime.toISOString ? b.endTime.toISOString().split('T')[1].substring(0,8) : String(b.endTime);
 
         const bStart = new Date(`${bStartStr} ${bStartTimeStr}`).getTime();
-        const bEnd = new Date(`${bStartStr} ${bEndTimeStr}`).getTime();
+        const bEnd = new Date(`${bEndStr} ${bEndTimeStr}`).getTime();
         
         return (reqStart >= bStart && reqStart < bEnd) ||
                (reqEnd > bStart && reqEnd <= bEnd) ||
@@ -156,7 +162,7 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
     });
 
     return () => { isMounted = false; };
-  }, [startDateStr, reqStartTimeStr, reqEndTimeStr, request?.id, masterData.rooms?.length, masterData.drivers?.length]);
+  }, [startDateStr, endDateStr, reqStartTimeStr, reqEndTimeStr, request?.id, masterData.rooms?.length, masterData.drivers?.length]);
 
   const getRoomOptions = () => {
     const rooms = availableRooms !== null ? availableRooms : (masterData.rooms || []);

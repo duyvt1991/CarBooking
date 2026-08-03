@@ -135,11 +135,10 @@ const handleRoomTypeChange = (field, value) => {
       const formattedEvents = data.filter(booking => booking.room?.mkey)
       .map(booking => ({
         id: booking.id,
-        // room: booking.room.mkey,
-        // title: booking.room.mvalue,
         room: booking.room?.mkey,
         title: booking.room?.mvalue,
         startDate: booking.startDate,
+        endDate: booking.endDate || booking.startDate,
         startTime: booking.startTime,
         endTime: booking.endTime,
         color: booking.room?.color || booking.room?.options?.color || booking.roomType?.color || booking.roomType?.options?.color || '#17a34a',
@@ -149,12 +148,12 @@ const handleRoomTypeChange = (field, value) => {
         tooltip: <table className="w-full text-sm overflow-hidden">
         <tbody className="divide-y divide-gray-200">
           <tr>
-            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Ngày sử dụng')}</td>
-            <td className="px-3 py-2 text-gray-600">{formatDate(booking.startDate)}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('booking.Ngày bắt đầu')}</td>
+            <td className="px-3 py-2 text-gray-600">{`${formatDate(booking.startDate)} ${formatTime(booking.startTime).slice(0, 5)}`}</td>
           </tr>
           <tr>
-            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Khung giờ sử dụng')}</td>
-            <td className="px-3 py-2 text-gray-600">{`${formatTime(booking.startTime).replace(":00", "")} - ${formatTime(booking.endTime).replace(":00", "")}`}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('booking.Ngày kết thúc')}</td>
+            <td className="px-3 py-2 text-gray-600">{`${formatDate(booking.endDate || booking.startDate)} ${formatTime(booking.endTime).slice(0, 5)}`}</td>
           </tr>
           {/* <tr>
             <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Loại xe')}</td>
@@ -247,7 +246,8 @@ const handleRoomTypeChange = (field, value) => {
     const actionButtons = [];
     const currentTime = new Date();
     const bookingStartTime = new Date(`${request?.startDate} ${request?.startTime}`);
-    const bookingEndTime = new Date(`${request?.startDate} ${request?.endTime}`);
+    const endDateStr = request?.endDate || request?.startDate;
+    const bookingEndTime = new Date(`${endDateStr} ${request?.endTime}`);
     const isBookingInProgress = currentTime >= bookingStartTime && currentTime <= bookingEndTime;
     const isPastBooking = currentTime > bookingEndTime;
 
@@ -369,9 +369,8 @@ const handleRoomTypeChange = (field, value) => {
               onClick: () => goToBookingForm('')
             }
           ]}
-          addNewPath={routes.searchByDemand.path} 
-          labelAddNew={routes.searchByDemand.label}
           headerLabel={routes.bookingCalendar.label} 
+          hideAddNew={true}
           backToUrl={-1}
         />}
       {Object.keys(initForm).filter(field => initForm[field].label).map(field => (

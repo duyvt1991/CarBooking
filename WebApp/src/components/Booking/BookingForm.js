@@ -24,12 +24,18 @@ const generateTimeOptions = () => {
   return timeOptions;
 };
 
-const filterEndTimeOptions = (startTime, isEndBooking) => {
-  const startTimeIndex = generateTimeOptions().findIndex(option => option.mkey === startTime);
+const filterEndTimeOptions = (startTime, startDate, endDate, isEndBooking) => {
+  const allOptions = generateTimeOptions();
+  // Nếu khác ngày thì load toàn bộ danh sách giờ (không filter theo startTime)
+  if (startDate && endDate && startDate !== endDate) {
+    return allOptions;
+  }
+  // Nếu cùng ngày thì chỉ lấy các khung giờ sau startTime như cũ
+  const startTimeIndex = allOptions.findIndex(option => option.mkey === startTime);
   if (!isEndBooking) {
-    return generateTimeOptions().slice(startTimeIndex + 1);
+    return startTimeIndex >= 0 ? allOptions.slice(startTimeIndex + 1) : allOptions;
   } else {
-    return generateTimeOptions().slice(startTimeIndex + 1).filter(option => {
+    return (startTimeIndex >= 0 ? allOptions.slice(startTimeIndex + 1) : allOptions).filter(option => {
       const currentTime = new Date();
       const currentDateString = currentTime.getFullYear() + '-' + (currentTime.getMonth() + 1).toString().padStart(2, '0') + '-' + currentTime.getDate().toString().padStart(2, '0');
       const bookingEndTime = new Date(`${currentDateString} ${option.mkey}`);
@@ -65,11 +71,10 @@ export const initForm = {
   startDate: { 
     column: 1,
     value: '', 
-    label: 'booking.Ngày sử dụng', 
+    label: 'booking.Ngày bắt đầu', 
     type: 'datepicker',
     disabled: (request) => request.isPriority || request.isEndBooking,
-    disabledPast: true,
-    validate: (value, t) => !value ? t('booking.Ngày sử dụng không được để trống') : '' 
+    validate: (value, t) => !value ? t('booking.Ngày bắt đầu không được để trống') : '' 
   },
   startTime: { 
     column: 1,
@@ -80,6 +85,27 @@ export const initForm = {
     options: generateTimeOptions().slice(0, 48),
     validate: (value, t) => !value ? t('booking.Bắt đầu lúc không được để trống') : '' 
   },
+  endDate: { 
+    column: 1,
+    value: '', 
+    label: 'booking.Ngày kết thúc', 
+    type: 'datepicker',
+    disabled: (request) => request.isPriority,
+    minDate: (request) => {
+      if (request?.startDate) {
+        const parts = String(request.startDate).split('-');
+        if (parts.length === 3) {
+          return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        }
+      }
+      return null;
+    },
+    validate: (value, t, request) => {
+      if (!value) return t('booking.Ngày kết thúc không được để trống');
+      if (request?.startDate && value < request.startDate) return t('booking.Ngày kết thúc không được nhỏ hơn ngày bắt đầu');
+      return '';
+    } 
+  },
   endTime: { 
     column: 1,
     value: '', 
@@ -87,22 +113,20 @@ export const initForm = {
     type: 'select',
     disabled: (request) => request.isPriority,
     options: generateTimeOptions(),
-    validate: (value, t) => !value ? t('booking.Kết thúc lúc không được để trống') : '' 
+    validate: (value, t, request) => {
+      if (!value) return t('booking.Kết thúc lúc không được để trống');
+      if (request?.startDate && request?.endDate && request.startDate === request.endDate && request.startTime) {
+        if (value <= request.startTime) return t('booking.Giờ kết thúc phải lớn hơn giờ bắt đầu khi cùng ngày');
+      }
+      return '';
+    } 
   },
   employeeNumber: { 
     column: 1,
     value: '', 
     label: 'booking.Số lượng người', 
     type: 'number',
-    // validate: (value, t) => !value ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
   },
-  // employees: { 
-  //   column: 1,
-  //   value: '', 
-  //   label: 'booking.Tên nhân viên tham gia', 
-  //   type: 'textarea',
-  //   // validate: (value, t) => !value ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
-  // },
   employeeList: { 
     column: 1,
     value: [], 
@@ -112,7 +136,6 @@ export const initForm = {
     tagsDisplayField: 'mvalue',
     tagsMappingField: [['*', 'employeeList']],
     tagsSchema: { key: 'mkey', value: 'mvalue' },
-    // validate: (value, t) => !value.length ? t('booking.Tên nhân viên tham gia không được để trống') : '' 
   },
   usagePurposeDetail: { 
     column: 1,
@@ -220,14 +243,47 @@ function BookingForm({ request, setRequest, errors, handleChange }) {
 
   const [initFormState, setInitFormState] = useState(initForm);
   
-  const setEndTimeOptions = (value, isEndBooking) => {
-    initForm.endTime.options = filterEndTimeOptions(value, isEndBooking);
-    setInitFormState({ ...initForm });
+  const setEndTimeOptions = (startTime, startDate, endDate, isEndBooking) => {
+    const options = filterEndTimeOptions(startTime, startDate, endDate, isEndBooking);
+    initForm.endTime.options = options;
+    setInitFormState(prevState => ({
+      ...prevState,
+      endTime: {
+        ...prevState.endTime,
+        options
+      }
+    }));
+  };
+
+  const handleStartDateChange = (field, value) => {
+    let newEndDate = request.endDate;
+    let newEndTime = request.endTime;
+
+    if (!newEndDate) {
+      newEndDate = value;
+    } else if (newEndDate < value) {
+      newEndDate = '';
+      newEndTime = '';
+    } else if (newEndDate === value && newEndTime && request.startTime && newEndTime <= request.startTime) {
+      newEndTime = '';
+    }
+
+    handleChange(['startDate', 'endDate', 'endTime'], [value, newEndDate, newEndTime]);
+    setEndTimeOptions(request.startTime, value, newEndDate, request.isEndBooking);
+  };
+
+  const handleEndDateChange = (field, value) => {
+    handleChange(field, value);
+    setEndTimeOptions(request.startTime, request.startDate, value, request.isEndBooking);
   };
 
   const handleStartTimeChange = (field, value) => {
-    handleChange([field, "endTime"], [value, '']);
-    setEndTimeOptions(value, request.isEndBooking);
+    if (request.startDate === request.endDate && request.endTime && request.endTime <= value) {
+      handleChange([field, "endTime"], [value, '']);
+    } else {
+      handleChange(field, value);
+    }
+    setEndTimeOptions(value, request.startDate, request.endDate, request.isEndBooking);
   };
 
   const toggleClientFieldsDisplay = (value) => {
@@ -237,17 +293,11 @@ function BookingForm({ request, setRequest, errors, handleChange }) {
       initForm.clients.validate = (value, t) => !value ? t('booking.Số lượng khách không được để trống') : '';
       initForm.clientNames.label = 'booking.Tên khách';
       initForm.clientNames.validate = (value, t) => !value.length ? t('booking.Tên khách không được để trống') : '';
-      // initForm.externalClients.label = 'booking.Số lượng khách ngoài';
-      // initForm.externalClientNames.label = 'booking.Phân loại khách ngoài';
     } else {
       initForm.clients.label = '';
       initForm.clients.validate = false;
       initForm.clientNames.label = '';
       initForm.clientNames.validate = false;
-      // initForm.externalClients.label = '';
-      // initForm.externalClients.validate = false;
-      // initForm.externalClientNames.label = '';
-      // initForm.externalClientNames.validate = false;
     }
     setInitFormState({ ...initForm });
   };
@@ -259,7 +309,7 @@ function BookingForm({ request, setRequest, errors, handleChange }) {
 
   useEffect(() => {
     if (request.isEndBooking) {
-      const newEndTime = filterEndTimeOptions(request.startTime, request.isEndBooking)?.pop();
+      const newEndTime = filterEndTimeOptions(request.startTime, request.startDate, request.endDate, request.isEndBooking)?.pop();
       if (newEndTime) {
         setTimeout(() => {
           handleChange(['endTime'], [newEndTime.mkey]);
@@ -268,25 +318,122 @@ function BookingForm({ request, setRequest, errors, handleChange }) {
     }
   }, [request.isEndBooking]);
 
-  // useEffect(() => {
-  //   toggleRoomDisplay(request.building);
-  // }, [request.building]);
-
-  // useEffect(() => {
-  //   getFacilities(request.room?.mkey);
-  // }, [request.room]);
-
   useEffect(() => {
-    setEndTimeOptions(request.startTime, request.isEndBooking);
-  }, [request.startTime]);
+    setEndTimeOptions(request.startTime, request.startDate, request.endDate, request.isEndBooking);
+  }, [request.startTime, request.startDate, request.endDate]);
 
   useEffect(() => {
     toggleClientFieldsDisplay(request.usagePurpose);
   }, [request.usagePurpose]);
 
   
-  const renderFormElements = (column) => (
-    Object.keys(initFormState).filter(field => initFormState[field].label && initForm[field].column === column).map((field, index) => (
+  const renderColumn1 = () => {
+    const col1Fields = Object.keys(initFormState).filter(
+      field => initFormState[field].label && initForm[field].column === 1
+    );
+
+    return col1Fields.map((field, index) => {
+      if (field === 'startDate') {
+        return (
+          <div key={field} className="mb-4 flex items-center">
+            <label className="block text-gray-700 w-[220px]">
+              <span className="text-red-600">*</span> {t('booking.Ngày bắt đầu')}:
+            </label>
+            <div className="w-full flex items-center gap-2">
+              <div className="flex-1">
+                <LoopFormElement 
+                  hideLabel
+                  containerClassName="mb-0"
+                  component={component} 
+                  field="startDate" 
+                  initForm={initFormState} 
+                  request={request} 
+                  errors={errors} 
+                  handleChange={handleStartDateChange} 
+                />
+              </div>
+              <span className="text-gray-700 font-medium px-1">{t('common.lúc')}</span>
+              <div className="flex-1">
+                <LoopFormElement 
+                  hideLabel
+                  containerClassName="mb-0"
+                  component={component} 
+                  field="startTime" 
+                  initForm={initFormState} 
+                  request={request} 
+                  errors={errors} 
+                  handleChange={handleStartTimeChange} 
+                />
+              </div>
+            </div>
+          </div>
+        );
+      }
+      if (field === 'startTime') {
+        return null;
+      }
+      if (field === 'endDate') {
+        return (
+          <div key={field} className="mb-4 flex items-center">
+            <label className="block text-gray-700 w-[220px]">
+              <span className="text-red-600">*</span> {t('booking.Ngày kết thúc')}:
+            </label>
+            <div className="w-full flex items-center gap-2">
+              <div className="flex-1">
+                <LoopFormElement 
+                  hideLabel
+                  containerClassName="mb-0"
+                  component={component} 
+                  field="endDate" 
+                  initForm={initFormState} 
+                  request={request} 
+                  errors={errors} 
+                  handleChange={handleEndDateChange} 
+                />
+              </div>
+              <span className="text-gray-700 font-medium px-1">{t('common.lúc')}</span>
+              <div className="flex-1">
+                <LoopFormElement 
+                  hideLabel
+                  containerClassName="mb-0"
+                  component={component} 
+                  field="endTime" 
+                  initForm={initFormState} 
+                  request={request} 
+                  errors={errors} 
+                  handleChange={handleChange} 
+                />
+              </div>
+            </div>
+          </div>
+        );
+      }
+      if (field === 'endTime') {
+        return null;
+      }
+
+      return (
+        <Fragment key={index}>
+          <LoopFormElement 
+            component={component} 
+            labelWidth='w-[220px]'
+            field={field} 
+            initForm={initFormState} 
+            request={request} 
+            errors={errors} 
+            handleChange={
+              field === 'usagePurpose' ? handleUsagePurposeChange : 
+              handleChange
+            } 
+          />
+        </Fragment>
+      );
+    });
+  };
+
+  const renderFormElements = (column) => {
+    if (column === 1) return renderColumn1();
+    return Object.keys(initFormState).filter(field => initFormState[field].label && initForm[field].column === column).map((field, index) => (
       <Fragment key={index}>
         <LoopFormElement 
           component={component} 
@@ -296,17 +443,13 @@ function BookingForm({ request, setRequest, errors, handleChange }) {
           request={request} 
           errors={errors} 
           handleChange={
-            // field === 'building' ? handleBuildingChange : 
             field === 'usagePurpose' ? handleUsagePurposeChange : 
-            // field === 'room' ? handleRoomChange : 
-            field === 'startTime' ? handleStartTimeChange : 
             handleChange
           } 
         />
-        {/* {request.room?.mkey && field === "room" && renderRoomDetails()} */}
       </Fragment>
-    ))
-  );
+    ));
+  };
 
   return (
     <>

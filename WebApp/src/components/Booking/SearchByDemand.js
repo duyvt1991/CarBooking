@@ -47,7 +47,6 @@ const initForm = {
     value: '', 
     label: 'booking.Ngày', 
     type: 'datepicker',
-    disabledPast: true,
   },
   startTime: { 
     value: '', 

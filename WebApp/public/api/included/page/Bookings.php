@@ -16,62 +16,45 @@ class Bookings {
         $roomType = $roomType ?? '';
 
 
-        if (!$fromDate || !$toDate || explode(" ", $fromDate)[0] != explode(" ", $toDate)[0]) {
+        if (!$fromDate || !$toDate) {
             return [];
         }
 
-        $startDateCondition = new \Bitrix\Main\Type\DateTime($fromDate, "Y-m-d H:i:s");
-        $startTimeCondition = $startDateCondition->format('H:i:s');
-        $endDateCondition = new \Bitrix\Main\Type\DateTime($toDate, "Y-m-d H:i:s");
-        $endTimeCondition = $endDateCondition->format('H:i:s');
+        $reqStart = strtotime($fromDate);
+        $reqEnd = strtotime($toDate);
 
         $queryBookingFilter = [];
-        // $queryBookingFilter = array_merge($queryBookingFilter, ['isApproved' => 1]);
-        // $queryBookingFilter = array_merge($queryBookingFilter, ['%roomType' => '"mkey":"'.$roomType.'"']);
         $queryBookingFilter = array_merge($queryBookingFilter, ['isCancelled' => 0]);
         $queryBookingFilter = array_merge($queryBookingFilter, ['@isApproved' => [ 2, 3]]);
         if ($roomType != "") {
-            // $queryBookingFilter = array_merge($queryBookingFilter, ['%roomType' => '"mkey":"'.$roomType.'"']);
             $queryBookingFilter = array_merge($queryBookingFilter, ['%room' => '"roomType":"'.$roomType.'"']);
-
         }
-        $queryBookingFilter[] =  [
-            'LOGIC' => 'OR',
-            [
-                '=startDate' => $startDateCondition,
-                '>=startTime' => $startTimeCondition,
-                '<startTime' => $endTimeCondition
-            ],
-            [
-                '=startDate' => $startDateCondition,
-                '>endTime' => $startTimeCondition,
-                '<=endTime' => $endTimeCondition
-            ],
-            [
-                '=startDate' => $startDateCondition,
-                '<=startTime' => $startTimeCondition,
-                '>=endTime' => $endTimeCondition
-            ]
-        ];
 
         $queryBooking = \Booking\Query::getInstance("car_booking_requests");
-        $queryBooking->setSelect(['room']);
+        $queryBooking->setSelect(['room', 'startDate', 'endDate', 'startTime', 'endTime']);
         $queryBooking->setFilter($queryBookingFilter);
-        $allDuplicatedBookings = $queryBooking->exec()->fetchAll();
+        $allBookings = $queryBooking->exec()->fetchAll();
 
-        // $allDuplicatedBookings = array_map(function($item) {
-        //     return $item['room']['mkey'];
-        // }, $allDuplicatedBookings);
         $bookedRoomKeys = [];
-        foreach ($allDuplicatedBookings as $item) {
-            $room = [];
-            if (!empty($item['room'])) {
-                try {
-                    $room = is_string($item['room']) ? Json::decode($item['room']) : (array)$item['room'];
-                } catch (\Throwable $th) {}
-            }
-            if (!empty($room['mkey'])) {
-                $bookedRoomKeys[] = $room['mkey'];
+        foreach ($allBookings as $item) {
+            $bStartStr = is_object($item['startDate']) ? $item['startDate']->format('Y-m-d') : explode(' ', $item['startDate'] ?? '')[0];
+            $bEndStr = !empty($item['endDate']) ? (is_object($item['endDate']) ? $item['endDate']->format('Y-m-d') : explode(' ', $item['endDate'])[0]) : $bStartStr;
+            $bStartTimeStr = is_object($item['startTime']) ? $item['startTime']->format('H:i:s') : $item['startTime'];
+            $bEndTimeStr = is_object($item['endTime']) ? $item['endTime']->format('H:i:s') : $item['endTime'];
+
+            $bStart = strtotime($bStartStr . " " . $bStartTimeStr);
+            $bEnd = strtotime($bEndStr . " " . $bEndTimeStr);
+
+            if ($reqStart < $bEnd && $reqEnd > $bStart) {
+                $room = [];
+                if (!empty($item['room'])) {
+                    try {
+                        $room = is_string($item['room']) ? Json::decode($item['room']) : (array)$item['room'];
+                    } catch (\Throwable $th) {}
+                }
+                if (!empty($room['mkey'])) {
+                    $bookedRoomKeys[] = $room['mkey'];
+                }
             }
         }
 
@@ -120,37 +103,22 @@ class Bookings {
         $queryFilters = [];
         $queryFilters = array_merge($queryFilters, ['@isApproved' => [0, 1, 2, 3, 4]]);
         $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
-        $startDateTime = new \Bitrix\Main\Type\DateTime($fromDate, "Y-m-d H:i:s");
-        $startTime = $startDateTime->format('H:i:s');
-        $queryFilters[] =  [
-            'LOGIC' => 'OR',
+        $startDateTime = new \Bitrix\Main\Type\DateTime(explode(' ', $fromDate)[0], "Y-m-d");
+        $endDateTime = new \Bitrix\Main\Type\DateTime(explode(' ', $endDate)[0], "Y-m-d");
+        $queryFilters[] = [
+            '<=startDate' => $endDateTime,
             [
-                '>startDate' => $startDateTime
-            ],
-            [
-                '=startDate' => $startDateTime,
-                '>=startTime' => $startTime
+                'LOGIC' => 'OR',
+                ['>=endDate' => $startDateTime],
+                [
+                    'endDate' => null,
+                    '>=startDate' => $startDateTime
+                ]
             ]
         ];
-
-        $endDateTime = new \Bitrix\Main\Type\DateTime($endDate, "Y-m-d H:i:s");
-        $endTime = $endDateTime->format('H:i:s');
-        $queryFilters[] =  [
-            'LOGIC' => 'OR',
-            [
-                '<startDate' => $endDateTime
-            ],
-            [
-                '=startDate' => $endDateTime,
-                '<=endTime' => $endTime
-            ]
-        ];
-
 
         if ($roomType != "") {
-            // $queryFilters = array_merge($queryFilters, ['%roomType' => '"mkey":"'.$roomType.'"']);
             $queryFilters = array_merge($queryFilters, ['%room' => '"roomType":"'.$roomType.'"']);
-
         }
 
         if ($room != "") {
@@ -177,8 +145,23 @@ class Bookings {
 
         $query->setFilter($queryFilters);
 
-        // Detect overlapping with priority bookings
         $results = $query->exec()->fetchAll();
+        $reqStart = strtotime($fromDate);
+        $reqEnd = strtotime($endDate);
+
+        $results = array_filter($results, function($b) use ($reqStart, $reqEnd) {
+            $bStartStr = is_object($b['startDate']) ? $b['startDate']->format('Y-m-d') : explode(' ', $b['startDate'] ?? '')[0];
+            $bEndStr = !empty($b['endDate']) ? (is_object($b['endDate']) ? $b['endDate']->format('Y-m-d') : explode(' ', $b['endDate'])[0]) : $bStartStr;
+            $bStartTimeStr = is_object($b['startTime']) ? $b['startTime']->format('H:i:s') : $b['startTime'];
+            $bEndTimeStr = is_object($b['endTime']) ? $b['endTime']->format('H:i:s') : $b['endTime'];
+
+            $bStart = strtotime($bStartStr . " " . $bStartTimeStr);
+            $bEnd = strtotime($bEndStr . " " . $bEndTimeStr);
+
+            return ($bStart <= $reqEnd && $bEnd >= $reqStart);
+        });
+
+        return array_values($results);
         // foreach ($results as &$result) {
             // if ($component == "week" || $component == "day") {
                 // $result['canPriorityBooking'] = 1;

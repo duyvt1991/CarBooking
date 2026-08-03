@@ -19,11 +19,13 @@ class MailTemplate {
         $driverPhoneNumber = $currentItem['driverPhoneNumber'];
         $licensePlateNumber = $currentItem['licensePlateNumber'];
         $startDate = $currentItem['startDate'];
+        $endDate = $currentItem['endDate'];
         $startTime = $currentItem['startTime'];
         $endTime = $currentItem['endTime'];
         $usagePurposeDetail = $currentItem['usagePurposeDetail'];
 
         $startDateFormatted = implode("/", array_reverse(explode("-", $startDate)));
+        $endDateFormatted = implode("/", array_reverse(explode("-", $endDate)));
         $startTimeFormatted = preg_replace('/:00$/', '', $startTime);
         $endTimeFormatted = preg_replace('/:00$/', '', $endTime);
 
@@ -39,7 +41,7 @@ class MailTemplate {
         if (!empty($department['mvalue'])) {
             $details .= "- Bộ phận: " . $department['mvalue'] . "<br/>";
         }
-        $details .= "- Thời gian sử dụng: " . $startTimeFormatted . " - " . $endTimeFormatted . " ngày " . $startDateFormatted . "<br/>";
+        $details .= "- Thời gian sử dụng: " . $startDateFormatted . " " . $startTimeFormatted . " - " . $endDateFormatted . " " . $endTimeFormatted . "<br/>";
         if (!empty($usagePurposeDetail)) {
             $details .= "- Mục đích chuyến đi: " . $usagePurposeDetail . "<br/>";
         }

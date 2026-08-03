@@ -66,8 +66,8 @@ function ApproveBookingList({
     { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
     { name: 'bookingUser', label: t('booking.Người đặt'), render: (field, request) => formatUser(request[field]) },
     { name: 'mainUser', label: t('booking.Người phụ trách'), render: (field, request) => formatUser(request[field]) },
-    { name: 'startDate', align: 'center',  label: t('booking.Ngày sử dụng'), render: (field, request) => formatDate(request[field]) },
-    { name: 'endTime', align: 'center',  label: t('booking.Khung giờ sử dụng'), render: (field, request) => `${formatTime(request['startTime']).replace(":00", "")} - ${formatTime(request[field]).replace(":00", "")}` },
+    { name: 'startDate', align: 'center', label: t('booking.Ngày bắt đầu'), render: (field, request) => `${formatDate(request.startDate)} ${formatTime(request.startTime).slice(0, 5)}` },
+    { name: 'endDate', align: 'center', label: t('booking.Ngày kết thúc'), render: (field, request) => `${formatDate(request.endDate || request.startDate)} ${formatTime(request.endTime).slice(0, 5)}` },
     { name: 'departureLocation', label: t('booking.Điểm xuất phát'), render: (field, request) => (request[field] || []).join(', ') || '-'},
     { name: 'department', label: t('booking.Phòng ban'), render: (field, request) => request[field].mvalue },
     { name: 'usagePurpose', label: t('booking.Phân loại khách'), render: (field, request) => request[field].mvalue },
@@ -82,7 +82,8 @@ function ApproveBookingList({
   const actionButtons = (request) => {
     const currentTime = new Date();
     const bookingStartTime = new Date(`${request?.startDate} ${request?.startTime}`);
-    const bookingEndTime = new Date(`${request?.startDate} ${request?.endTime}`);
+    const endDateStr = request?.endDate || request?.startDate;
+    const bookingEndTime = new Date(`${endDateStr} ${request?.endTime}`);
     const isBookingInProgress = currentTime >= bookingStartTime && currentTime <= bookingEndTime;
     const isPastBooking = currentTime > bookingEndTime;
     const approvedStatus = Number(request?.isApproved);
