@@ -254,10 +254,11 @@ const Calendar = ({ events, myCalendar = false, onMyCalendarClick, onCalendarCha
           }}>
           <strong>{event.title || 'Đặt xe'}</strong>
           <span className="event-timeslot">{timeText}</span>
-          {!!event.canPriorityBooking && <button className='btn-priority' onClick={(e) => {
+          {!!event.usagePurposeDetail && <span className="event-purpose">{event.usagePurposeDetail}</span>}
+          {/* {!!event.canPriorityBooking && <button className='btn-priority' onClick={(e) => {
             e.stopPropagation();
             onPriorityClick(event.id);
-          }}>{t('common.Đặt ưu tiên')}</button>}
+          }}>{t('common.Đặt ưu tiên')}</button>} */}
         </div>
       ) : null;
     });

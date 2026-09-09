@@ -259,4 +259,38 @@ class MasterData {
         $departureLocations = array_map("unserialize", array_unique(array_map("serialize", $departureLocations)));
         return array_values($departureLocations);
     }
+
+    public static function suggestionHotels() {
+        $request = Context::getCurrent()->getRequest();
+        extract($request->getPostList()->toArray());
+        $keyword = $keyword ?? '';
+        $keyword = trim($keyword);
+        if (empty($keyword)) {
+            return [];
+        }
+
+        $query = \Booking\Query::getInstance("car_booking_requests");
+        $query->setSelect(['hotelNames']);
+        $query->setFilter(['%hotelNames' => $keyword, '!hotelNames' => '[]']);
+        $query->setLimit(10);
+        $query->setOrder(['hotelNames' => 'ASC']);
+        $result = $query->exec()->fetchAll();
+        $hotelNames = [];
+        foreach ($result as $row) {
+            if (empty($row['hotelNames'])) {
+                continue;
+            }
+            foreach ($row['hotelNames'] as $hotelName) {
+                if (stripos(iconv('UTF-8', 'ASCII//TRANSLIT', $hotelName), iconv('UTF-8', 'ASCII//TRANSLIT', $keyword)) === false) {
+                    continue;
+                }
+                $hotelNames[] = [
+                    'mvalue' => $hotelName,
+                    'mkey' => $hotelName
+                ];
+            }
+        }
+        $hotelNames = array_map("unserialize", array_unique(array_map("serialize", $hotelNames)));
+        return array_values($hotelNames);
+    }
 }

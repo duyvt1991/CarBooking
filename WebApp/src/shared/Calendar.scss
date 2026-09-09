@@ -225,15 +225,29 @@ $border-radius: 4px;
   font-size: x-small;
   overflow: hidden;
   cursor: pointer;
+  .event-purpose {
+    display: block;
+    white-space: normal;
+    word-break: break-word;
+    font-size: xx-small;
+    line-height: 1.25;
+    margin: 1px 0;
+    opacity: 0.95;
+  }
   .event-timeslot {
     display: block;
     font-size: xx-small;
   }
   &:hover {
     filter: brightness(1.2);
-    .btn-priority {
-      opacity: 1;
-    }
+    // z-index: 10;
+    // height: auto !important;
+    // min-height: 100%;
+    // overflow: visible;
+    // box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    // .btn-priority {
+    //   opacity: 1;
+    // }
   }
   .btn-priority {
     padding: 2px 4px;

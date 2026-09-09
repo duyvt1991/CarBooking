@@ -42,6 +42,39 @@ export const formatTime = (dateString) => {
   return `${timePart || ''}`;
 };
 
+export const formatLongText = (text, maxCharsPerLine = 50) => {
+  if (!text || text === '-') return '-';
+  const str = String(text);
+  const existingLines = str.split(/\r?\n/);
+  
+  const resultLines = [];
+  for (const line of existingLines) {
+    if (!line.trim()) {
+      resultLines.push('');
+      continue;
+    }
+    const words = line.split(' ');
+    let currentLine = '';
+
+    for (const word of words) {
+      if ((currentLine + (currentLine ? ' ' : '') + word).length <= maxCharsPerLine) {
+        currentLine += (currentLine ? ' ' : '') + word;
+      } else {
+        if (currentLine) resultLines.push(currentLine);
+        let remainingWord = word;
+        while (remainingWord.length > maxCharsPerLine) {
+          resultLines.push(remainingWord.slice(0, maxCharsPerLine));
+          remainingWord = remainingWord.slice(maxCharsPerLine);
+        }
+        currentLine = remainingWord;
+      }
+    }
+    if (currentLine) resultLines.push(currentLine);
+  }
+
+  return resultLines.join('\n');
+};
+
 export const formatLogType = (logType, t) => {
   switch (logType) {
     case "Add":
@@ -252,6 +285,7 @@ export const getFieldsBookingDetail = (request, masterData, t) => {
   const safeDriverDeclineUser = Array.isArray(request.driverDeclineUser) ? request.driverDeclineUser : [];
 
   const safeClientNames = Array.isArray(request.clientNames) ? request.clientNames : [];
+  const safeHotelNames = Array.isArray(request.hotelNames) ? request.hotelNames : [];
   const safeDepartureLocations = Array.isArray(request.departureLocation) ? request.departureLocation : [request.departureLocation].filter(Boolean);
   const rejectedCount = safeRejectedUsers.length;
   const safeEmployeeList = Array.isArray(request.employeeList) ? request.employeeList : [];
@@ -350,6 +384,11 @@ export const getFieldsBookingDetail = (request, masterData, t) => {
     request.clients > 0 && { label: t('common.Số lượng khách'), value: formatPersons(request.clients, null, t) },
     safeClientNames.length > 0 && {
       label: t('common.Tên khách'), value: safeClientNames.map((name, index) => (
+        <span key={index} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{name}</span>
+      ))
+    },
+    safeHotelNames.length > 0 && {
+      label: t('booking.Tên khách sạn'), value: safeHotelNames.map((name, index) => (
         <span key={index} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{name}</span>
       ))
     },

@@ -7,6 +7,8 @@ import { getStatistics } from '../../systems/api';
 import { routes } from '../../systems/constant';
 import { formatLocale, formatUsagePurpose } from '../../systems/util';
 import { useTranslation } from 'react-i18next';
+import ReportFilter from '../../shared/ReportFilter';
+import { exportToExcel, exportToPdf } from '../../systems/exportUtil';
 
 function ReportUsedCount() {
   const { setLoading, masterData } = useContext(RequestContext);
@@ -15,9 +17,9 @@ function ReportUsedCount() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  useEffect(() => {
+  const fetchStatistics = (filters = {}) => {
     setLoading(true);
-    getStatistics(routes.reportUsedCount.component).then((statistics) => {
+    getStatistics(routes.reportUsedCount.component, filters).then((statistics) => {
         setStatistics(statistics);
     }).catch(error => {
       if (error.name !== 'AbortError' && error.name !== 'CanceledError') {
@@ -26,7 +28,15 @@ function ReportUsedCount() {
     }).finally(() => {
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchStatistics();
   }, []);
+
+  const handleFilter = (filters) => {
+    fetchStatistics(filters);
+  };
 
   const generateChartData = (data, formatter, label) => [
     [label, t('report.Số lần')],
@@ -69,11 +79,33 @@ function ReportUsedCount() {
   const totalUsagePurpose = usagePurposeData.slice(1).reduce((total, [, count]) => total + count, 0);
   const totalLocale = filteredLocaleData.slice(1).reduce((total, [, count]) => total + count, 0);
 
+  const handleExportExcel = () => {
+    const dataToExport = Object.entries(statistics.usagePurposeCounts || {}).map(([key, counts]) => {
+      const val = typeof counts === 'number' ? counts : Object.values(counts).reduce((a, b) => a + b, 0);
+      return {
+        [t('report.Mục đích sử dụng')]: formatUsagePurpose(key, masterData),
+        [t('report.Số lần')]: val
+      };
+    });
+
+    dataToExport.push({
+      [t('report.Mục đích sử dụng')]: t('report.Tổng'),
+      [t('report.Số lần')]: totalUsagePurpose
+    });
+
+    exportToExcel(dataToExport, 'bao-cao-so-lan-su-dung.xlsx', 'Số lần sử dụng');
+  };
+
+  const handleExportPdf = () => {
+    exportToPdf('report-used-count-container', 'bao-cao-so-lan-su-dung.pdf');
+  };
+
   return (
-    <div className="m-1 p-6 shadow-md rounded-lg bg-white">
+    <div id="report-used-count-container" className="m-1 p-6 shadow-md rounded-lg bg-white">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold flex-grow text-left">{t(`routes.${routes.reportUsedCount.label}`)}</h1>
       </div>
+      <ReportFilter onFilter={handleFilter} onExportExcel={handleExportExcel} onExportPdf={handleExportPdf} />
       <div className="p-0">
         <div className="grid grid-cols-1 my-4 sm:grid-cols-2 gap-4">
           <div className="p-4 border rounded-lg">

@@ -62,6 +62,15 @@
     "Ngày": "日",
     "Tuần": "週",
     "Tháng": "月",
+    "Năm": "年",
+    "Loại lọc": "フィルター種類",
+    "Từ ngày": "開始日",
+    "Đến ngày": "終了日",
+    "Chọn tháng": "月を選択",
+    "Chọn năm": "年を選択",
+    "Đặt lại": "リセット",
+    "Xuất Excel": "Excel出力",
+    "Xuất PDF": "PDF出力",
     "Trước": "前",
     "Hiện tại": "現在",
     "Tiếp": "次",
@@ -101,7 +110,8 @@
     "Biển số xe": "車両番号",
     "Số điện thoại tài xế": "運転手の電話番号",
     "Tài xế": "運転手",
-    "Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?": "ID = {{id}} の車予約を承認してもよろしいですか？"
+    "Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?": "ID = {{id}} の車予約を承認してもよろしいですか？",
+    "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = [id] không?": "ID = {{id}} の車予約を終了してもよろしいですか？"
   },
   "routes": {
     "Đặt phòng": "車予約",
@@ -469,7 +479,10 @@
     "Biển số xe không được để trống": "車両番号は必須です",
     "Đã duyệt": "承認済み",
     "Đã phân công": "割り当て済み",
-    "Số lượng người": "ゲスト数"
+    "Số lượng người": "ゲスト数",
+    "Tên khách sạn": "ホテル名",
+    "Phân công": "割り当て",
+    "Số lượng người tham gia phải lớn hơn 0": "参加者数は0より大きくなければなりません"
 
   },
   "report": {
@@ -494,6 +507,13 @@
     "Tổng sức chứa": "合計収容人数",
     "Theo toà nhà": "支店別",
     "Theo loại phòng": "車の種類別",
+    "Theo loại xe": "車の種類別",
+    "Theo xe": "車別",
+    "Loại xe": "車の種類",
+    "Xe": "車",
+    "chuyến": "便",
+    "Số chuyến": "便数",
+    "Tổng chuyến": "合計便数",
     "Số lần": "回数",
     "lần": "回",
     "Phòng ban": "部門"

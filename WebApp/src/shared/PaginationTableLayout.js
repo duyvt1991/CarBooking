@@ -1,6 +1,6 @@
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-function PaginationTableLayout({ totalPages, currentPage, requestsPerPage = 20, handlePageChange, handlePageLimitChange }) {
+function PaginationTableLayout({ totalPages, currentPage, requestsPerPage = 10, handlePageChange, handlePageLimitChange }) {
     const pages = [];
     const maxPagesToShow = 3;
     const startPage = Math.max(1, currentPage - Math.ceil(maxPagesToShow / 2));

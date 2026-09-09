@@ -104,7 +104,9 @@
     "Tài xế": "運転手",
     "Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?": "ID = {{id}} の車予約を承認してもよろしいですか？",
     "Bộ lọc": "フィルター",
-    "Thu gọn": "折りたたむ"
+    "Thu gọn": "折りたたむ",
+    "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = [id] không?": "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = {{id}} không?"
+
   },
   "routes": {
     "Đặt phòng": "車予約",
@@ -472,7 +474,10 @@
     "Biển số xe không được để trống": "車両番号は必須です",
     "Đã duyệt": "承認済み",
     "Đã phân công": "割り当て済み",
-    "Phân công": "Phân công"
+    "Số lượng người": "人数",
+    "Tên khách sạn": "ホテル名",
+    "Phân công": "割り当て",
+    "Số lượng người tham gia phải lớn hơn 0": "参加人数は0より大きくなければなりません"
 
   },
   "report": {

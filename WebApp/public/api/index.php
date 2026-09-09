@@ -13,6 +13,8 @@ function handleResponse($action) {
             return \Booking\Page\MasterData::suggestionUsers();
         case 'suggestionClients':
             return \Booking\Page\MasterData::suggestionClients();
+        case 'suggestionHotels':
+            return \Booking\Page\MasterData::suggestionHotels();
         case 'suggestionExternalClients':
             return \Booking\Page\MasterData::suggestionExternalClients();
          case 'suggestionDepartureLocations':

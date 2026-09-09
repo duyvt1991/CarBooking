@@ -178,7 +178,7 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
       randomClientNames = clients.slice(0, randomClients).map(client => client.mvalue);
     }
 
-    const randomUsagePurposeDetail = `Usage Purpose Detail ${Math.floor(Math.random() * 5) + 1}`;
+    const randomUsagePurposeDetail = `Mục đích chuyến đi  ${Math.floor(Math.random() * 5) + 1}`;
     const randomUsagePurposeLocale = Math.random() > 0.5 ? 'vn' : 'jp';
 
     // const randomDepartureLocation = mockMasterData.departureLocations[Math.floor(Math.random() * mockMasterData.departureLocations.length)];
@@ -210,6 +210,7 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
       usagePurpose: randomUsagePurpose,
       usagePurposeDetail: randomUsagePurposeDetail,
       usagePurposeLocale: randomUsagePurposeLocale,
+      // detailedSchedule: `Detailed Schedule asdas dasda dasd asd asdewr wer h gh. gfdg dfg .  gdfgdfgfd.Schedule asdas dasda dasd asd asdewr wer h gh. gfdg dfg . Schedule asdas dasda dasd asd asdewr wer h gh. gfdg dfg . fgkdfgkdfgk ${Math.floor(Math.random() * 5) + 1}`,
       clients: randomClients,
       clientNames: randomClientNames,
       isApproved: randomIsApprovedStatus,
@@ -915,25 +916,25 @@ const mockReviewList = normalizedBookings.filter(booking => booking.isCancelled 
 
 const calculateGuestCounts = (bookings) => {
   const usagePurposeCounts = {};
-  const localeCounts = { vn: 0, jp: 0 };
+  const partnerKeys = mockMasterData.config?.usagePurposeKeyForClient || [];
 
   bookings.forEach(booking => {
-    const { usagePurpose, usagePurposeLocale, clients } = booking;
+    const { usagePurpose, clients, persons } = booking;
+    if (!usagePurpose || !usagePurpose.mkey) return;
     const purposeKey = usagePurpose.mkey;
-    const locale = usagePurposeLocale;
 
     if (!usagePurposeCounts[purposeKey]) {
-      usagePurposeCounts[purposeKey] = { vn: 0, jp: 0 };
+      usagePurposeCounts[purposeKey] = 0;
     }
 
-    usagePurposeCounts[purposeKey][locale] += clients;
-    localeCounts[locale] += clients;
+    const isPartner = partnerKeys.includes(purposeKey);
+    const count = isPartner ? (Number(clients) || 0) : (Number(persons) || 0);
+
+    usagePurposeCounts[purposeKey] += count;
   });
 
-  return { usagePurposeCounts, localeCounts };
+  return { usagePurposeCounts };
 };
-
-const mockReportGuestCount = calculateGuestCounts(bookings);
 
 const calculateUsedCounts = (bookings) => {
   const usagePurposeCounts = {};
@@ -957,35 +958,39 @@ const calculateUsedCounts = (bookings) => {
 
 const mockReportUsedCount = calculateUsedCounts(bookings);
 
-const calculateCapacityCounts = (rooms) => {
-  const buildingCapacities = {};
-  const totalCapacities = {};
+const calculateCapacityCounts = (bookings) => {
+  const roomTypeCapacities = {};
+  const totalRoomTypeCapacities = {};
+  const totalRoomCapacities = {};
 
-  rooms.forEach(room => {
-    const { building, roomType, persons } = room;
-    const buildingKey = building;
-    const roomTypeKey = roomType;
+  (bookings || []).forEach(booking => {
+    const roomTypeKey = booking.roomType?.mkey || booking.roomType;
+    const roomKey = booking.room?.mkey || booking.room;
+    if (!roomTypeKey) return;
 
-    if (!buildingCapacities[buildingKey]) {
-      buildingCapacities[buildingKey] = {};
+    if (!totalRoomTypeCapacities[roomTypeKey]) {
+      totalRoomTypeCapacities[roomTypeKey] = 0;
     }
+    totalRoomTypeCapacities[roomTypeKey] += 1;
 
-    if (!buildingCapacities[buildingKey][roomTypeKey]) {
-      buildingCapacities[buildingKey][roomTypeKey] = 0;
+    if (roomKey) {
+      if (!roomTypeCapacities[roomTypeKey]) {
+        roomTypeCapacities[roomTypeKey] = {};
+      }
+      if (!roomTypeCapacities[roomTypeKey][roomKey]) {
+        roomTypeCapacities[roomTypeKey][roomKey] = 0;
+      }
+      roomTypeCapacities[roomTypeKey][roomKey] += 1;
+
+      if (!totalRoomCapacities[roomKey]) {
+        totalRoomCapacities[roomKey] = 0;
+      }
+      totalRoomCapacities[roomKey] += 1;
     }
-
-    if (!totalCapacities[roomTypeKey]) {
-      totalCapacities[roomTypeKey] = 0;
-    }
-
-    buildingCapacities[buildingKey][roomTypeKey] += persons || 0;
-    totalCapacities[roomTypeKey] += persons || 0;
   });
 
-  return { buildingCapacities, totalCapacities };
+  return { roomTypeCapacities, totalRoomTypeCapacities, totalRoomCapacities };
 };
-
-const mockReportCapacity = calculateCapacityCounts(mockMasterData.rooms);
 
 const calculateUsageDemand = (bookings) => {
   const usageDemand = {};
@@ -1055,6 +1060,22 @@ const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room, statusApp
 export const mockData = (action, data) => {
   const { page = 1, limit = 20 } = data;
   switch (action) {
+    case 'endItem': {
+      const target = normalizedBookings.find(b => String(b.id) === String(data.id));
+      if (target) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        target.endDate = `${year}-${month}-${day}`;
+        target.endTime = `${hours}:${minutes}:${seconds}`;
+        target.isApproved = 4;
+      }
+      return { status: 'success', message: 'Kết thúc chuyến xe thành công' };
+    }
     case 'suggestionClients':
       return data.keyword
         ? clients.filter(client =>
@@ -1189,15 +1210,30 @@ export const mockData = (action, data) => {
           return {};
       }
     case 'getStatistics':
+      let statsFilters = data.filters;
+      if (typeof statsFilters === 'string') {
+        try { statsFilters = JSON.parse(statsFilters); } catch (e) { statsFilters = {}; }
+      }
+      let filteredStatsBookings = bookings;
+      if (statsFilters && (statsFilters.startDate || statsFilters.endDate)) {
+        const fromStr = statsFilters.startDate ? statsFilters.startDate.substring(0, 10) : '0000-01-01';
+        const toStr = statsFilters.endDate ? statsFilters.endDate.substring(0, 10) : '9999-12-31';
+        filteredStatsBookings = bookings.filter(b => {
+          const bDate = (b.startDate || b.createdDate || '').substring(0, 10);
+          if (!bDate) return true;
+          return bDate >= fromStr && bDate <= toStr;
+        });
+      }
+
       switch (data.component) {
         case 'reportGuestCount': 
-          return mockReportGuestCount;
+          return calculateGuestCounts(filteredStatsBookings);
         case 'reportUsedCount':
-          return mockReportUsedCount;
+          return calculateUsedCounts(filteredStatsBookings);
         case 'reportCapacity':
-          return mockReportCapacity;
+          return calculateCapacityCounts(filteredStatsBookings);
         case 'reportUsageDemand':
-          return mockReportUsageDemand;
+          return calculateUsageDemand(filteredStatsBookings);
         // case 'reportUserReview':
         //   return mockReportUserReview;
         case 'reportManagerReview':

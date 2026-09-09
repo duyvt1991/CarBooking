@@ -62,6 +62,10 @@ export function suggestionClients(component, keyword, options = {}) {
     return postFormData('suggestionClients', { keyword, component }, options);
 }
 
+export function suggestionHotels(component, keyword, options = {}) {
+    return postFormData('suggestionHotels', { keyword, component }, options);
+}
+
 export function suggestionExternalClients(component, keyword, options = {}) {
     return postFormData('suggestionExternalClients', { keyword, component }, options);
 }
@@ -90,12 +94,12 @@ export function submitItem(component, data, options = {}) {
     return postFormData('submitItem', { ...data, component }, options);
 }
 
-export function getList(component, filters = {}, page = 1, limit = 20, options = {}) {
+export function getList(component, filters = {}, page = 1, limit = 10, options = {}) {
     return postFormData('getList', { filters: JSON.stringify(filters), page, limit, component }, options);
 }
 
-export function getStatistics(component, options = {}) {
-    return postFormData('getStatistics', { component }, options);
+export function getStatistics(component, filters = {}, options = {}) {
+    return postFormData('getStatistics', { component, filters: JSON.stringify(filters) }, options);
 }
 
 export function getBookings(component, data, options = {}) {
@@ -108,4 +112,8 @@ export function getAvailableRooms(component, data, options = {}) {
 
 export function confirmItem(component, id, options = {}) {
     return postFormData('confirmItem', { id, component }, options);
+}
+
+export function endItem(component, id, options = {}) {
+    return postFormData('endItem', { id, component }, options);
 }
