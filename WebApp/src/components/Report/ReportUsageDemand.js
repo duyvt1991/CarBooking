@@ -7,6 +7,8 @@ import { getStatistics } from '../../systems/api';
 import { routes } from '../../systems/constant';
 import { formatDepartment } from '../../systems/util';
 import { useTranslation } from 'react-i18next';
+import ReportFilter from '../../shared/ReportFilter';
+import { exportToExcel, exportToPdf } from '../../systems/exportUtil';
 
 function ReportUsageDemand() {
   const { setLoading, masterData } = useContext(RequestContext);
@@ -14,9 +16,9 @@ function ReportUsageDemand() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  useEffect(() => {
+  const fetchStatistics = (filters = {}) => {
     setLoading(true);
-    getStatistics(routes.reportUsageDemand.component).then((statistics) => {
+    getStatistics(routes.reportUsageDemand.component, filters).then((statistics) => {
         setStatistics(statistics);
     }).catch(error => {
       if (error.name !== 'AbortError' && error.name !== 'CanceledError') {
@@ -25,7 +27,15 @@ function ReportUsageDemand() {
     }).finally(() => {
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchStatistics();
   }, []);
+
+  const handleFilter = (filters) => {
+    fetchStatistics(filters);
+  };
 
   const generateChartData = (data) => [
     [t('report.Phòng ban'), t('report.Số lần')],
@@ -34,11 +44,25 @@ function ReportUsageDemand() {
 
   const chartData = generateChartData(statistics);
 
+  const handleExportExcel = () => {
+    const dataToExport = Object.entries(statistics || {}).map(([key, value]) => ({
+      [t('report.Phòng ban')]: formatDepartment(key, masterData),
+      [t('report.Số lần')]: value
+    }));
+
+    exportToExcel(dataToExport, 'bao-cao-nhu-cau-su-dung.xlsx', 'Nhu cầu sử dụng');
+  };
+
+  const handleExportPdf = () => {
+    exportToPdf('report-usage-demand-container', 'bao-cao-nhu-cau-su-dung.pdf');
+  };
+
   return (
-    <div className="m-1 p-6 shadow-md rounded-lg bg-white">
+    <div id="report-usage-demand-container" className="m-1 p-6 shadow-md rounded-lg bg-white">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold flex-grow text-left">{t(`routes.${routes.reportUsageDemand.label}`)}</h1>
       </div>
+      <ReportFilter onFilter={handleFilter} onExportExcel={handleExportExcel} onExportPdf={handleExportPdf} />
       <div className="p-0">
         <div className="p-4 border rounded-lg">
           <Chart

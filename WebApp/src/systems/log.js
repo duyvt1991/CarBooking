@@ -297,6 +297,12 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Lý do tài xế từ chối";
                 case "employeeNumber":
                     return "Số lượng người";
+                case "driverConfirmationDate":
+                    return "Ngày tài xế xác nhận";
+                case "driverConfirmationUser":
+                    return "Tài xế xác nhận";
+                case "hotelNames":
+                    return "Tên khách sạn";
                 default:
                     return key.toUpperCase();
             }

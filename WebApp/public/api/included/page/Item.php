@@ -1005,6 +1005,7 @@ class Item {
                             "usagePurpose" => Json::encode(Json::decode($usagePurpose)),	
                             "clients" => $clients ?? 0,
                             "clientNames" => Json::encode(Json::decode($clientNames)),	
+                            "hotelNames" => Json::encode(Json::decode($hotelNames)),
                             "detailedSchedule" => $detailedSchedule ?? "",
                             "note" => $note ?? "",
                             "employeeNumber" => $employeeNumber ?? 0,
@@ -1070,29 +1071,18 @@ class Item {
                     }
                 } else {
                     try {
+                        $nowDateStr = date('Y-m-d');
+                        $nowTimeStr = date('H:i:s');
                         $data = [
-                            // "mainUser" => Json::encode(Json::decode($mainUser)),	
-                            // "users" => Json::encode(Json::decode($users)),	
-                            // "department" => Json::encode(Json::decode($department)),	
-                            "endTime" => new \Bitrix\Main\Type\DateTime($endTime, "H:i:s"),
-                            // "usagePurpose" => Json::encode(Json::decode($usagePurpose)),	
-                            // "usagePurposeDetail" => $usagePurposeDetail ?? "",	
-                            // "usagePurposeLocale" => $usagePurposeLocale ?? "",
-                            // "note" => $note ?? "",
-                            // "clients" => $clients ?? 0,
-                            // "clientNames" => Json::encode(Json::decode($clientNames)),	
-                            // "externalClients" => $externalClients ?? 0,
-                            // "externalClientNames" => Json::encode(Json::decode($externalClientNames))
+                            "isApproved" => 4,
+                            "endDate" => new \Bitrix\Main\Type\DateTime($nowDateStr, "Y-m-d"),
+                            "endTime" => new \Bitrix\Main\Type\DateTime($nowTimeStr, "H:i:s"),
                         ];
                     } catch (\Throwable $th) {
                         return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
                     }
                     if ($id != "" && $id != "*") {
-                        \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, 
-                            ['%bookingUser' => '"mkey":"BitrixID-'.$userId.'"'
-                            // , '%room' => '"BitrixID-'.$userId.'"', '%roomType' => '"BitrixID-'.$userId.'"'
-                            ]
-                        ], $data);
+                        \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], $data);
                         self::logBooking($id, $currentItem, $userId);
                     }
                 }
@@ -1585,6 +1575,43 @@ class Item {
             }
         }
         return $result;
+    }
+
+    public static function endItem() {
+        global $USER;
+        $userId = $USER->GetID();
+        $request = Context::getCurrent()->getRequest();
+        extract($request->getPostList()->toArray());
+        $component = $component ?? '';
+        $id = $id ?? '';
+        $hasPermission = self::checkPermission($userId, $component);
+        if (!$hasPermission) {
+            return ['status' => 'error', 'message' => 'Tài khoản của bạn không có quyền thực hiện thao tác này'];
+        }
+        $currentItem = null;
+        if ($component === "approveBookingList") {
+            if ($id != "") {
+                $query = \Booking\Query::getInstance("car_booking_requests");
+                $query->setSelect(['*']);
+                $query->setFilter(['id' => $id]);
+                $currentItem = $query->exec()->fetch();
+            }
+            if ($currentItem) {
+                $nowDateStr = date('Y-m-d');
+                $nowTimeStr = date('H:i:s');
+                $updateData = [
+                    'isApproved' => 4,
+                    'endDate' => new \Bitrix\Main\Type\DateTime($nowDateStr, "Y-m-d"),
+                    'endTime' => new \Bitrix\Main\Type\DateTime($nowTimeStr, "H:i:s"),
+                ];
+                \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], $updateData);
+                self::logBooking($id, $currentItem, $userId);
+            } else {
+                return ['status' => 'error', 'message' => 'Không tìm thấy dữ liệu đặt xe'];
+            }
+        }
+
+        return ['status' => 'success', 'message' => 'Kết thúc chuyến xe thành công'];
     }
 
 }

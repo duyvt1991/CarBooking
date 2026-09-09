@@ -6,7 +6,7 @@ import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
 import { FaBan, FaCheck, FaRegHourglass,FaClock, FaMinusCircle } from 'react-icons/fa';
-import { formatDateTime, formatDate, formatTime, formatBookingStatus } from '../../systems/util';
+import { formatDateTime, formatDate, formatTime, formatBookingStatus, formatLongText } from '../../systems/util';
 import { RequestContext } from '../../App';
 import FilterTableLayout from '../../shared/FilterTableLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -49,14 +49,29 @@ function BookingList({
   ];
 
   const requestFields = [
-    { name: 'id', label: t('booking.ID'), render: (field, request) => request[field] },
-    { name: 'status', align: 'center',  label: t('common.Trạng thái'), render: (field, request) => formatBookingStatus(request, masterData, setModal, t) },
-    { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
-    // { name: 'building', label: t('booking.Toà nhà'), render: (field, request) => request[field]?.mvalue || '-' },
+    // { name: 'id', label: t('booking.ID'), render: (field, request) => request[field] },
+    // { name: 'status', align: 'center',  label: t('common.Trạng thái'), render: (field, request) => formatBookingStatus(request, masterData, setModal, t) },
+    { 
+          name: 'id', 
+          label: 'ID', 
+          additionalClass: 'sticky left-0 z-10 w-[60px] min-w-[60px]',
+          additionalClassHeader: 'sticky left-0 z-20 !bg-green-600 w-[60px] min-w-[60px]',
+          render: (field, request) => request[field] 
+        },
+        { 
+          name: 'status', 
+          align: 'center',  
+          label: t('common.Trạng thái'), 
+          additionalClass: 'sticky left-[60px] z-10 w-[140px] min-w-[140px]',
+          additionalClassHeader: 'sticky left-[60px] z-20 !bg-green-600 w-[140px] min-w-[140px]',
+          render: (field, request) => formatBookingStatus(request, masterData, setModal, t) 
+        },
     { name: 'startDate', align: 'center', label: t('booking.Ngày bắt đầu'), render: (field, request) => `${formatDate(request.startDate)} ${formatTime(request.startTime).slice(0, 5)}` },
     { name: 'endDate', align: 'center', label: t('booking.Ngày kết thúc'), render: (field, request) => `${formatDate(request.endDate || request.startDate)} ${formatTime(request.endTime).slice(0, 5)}` },
-    // { name: 'departureLocation', label: t('booking.Điểm xuất phát'), render: (field, request) => request[field]?.mvalue || '-' },
+    { name: 'usagePurposeDetail', label: t('booking.Mục đích chuyến đi'), additionalClass: '!whitespace-pre-line !max-w-none !overflow-visible align-top min-w-[300px] w-[300px]', render: (field, request) => formatLongText(request[field], 50) },
+    { name: 'detailedSchedule', label: t('booking.Lịch trình chi tiết'), additionalClass: '!whitespace-pre-line !max-w-none !overflow-visible align-top min-w-[380px] w-[380px]', render: (field, request) => formatLongText(request[field], 50) },
     { name: 'departureLocation', label: t('booking.Điểm xuất phát'), render: (field, request) => (request[field] || []).join(', ') || '-'},
+    { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
     { name: 'department', label: t('booking.Phòng ban'), render: (field, request) => request[field]?.mvalue || '-' },
     { name: 'usagePurpose', label: t('booking.Phân loại khách'), render: (field, request) => request[field]?.mvalue || '-' },
     { name: 'roomType', label: t('booking.Loại xe'), render: (field, request) => request[field]?.mvalue || '-' },

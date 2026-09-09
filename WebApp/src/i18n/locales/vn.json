@@ -62,6 +62,15 @@
     "Ngày": "Ngày",
     "Tuần": "Tuần",
     "Tháng": "Tháng",
+    "Năm": "Năm",
+    "Loại lọc": "Loại lọc",
+    "Từ ngày": "Từ ngày",
+    "Đến ngày": "Đến ngày",
+    "Chọn tháng": "Chọn tháng",
+    "Chọn năm": "Chọn năm",
+    "Đặt lại": "Đặt lại",
+    "Xuất Excel": "Xuất Excel",
+    "Xuất PDF": "Xuất PDF",
     "Trước": "Trước",
     "Hiện tại": "Hiện tại",
     "Tiếp": "Tiếp",
@@ -101,7 +110,8 @@
     "Biển số xe": "Biển số xe",
     "Số điện thoại tài xế": "Số điện thoại tài xế",
     "Tài xế": "Tài xế",
-    "Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?": "Bạn có chắc chắn muốn xác nhận đặt xe có ID = {{id}} không?"
+    "Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?": "Bạn có chắc chắn muốn xác nhận đặt xe có ID = {{id}} không?",
+    "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = [id] không?": "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = {{id}} không?"
 
   },
   "routes": {
@@ -470,7 +480,10 @@
     "Biển số xe không được để trống": "Biển số xe không được để trống",
     "Đã duyệt": "Đã duyệt",
     "Đã phân công": "Đã phân công",
-    "Số lượng người": "Số lượng người"
+    "Số lượng người": "Số lượng người",
+    "Tên khách sạn": "Tên khách sạn",
+    "Phân công": "Phân công",
+    "Số lượng người tham gia phải lớn hơn 0": "Số lượng người tham gia phải lớn hơn 0"
 
   },
   "report": {
@@ -495,6 +508,13 @@
     "Tổng sức chứa": "Tổng sức chứa",
     "Theo toà nhà": "Theo chi nhánh",
     "Theo loại phòng": "Theo loại phòng",
+    "Theo loại xe": "Theo loại xe",
+    "Theo xe": "Theo xe",
+    "Loại xe": "Loại xe",
+    "Xe": "Xe",
+    "chuyến": "chuyến",
+    "Số chuyến": "Số chuyến",
+    "Tổng chuyến": "Tổng chuyến",
     "Số lần": "Số lần",
     "lần": "lần",
     "Phòng ban": "Phòng ban"

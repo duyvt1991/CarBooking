@@ -97,11 +97,12 @@ class MailTemplate {
         $bookingUserUrl = "<br/><br/>Hãy truy cập <a target='_blank' href='".DAT_PHONG_ENDPOINT."/#/booking-list?id=%ID%'>[tại đây]</a> để xem thông tin chi tiết và đặt lại yêu cầu đặt xe.";
         $driverConfirmUrl = "<br/><br/>Hãy truy cập <a target='_blank' href='".DAT_PHONG_ENDPOINT."/#/driver-confirm-booking-list?id=%ID%'>[tại đây]</a> để xem thông tin chi tiết và xác nhận phân công tài xế cho yêu cầu đặt xe.";
 
-        $noteWhenUsing = "<br/><br/>Lưu ý khi sử dụng:<br/>- Vui lòng đến đúng giờ và giữ vệ sinh chung.<br/>- Không để lại vật dụng cá nhân nếu không có người trực tiếp quản lý.<br/>- Cập nhật thời gian sử dụng nếu xong trước thời gian dự kiến.";
+        $noteWhenUsing = "<br/><br/>Lưu ý khi sử dụng:<br/>- Vui lòng đến đúng giờ và giữ vệ sinh chung.<br/>- Không để lại vật dụng cá nhân nếu không có người trực tiếp quản lý.<br/>";
         $noteAfterUsing = "<br/><br/>Vui lòng đánh giá chất lượng xe sau khi sử dụng để hỗ trợ team quản lý & cải tiến nhé. Cám ơn bạn.";
         $sorry = "Thành thật xin lỗi & mong bạn thông cảm về sự bất tiện này.";
 
         $commonNote = "<br/><br/>Lưu ý: Đây là thư tự động, không hồi âm (reply) về địa chỉ thư điện tử này. Trường hợp không xem được link chi tiết, vui lòng liên hệ DCC để được xác nhận phân quyền.<br/>DCC team.";
+        $noteGrab = "<br/><br/>Lưu ý: Trường hợp xe phục vụ Grab, vui lòng liên hệ Mỹ Chi để được cấp tài khoản Grab Business.";
         
         $additionalMessages = [
             'approversUrl' => $approversUrl, 
@@ -523,7 +524,7 @@ class MailTemplate {
                 'content' => function($currentItem) use ($additionalMessages) {
                     extract($additionalMessages);
                     $details = self::getBookingDetails($currentItem);
-                    return "Chào bạn,<br/><br/>Lịch đặt xe của bạn đã được xác nhận:<br/>" . $details . $noteWhenUsing . $noteAfterUsing . $commonNote;
+                    return "Chào bạn,<br/><br/>Lịch đặt xe của bạn đã được xác nhận:<br/>" . $details . $noteWhenUsing . $noteAfterUsing . $noteGrab . $commonNote;
                 }
             ],
           

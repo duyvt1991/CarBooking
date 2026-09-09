@@ -789,6 +789,21 @@ class booking_requestsTable extends DataManager {
                     ];
                 }
             ]), 
+            new TextField('hotelNames', [
+                'default_value' => [],
+                'fetch_data_modification' => function() {
+                    return [
+                        function ($value) {
+                            if (empty($value)) return [];
+                            try {
+                                return json_decode($value, true) ?: [];
+                            } catch (\Throwable $th) {
+                                return [];
+                            }
+                        }
+                    ];
+                }
+            ]),
 
         ];
     }

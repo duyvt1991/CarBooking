@@ -55,6 +55,21 @@ function DriverConfirmBookingList({
   const requestFields = [
     { name: 'id', label: 'ID', render: (field, request) => request[field] },
     { name: 'status', align: 'center',  label: t('common.Trạng thái'), render: (field, request) => formatBookingStatus(request, masterData, setModal, t) },
+    // { 
+    //       name: 'id', 
+    //       label: 'ID', 
+    //       additionalClass: 'sticky left-0 z-10 w-[60px] min-w-[60px]',
+    //       additionalClassHeader: 'sticky left-0 z-20 !bg-green-600 w-[60px] min-w-[60px]',
+    //       render: (field, request) => request[field] 
+    //     },
+    //     { 
+    //       name: 'status', 
+    //       align: 'center',  
+    //       label: t('common.Trạng thái'), 
+    //       additionalClass: 'sticky left-[60px] z-10 w-[140px] min-w-[140px]',
+    //       additionalClassHeader: 'sticky left-[60px] z-20 !bg-green-600 w-[140px] min-w-[140px]',
+    //       render: (field, request) => formatBookingStatus(request, masterData, setModal, t) 
+    //     },
     ...(tempFilters?.tab === 'review' ? [
       { name: 'driverReviewScore', align: 'center', label: t('review.Chi tiết đánh giá'), render: (field, request) => formatDriverReviewScore(request, setModal, t) },
     ] : []),
@@ -88,7 +103,7 @@ function DriverConfirmBookingList({
     // Button templates
     const statusButtons = {
       default: { component: <span className="inline-flex items-center justify-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-500"><FaClock /></span> },
-      inProgress: { component: <span className="flex items-center justify-center gap-1"><FaRegHourglass className="text-yellow-500" /> {t('booking.Đang sử dụng')}</span> },
+      inProgress: { component: <span className="flex items-center justify-center gap-1"><FaRegHourglass className="text-yellow-500" /></span> },
       done: { component: <span className="flex items-center justify-center gap-1"><FaCheck className="text-green-500" /></span> },
       rejected: { component: <span className="flex items-center justify-center gap-1"><FaBan className="text-red-500" /></span> },
     };

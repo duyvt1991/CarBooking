@@ -124,7 +124,8 @@ class Install {
                 notificationDriverDate DATETIME,           
                 isNotification30MinSent BOOLEAN DEFAULT 0,
                 employeeNumber INT DEFAULT 0,
-                employeeList TEXT NULL
+                employeeList TEXT NULL,
+                hotelNames TEXT NULL
 
             )
         ";

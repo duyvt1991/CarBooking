@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import withRequestForm from '../../hoc/withRequestForm';
 import LoopFormElement from '../../shared/LoopFormElement';
-import { suggestionClients, suggestionExternalClients, suggestionUsers, suggestionDepartureLocations } from '../../systems/api';
+import { suggestionClients, suggestionExternalClients, suggestionUsers, suggestionDepartureLocations, suggestionHotels } from '../../systems/api';
 import { routes } from '../../systems/constant';
 import { RequestContext } from '../../App';
 import { formatPersons, formatSize, formatEquipmentsWithType, formatUser } from '../../systems/util';
@@ -126,6 +126,7 @@ export const initForm = {
     value: '', 
     label: 'booking.Số lượng người', 
     type: 'number',
+    validate: (value, t) => (!value || Number(value) <= 0) ? t('booking.Số lượng người tham gia phải lớn hơn 0') : ''
   },
   employeeList: { 
     column: 1,
@@ -144,6 +145,14 @@ export const initForm = {
     type: 'textarea',
     validate: (value, t) => !value ? t('booking.Mục đích chuyến đi không được để trống') : '' 
   },
+  detailedSchedule: { 
+    column: 1,
+    value: '', 
+    label: 'booking.Lịch trình chi tiết', 
+    type: 'textarea',
+    validate: (value, t) => !value ? t('booking.Lịch trình chi tiết không được để trống') : '' 
+  },
+
   carLine: { 
     column: 2,
     value: '', 
@@ -209,6 +218,19 @@ export const initForm = {
     label: '', 
     type: 'number'
   },
+  hotelNames: { 
+    column: 2,
+    value: [], 
+    label: '', 
+    type: 'tags',
+    insertable: true,
+    tagsApi: suggestionHotels,
+    tagsDisplayField: 'mvalue',
+    tagsMappingField: [['mkey', 'hotelNames']],
+    placeholder: 'common.Nhập từ khoá & enter để tạo mới...',
+    // validate: (value, t) => !value.length ? t('booking.Tên khách không được để trống') : ''
+  },
+
  flightNumber: {
     column: 2,
     value: '', 
@@ -216,13 +238,7 @@ export const initForm = {
     type: 'text'
   },
 
-  detailedSchedule: { 
-    column: 2,
-    value: '', 
-    label: 'booking.Lịch trình chi tiết', 
-    type: 'textarea',
-    validate: (value, t) => !value ? t('booking.Lịch trình chi tiết không được để trống') : '' 
-  },
+ 
   note: {
     column: 2,
     value: '', 
@@ -293,11 +309,15 @@ function BookingForm({ request, setRequest, errors, handleChange }) {
       initForm.clients.validate = (value, t) => !value ? t('booking.Số lượng khách không được để trống') : '';
       initForm.clientNames.label = 'booking.Tên khách';
       initForm.clientNames.validate = (value, t) => !value.length ? t('booking.Tên khách không được để trống') : '';
+      initForm.hotelNames.label = 'booking.Tên khách sạn';
+      // initForm.hotelNames.validate = (value, t) => !value.length ? t('booking.Tên khách sạn không được để trống') : '';
     } else {
       initForm.clients.label = '';
       initForm.clients.validate = false;
       initForm.clientNames.label = '';
       initForm.clientNames.validate = false;
+      initForm.hotelNames.label = '';
+      // initForm.hotelNames.validate = false;
     }
     setInitFormState({ ...initForm });
   };

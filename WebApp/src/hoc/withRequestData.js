@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { RequestContext } from '../App';
-import { activeItem, approveItem, deactiveItem, deleteItem, getList, confirmItem } from '../systems/api';
+import { activeItem, approveItem, deactiveItem, deleteItem, getList, confirmItem, endItem } from '../systems/api';
 import { defaultFilters } from '../systems/constant';
 import { useTranslation } from 'react-i18next';
 
@@ -84,6 +84,7 @@ const withRequestData = (WrappedComponent, component) => {
         activate: t('common.Bạn có chắc chắn muốn mở khoá dữ liệu có ID = [id] không?', { id }),
         approve: t('common.Bạn có chắc chắn muốn duyệt đặt xe có ID = [id] không?', { id }),
         confirm: t('common.Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?', { id }),
+        endBooking: t('common.Bạn có chắc chắn muốn kết thúc chuyến xe có ID = [id] không?', { id }),
       };
   
       const actions = {
@@ -94,6 +95,7 @@ const withRequestData = (WrappedComponent, component) => {
         activate: () => activeItem(component, id),
         approve: () => approveItem(component, id),
         confirm: () => confirmItem(component, id),
+        endBooking: () => endItem(component, id),
       };
   
       showConfirmModal(messages[actionType], () => {

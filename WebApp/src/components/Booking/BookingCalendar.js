@@ -137,6 +137,7 @@ const handleRoomTypeChange = (field, value) => {
         id: booking.id,
         room: booking.room?.mkey,
         title: booking.room?.mvalue,
+        usagePurposeDetail: booking.usagePurposeDetail,
         startDate: booking.startDate,
         endDate: booking.endDate || booking.startDate,
         startTime: booking.startTime,
@@ -172,7 +173,7 @@ const handleRoomTypeChange = (field, value) => {
             <td className="px-3 py-2 text-gray-600">{booking.mainUser?.mvalue}</td>
           </tr>
           <tr>
-            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('common.Mục đích')}</td>
+            <td className="font-semibold px-3 py-2 text-gray-700 text-nowrap">{t('booking.Mục đích chuyến đi')}</td>
             <td className="px-3 py-2 text-gray-600">{booking.usagePurposeDetail}</td>
           </tr>
           <tr>

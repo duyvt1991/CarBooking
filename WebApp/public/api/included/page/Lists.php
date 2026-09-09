@@ -15,7 +15,7 @@ class Lists {
         $component = $component ?? '';
         $filters = $filters ? Json::decode($filters) : [];
         $page = $page ? (int)$page : 1;
-        $limit = $limit ? (int)$limit : 20;
+        $limit = $limit ? (int)$limit : 10;
         $userId = $USER->GetID();
         $userRoles = \Booking\Page\MasterData::getUserRoles($userId);
     
