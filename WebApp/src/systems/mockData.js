@@ -210,10 +210,10 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
       usagePurpose: randomUsagePurpose,
       usagePurposeDetail: randomUsagePurposeDetail,
       usagePurposeLocale: randomUsagePurposeLocale,
-      // detailedSchedule: `Detailed Schedule asdas dasda dasd asd asdewr wer h gh. gfdg dfg .  gdfgdfgfd.Schedule asdas dasda dasd asd asdewr wer h gh. gfdg dfg . Schedule asdas dasda dasd asd asdewr wer h gh. gfdg dfg . fgkdfgkdfgk ${Math.floor(Math.random() * 5) + 1}`,
+      detailedSchedule: (j % 2 === 0) ? `Lịch trình công tác: Trụ sở chính -> Chi nhánh -> Trở về` : '',
       clients: randomClients,
       clientNames: randomClientNames,
-      isApproved: randomIsApprovedStatus,
+      isApproved: (j % 2 === 0 ? 4 : (j % 4)),
       approvedUsers: [mockMasterData.approvers[2]],
       approvedDate: "2026-05-26 12:30:00",
       rejectedUsers: [],
@@ -235,6 +235,347 @@ eachDayOfInterval({ start: startDateOfWeek, end: endDateOfWeek }).forEach((date,
     });
   }
 });
+
+// Thêm các booking mẫu tháng 8/2026 khớp theo hình ảnh yêu cầu
+const augustSampleBookings = [
+  {
+    id: 'aug-1',
+    bookingUser: { mkey: '101', mvalue: 'Nhin' },
+    mainUser: { mkey: '101', mvalue: 'Nhin' },
+    department: { mkey: 'D_ONETEAM', mvalue: 'Oneteam' },
+    room: { mkey: 'LS500', mvalue: 'LS500' },
+    roomType: { mkey: 'RT_SEDAN', mvalue: 'LS500' },
+    createdDate: "2026-07-28 10:00:00",
+    startDate: "2026-08-01",
+    endDate: "2026-08-01",
+    startTime: "07:30:00",
+    endTime: "21:00:00",
+    persons: 2,
+    employeeNumber: 2,
+    usagePurpose: mockMasterData.usagePurposes[0],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_QB', mvalue: 'Quốc Bảo' },
+    driverUser: { mkey: 'DRV_QB', mvalue: 'Quốc Bảo' },
+    detailedSchedule: "(HH TOASHOKEN) 18h30 xuất phát từ S2 --> 19h30 đón KS Wink Saigon Centre, Unscripted by Hyatt 75 Nguyễn Bỉnh Khiêm, Tan Dinh Ward --> Tiễn sân bay --> kết thúc",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-30 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  },
+  {
+    id: 'aug-2',
+    bookingUser: { mkey: '102', mvalue: 'Minh' },
+    mainUser: { mkey: '102', mvalue: 'Minh' },
+    department: { mkey: 'D_JPC', mvalue: 'JPC' },
+    room: { mkey: 'KIA_XANH', mvalue: 'KIA XANH' },
+    roomType: { mkey: 'RT_KIA', mvalue: 'KIA XANH' },
+    createdDate: "2026-07-29 10:00:00",
+    startDate: "2026-08-01",
+    endDate: "2026-08-01",
+    startTime: "07:00:00",
+    endTime: "13:00:00",
+    persons: 1,
+    employeeNumber: 1,
+    usagePurpose: mockMasterData.usagePurposes[1],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_TP', mvalue: 'Th.Phương' },
+    driverUser: { mkey: 'DRV_TP', mvalue: 'Th.Phương' },
+    detailedSchedule: "CHUYỂN 12 THÙNG GIÁO TRÌNH SANG ÂU CƠ S2> ÂU CƠ > S2",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-30 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  },
+  {
+    id: 'aug-3',
+    bookingUser: { mkey: '103', mvalue: 'Thúy Hà' },
+    mainUser: { mkey: '103', mvalue: 'Thúy Hà' },
+    department: { mkey: 'D_JPC', mvalue: 'JPC' },
+    room: { mkey: 'SIENNA', mvalue: 'SIENNA' },
+    roomType: { mkey: 'RT_SIENNA', mvalue: 'SIENNA' },
+    createdDate: "2026-07-29 10:00:00",
+    startDate: "2026-08-01",
+    endDate: "2026-08-01",
+    startTime: "07:00:00",
+    endTime: "12:00:00",
+    persons: 1,
+    employeeNumber: 1,
+    usagePurpose: mockMasterData.usagePurposes[1],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_QT', mvalue: 'Quốc Tuấn' },
+    driverUser: { mkey: 'DRV_QT', mvalue: 'Quốc Tuấn' },
+    detailedSchedule: "đưa chị Hà đi xem trồng",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-30 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  },
+  {
+    id: 'aug-4',
+    bookingUser: { mkey: '104', mvalue: 'Sếp' },
+    mainUser: { mkey: '104', mvalue: 'Sếp' },
+    department: { mkey: 'D_SEP', mvalue: 'Sếp' },
+    room: { mkey: 'PORSCHE', mvalue: 'PORSCHE' },
+    roomType: { mkey: 'RT_PORSCHE', mvalue: 'PORSCHE' },
+    createdDate: "2026-07-29 10:00:00",
+    startDate: "2026-08-01",
+    endDate: "2026-08-01",
+    startTime: "07:00:00",
+    endTime: "20:38:00",
+    persons: 1,
+    employeeNumber: 1,
+    usagePurpose: mockMasterData.usagePurposes[1],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_HK', mvalue: 'Hồng Khanh' },
+    driverUser: { mkey: 'DRV_HK', mvalue: 'Hồng Khanh' },
+    detailedSchedule: "Lịch sếp",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-30 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  },
+  {
+    id: 'aug-5',
+    bookingUser: { mkey: '105', mvalue: 'miki' },
+    mainUser: { mkey: '105', mvalue: 'miki' },
+    department: { mkey: 'D_MIKI', mvalue: 'miki' },
+    room: { mkey: 'LS500', mvalue: 'LS500' },
+    roomType: { mkey: 'RT_LS500', mvalue: 'LS500' },
+    createdDate: "2026-07-29 10:00:00",
+    startDate: "2026-08-01",
+    endDate: "2026-08-01",
+    startTime: "06:30:00",
+    endTime: "12:00:00",
+    persons: 1,
+    employeeNumber: 1,
+    usagePurpose: mockMasterData.usagePurposes[1],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_QTIEN', mvalue: 'Quốc Tiến' },
+    driverUser: { mkey: 'DRV_QTIEN', mvalue: 'Quốc Tiến' },
+    detailedSchedule: "",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-30 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  },
+  {
+    id: 'aug-6',
+    bookingUser: { mkey: '106', mvalue: 'Shimizu' },
+    mainUser: { mkey: '106', mvalue: 'Shimizu' },
+    department: { mkey: 'D_ONETEAM', mvalue: 'Oneteam' },
+    room: { mkey: 'KIA_XANH', mvalue: 'KIA XANH' },
+    roomType: { mkey: 'RT_KIA', mvalue: 'KIA XANH' },
+    createdDate: "2026-07-30 10:00:00",
+    startDate: "2026-08-02",
+    endDate: "2026-08-02",
+    startTime: "13:00:00",
+    endTime: "21:45:00",
+    persons: 2,
+    employeeNumber: 2,
+    usagePurpose: mockMasterData.usagePurposes[0],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_TP', mvalue: 'Th.Phương' },
+    driverUser: { mkey: 'DRV_TP', mvalue: 'Th.Phương' },
+    detailedSchedule: "Đón sân bay -> Đưa chị Kubota về khách sạn ở Bình Giã -> Đưa chị Shimizu về nhà Sếp",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-31 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  },
+  {
+    id: 'aug-7',
+    bookingUser: { mkey: '101', mvalue: 'Nhin' },
+    mainUser: { mkey: '101', mvalue: 'Nhin' },
+    department: { mkey: 'D_ONETEAM', mvalue: 'Oneteam' },
+    room: { mkey: 'HIACE', mvalue: 'HIACE' },
+    roomType: { mkey: 'RT_HIACE', mvalue: 'HIACE' },
+    createdDate: "2026-07-30 10:00:00",
+    startDate: "2026-08-02",
+    endDate: "2026-08-02",
+    startTime: "13:10:00",
+    endTime: "22:00:00",
+    persons: 1,
+    employeeNumber: 1,
+    usagePurpose: mockMasterData.usagePurposes[0],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_QT', mvalue: 'Quốc Tuấn' },
+    driverUser: { mkey: 'DRV_QT', mvalue: 'Quốc Tuấn' },
+    detailedSchedule: "(CTY FAREN) 13h xuất phát từ S2 --> đón sân bay --> Checkin KS HOTEL CONTINENTAL SAIGON 132 Đồng Khởi, Q1 --> ăn tối --> kết thúc",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-31 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  },
+  {
+    id: 'aug-8',
+    bookingUser: { mkey: '104', mvalue: 'Sếp' },
+    mainUser: { mkey: '104', mvalue: 'Sếp' },
+    department: { mkey: 'D_SEP', mvalue: 'Sếp' },
+    room: { mkey: 'PORSCHE', mvalue: 'PORSCHE' },
+    roomType: { mkey: 'RT_PORSCHE', mvalue: 'PORSCHE' },
+    createdDate: "2026-07-30 10:00:00",
+    startDate: "2026-08-02",
+    endDate: "2026-08-02",
+    startTime: "07:00:00",
+    endTime: "22:41:00",
+    persons: 1,
+    employeeNumber: 1,
+    usagePurpose: mockMasterData.usagePurposes[1],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_HK', mvalue: 'Hồng Khanh' },
+    driverUser: { mkey: 'DRV_HK', mvalue: 'Hồng Khanh' },
+    detailedSchedule: "Lịch sếp",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-31 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  },
+  {
+    id: 'aug-9',
+    bookingUser: { mkey: '107', mvalue: 'Nguyên' },
+    mainUser: { mkey: '107', mvalue: 'Nguyên' },
+    department: { mkey: 'D_JPC', mvalue: 'JPC' },
+    room: { mkey: 'XE_NGOAI', mvalue: 'Xe ngoài-Ph.Trang' },
+    roomType: { mkey: 'RT_NGOAI', mvalue: 'Xe ngoài-Ph.Trang' },
+    createdDate: "2026-07-30 10:00:00",
+    startDate: "2026-08-02",
+    endDate: "2026-08-02",
+    startTime: "08:00:00",
+    endTime: "17:00:00",
+    persons: 1,
+    employeeNumber: 1,
+    usagePurpose: mockMasterData.usagePurposes[1],
+    usagePurposeLocale: 'vn',
+    serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+    driver: { mkey: 'DRV_HN', mvalue: 'Huỳnh Nguyên' },
+    driverUser: { mkey: 'DRV_HN', mvalue: 'Huỳnh Nguyên' },
+    detailedSchedule: "Cô Arisa từ 8:00 xuất phát từ trụ sở chính 40/12 Ấp Bắc, P. Tân Bình, HCM đến Số 7 Nguyễn Thiện Thành, phường Hòa Thuận, Vĩnh Long. Sau khi giáo viên người nhật đến TTLK Trà Vinh tài xế sẽ quay lại trụ sở chính HCM.",
+    isApproved: 4,
+    notificationDriverDate: "2026-07-31 08:00:00",
+    notificationCount: 1,
+    isCancelled: 0,
+  }
+];
+additionalBookings.push(...augustSampleBookings);
+
+// Booking mẫu tháng 9/2026 (tháng hiện tại) - Sinh ~50 chuyến xe phong phú để test scrollbar
+const sampleDriverList = [
+  { mkey: 'DRV_QB', mvalue: 'Quốc Bảo', phone: '0908123456' },
+  { mkey: 'DRV_TP', mvalue: 'Th.Phương', phone: '0908234567' },
+  { mkey: 'DRV_QT', mvalue: 'Quốc Tuấn', phone: '0908345678' },
+  { mkey: 'DRV_NH', mvalue: 'Huy (L.Huy)', phone: '0908456789' },
+  { mkey: 'DRV_HN', mvalue: 'Huỳnh Nguyên', phone: '0908567890' },
+  { mkey: '107', mvalue: 'Driver 7', phone: '0901234567' },
+  { mkey: '108', mvalue: 'Driver 8', phone: '0901234568' }
+];
+
+const sampleCarList = [
+  { mkey: 'LS500', mvalue: 'LS500', licensePlateNumber: '51F-888.88', roomType: { mkey: 'RT_SEDAN', mvalue: 'LS500' } },
+  { mkey: 'KIA_XANH', mvalue: 'KIA XANH', licensePlateNumber: '51A-678.90', roomType: { mkey: 'RT_KIA', mvalue: 'KIA XANH' } },
+  { mkey: 'SIENNA', mvalue: 'SIENNA', licensePlateNumber: '51K-123.45', roomType: { mkey: 'RT_SIENNA', mvalue: 'SIENNA' } },
+  { mkey: 'CARNIVAL', mvalue: 'CARNIVAL', licensePlateNumber: '51H-999.99', roomType: { mkey: 'RT_CARNIVAL', mvalue: 'CARNIVAL' } },
+  { mkey: 'R001', mvalue: 'Room 1', licensePlateNumber: '30A-12345', roomType: { mkey: 'RT001', mvalue: 'Room Type 1' } },
+  { mkey: 'R002', mvalue: 'Room 2', licensePlateNumber: '30A-54321', roomType: { mkey: 'RT002', mvalue: 'Room Type 2' } }
+];
+
+const sampleDeptList = [
+  { mkey: 'D_ONETEAM', mvalue: 'Oneteam' },
+  { mkey: 'D_JPC', mvalue: 'JPC' },
+  { mkey: 'D_SEP', mvalue: 'Sếp' },
+  { mkey: 'D_KD', mvalue: 'Kinh Doanh' },
+  { mkey: 'D_NS', mvalue: 'Nhân Sự' },
+  { mkey: 'D001', mvalue: 'Department 1' },
+  { mkey: 'D002', mvalue: 'Department 2' }
+];
+
+const sampleUsers = [
+  { mkey: '101', mvalue: 'Nhin' },
+  { mkey: '102', mvalue: 'Minh' },
+  { mkey: '103', mvalue: 'Thúy Hà' },
+  { mkey: '104', mvalue: 'Sếp' },
+  { mkey: '105', mvalue: 'Trần Văn An' },
+  { mkey: '106', mvalue: 'Nguyễn Thị Bình' },
+  { mkey: '107', mvalue: 'Nguyên' }
+];
+
+const sampleSchedules = [
+  "(HH TOASHOKEN) 18h30 xuất phát từ S2 --> 19h30 đón KS Wink Saigon Centre --> Tiễn sân bay",
+  "CHUYỂN 12 THÙNG GIÁO TRÌNH SANG ÂU CƠ: S2 > ÂU CƠ > S2",
+  "Đưa chị Hà và đoàn đi công tác khảo sát đối tác Nhật Bản tại KCN Long Hậu",
+  "Chở Sếp đi họp với Ban Lãnh đạo đối tác tại Q1 và đón khách về văn phòng",
+  "Xe rước Thầy cô từ Khách sạn Đệ Nhất sang cơ sở Ấp Bắc dự lễ khai giảng",
+  "Cô Arisa từ 8:00 xuất phát từ 40/12 Ấp Bắc, Tân Bình đến Số 7 Nguyễn Thiện Thành, Vĩnh Long",
+  "Đón chuyên gia kỹ thuật Nhật Bản tại Ga quốc tế Tân Sơn Nhất về khách sạn Rex",
+  "Chở phòng Kinh Doanh đi gặp gỡ các nghiệp đoàn tỉnh Bình Dương",
+  "Chở phòng Nhân Sự đi phỏng vấn tuyển dụng thực tập sinh tại Đồng Nai",
+  "Đi công tác Cần Thơ làm việc với trường Đại học Cần Thơ",
+  "Đưa đoàn thực tập sinh xuất cảnh ra sân bay Tân Sơn Nhất lúc sáng sớm",
+  "Chở tài liệu hợp đồng ký kết đối tác tại khu công nghệ cao Quận 9"
+];
+
+const timeSlots = [
+  { start: '05:30:00', end: '10:00:00' },
+  { start: '06:00:00', end: '11:30:00' },
+  { start: '07:30:00', end: '12:00:00' },
+  { start: '08:00:00', end: '17:00:00' },
+  { start: '13:00:00', end: '17:30:00' },
+  { start: '14:00:00', end: '18:30:00' },
+  { start: '18:00:00', end: '21:30:00' }
+];
+
+const septemberSampleBookings = [];
+let sepIndex = 1;
+for (let day = 1; day <= 25; day++) {
+  const tripsPerDay = (day % 3) + 1;
+  const dayStr = String(day).padStart(2, '0');
+  const dateStr = `2026-09-${dayStr}`;
+
+  for (let t = 0; t < tripsPerDay; t++) {
+    const slot = timeSlots[(day + t) % timeSlots.length];
+    const driverObj = sampleDriverList[(day + t) % sampleDriverList.length];
+    const carObj = sampleCarList[(day * 2 + t) % sampleCarList.length];
+    const deptObj = sampleDeptList[(day + t * 2) % sampleDeptList.length];
+    const userObj = sampleUsers[(day + t) % sampleUsers.length];
+    const sched = sampleSchedules[(day * 3 + t) % sampleSchedules.length];
+
+    septemberSampleBookings.push({
+      id: `sep-gen-${sepIndex++}`,
+      bookingUser: userObj,
+      mainUser: userObj,
+      department: deptObj,
+      room: { mkey: carObj.mkey, mvalue: carObj.mvalue, licensePlateNumber: carObj.licensePlateNumber },
+      roomType: carObj.roomType,
+      createdDate: `2026-08-${String((day % 28) + 1).padStart(2, '0')} 09:00:00`,
+      startDate: dateStr,
+      endDate: dateStr,
+      startTime: (day === 10 && t === 0) ? '08:00:00' : slot.start,
+      endTime: (day === 10 && t === 0) ? '18:00:00' : slot.end,
+      persons: ((day + t) % 5) + 1,
+      employeeNumber: ((day + t) % 5) + 1,
+      usagePurpose: mockMasterData.usagePurposes[0],
+      usagePurposeLocale: 'vn',
+      serviceType: { mkey: 'ST001', mvalue: 'Nội bộ' },
+      driver: { mkey: driverObj.mkey, mvalue: driverObj.mvalue },
+      driverUser: { mkey: driverObj.mkey, mvalue: driverObj.mvalue, driverPhoneNumber: driverObj.phone },
+      licensePlateNumber: carObj.licensePlateNumber,
+      driverPhoneNumber: driverObj.phone,
+      detailedSchedule: (day === 10 && t === 0) ? "Chuyến xe đang di chuyển hôm nay - Thử nghiệm nút Kết thúc" : sched,
+      isApproved: (day === 10 && t === 0) ? 3 : 4,
+      isCancelled: 0,
+      notificationDriverDate: `2026-08-${String((day % 28) + 1).padStart(2, '0')} 10:00:00`,
+      notificationCount: 1,
+    });
+  }
+}
+additionalBookings.push(...septemberSampleBookings);
 
 const bookings = [
   { 
@@ -749,7 +1090,7 @@ const normalizeBookingByAssignmentStatus = (booking) => {
   if (status === 2) { // Chờ tài xế xác nhận
     return {
       ...booking,
-      serviceType: randomServiceType, // Khi ở trạng thái chờ tài xế xác nhận, nếu chưa có serviceType thì mặc định là nội bộ
+      serviceType: booking.serviceType || resolvedServiceType,
       driverUser: resolvedDriverUser,
       licensePlateNumber: resolvedLicensePlateNumber,
       driverPhoneNumber: resolvedDriverPhoneNumber,
@@ -765,7 +1106,7 @@ const normalizeBookingByAssignmentStatus = (booking) => {
     if (status === 3) { // Tài xế đã xác nhận
     return {
       ...booking,
-      serviceType: randomServiceType,
+      serviceType: booking.serviceType || resolvedServiceType,
       driverUser: resolvedDriverUser,
       licensePlateNumber: resolvedLicensePlateNumber,
       driverPhoneNumber: resolvedDriverPhoneNumber,
@@ -798,7 +1139,7 @@ const normalizeBookingByAssignmentStatus = (booking) => {
    if (status === 4) { // Hoàn thành
     return {
       ...booking,
-      serviceType: randomServiceType,
+      serviceType: booking.serviceType || resolvedServiceType,
       driverUser: resolvedDriverUser,
       licensePlateNumber: resolvedLicensePlateNumber,
       driverPhoneNumber: resolvedDriverPhoneNumber,
@@ -940,16 +1281,24 @@ const calculateUsedCounts = (bookings) => {
   const usagePurposeCounts = {};
   const localeCounts = { vn: 0, jp: 0 };
 
-  bookings.forEach(booking => {
-    const { usagePurpose, usagePurposeLocale } = booking;
+  (bookings || []).forEach(booking => {
+    const { usagePurpose, usagePurposeLocale } = booking || {};
+    if (!usagePurpose || !usagePurpose.mkey) return;
     const purposeKey = usagePurpose.mkey;
-    const locale = usagePurposeLocale;
+    const locale = usagePurposeLocale || 'vn';
 
     if (!usagePurposeCounts[purposeKey]) {
       usagePurposeCounts[purposeKey] = { vn: 0, jp: 0 };
     }
 
+    if (usagePurposeCounts[purposeKey][locale] === undefined) {
+      usagePurposeCounts[purposeKey][locale] = 0;
+    }
     usagePurposeCounts[purposeKey][locale]++;
+
+    if (localeCounts[locale] === undefined) {
+      localeCounts[locale] = 0;
+    }
     localeCounts[locale]++;
   });
 
@@ -995,8 +1344,9 @@ const calculateCapacityCounts = (bookings) => {
 const calculateUsageDemand = (bookings) => {
   const usageDemand = {};
 
-  bookings.forEach(booking => {
-    const departmentKey = booking.department.mkey;
+  (bookings || []).forEach(booking => {
+    const departmentKey = booking?.department?.mkey;
+    if (!departmentKey) return;
 
     if (!usageDemand[departmentKey]) {
       usageDemand[departmentKey] = 0;
@@ -1028,14 +1378,28 @@ const managerReviewScores = { score1: 0, score2: 0, score3: 0, score4: 0, score5
 
 const mockReportManagerReview = calculateManagerReviewScores(bookings);
 
-const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room, statusApproved }) => 
-  [...normalizedBookings, ...additionalBookings.map(normalizeBookingByAssignmentStatus)].filter(booking => {
-    const bookingStart = new Date(`${booking.startDate} ${booking.startTime}`);
+const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room, statusApproved }) => {
+  const seenIds = new Set();
+  return [...normalizedBookings, ...additionalBookings.map(normalizeBookingByAssignmentStatus)].filter(booking => {
+    if (booking.id && seenIds.has(booking.id)) {
+      return false;
+    }
+    if (booking.id) {
+      seenIds.add(booking.id);
+    }
+    const bookingStart = new Date(`${booking.startDate} ${booking.startTime}`.replace(' ', 'T'));
     const endDateStr = booking.endDate || booking.startDate;
-    const bookingEnd = new Date(`${endDateStr} ${booking.endTime}`);
-    const fromDateTime = new Date(fromDate);
-    const endDateTime = new Date(endDate);
-    let isValid = bookingStart <= endDateTime && bookingEnd >= fromDateTime;
+    const bookingEnd = new Date(`${endDateStr} ${booking.endTime}`.replace(' ', 'T'));
+    const fromDateTime = fromDate ? new Date(String(fromDate).replace(' ', 'T')) : null;
+    const endDateTime = endDate ? new Date(String(endDate).replace(' ', 'T')) : null;
+
+    let isValid = true;
+    if (fromDateTime && !isNaN(fromDateTime.getTime())) {
+      isValid = isValid && bookingEnd >= fromDateTime;
+    }
+    if (endDateTime && !isNaN(endDateTime.getTime())) {
+      isValid = isValid && bookingStart <= endDateTime;
+    }
 
     if (roomType) {
       isValid = isValid && booking.roomType.mkey === roomType;
@@ -1056,12 +1420,16 @@ const mockBookings = ({ myCalendar, fromDate, endDate, roomType, room, statusApp
 
     return isValid;
   });
+};
 
 export const mockData = (action, data) => {
   const { page = 1, limit = 20 } = data;
   switch (action) {
     case 'endItem': {
-      const target = normalizedBookings.find(b => String(b.id) === String(data.id));
+      let target = normalizedBookings.find(b => String(b.id) === String(data.id));
+      if (!target) {
+        target = additionalBookings.find(b => String(b.id) === String(data.id));
+      }
       if (target) {
         const now = new Date();
         const year = now.getFullYear();
@@ -1243,6 +1611,58 @@ export const mockData = (action, data) => {
     }
     case 'getBookings':
       return mockBookings(data);
+    case 'getReportCarActivity': {
+      let { fromDate, toDate, endDate, filterType, selectedMonth, month, selectedYear, year, room, roomType, driver, driverUser, department } = data;
+
+      if (filterType === 'month' && (selectedMonth || month) && (selectedYear || year)) {
+        const m = parseInt(selectedMonth || month, 10);
+        const y = parseInt(selectedYear || year, 10);
+        fromDate = `${y}-${String(m).padStart(2, '0')}-01 00:00:00`;
+        const lastDay = new Date(y, m, 0).getDate();
+        toDate = `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')} 23:59:59`;
+      }
+
+      const targetEnd = toDate || endDate;
+      let allResults = mockBookings({
+        fromDate,
+        endDate: targetEnd,
+        roomType,
+        room,
+      });
+
+      // Chỉ lấy các chuyến xe có isApproved = 4 (đã hoàn thành), không bị hủy, và serviceType = ST001 (Xe nội bộ)
+      allResults = allResults.filter(b => {
+        if (Number(b.isApproved) !== 4 || Number(b.isCancelled) === 1) return false;
+        const stKey = b.serviceType?.mkey || b.serviceType?.id || (typeof b.serviceType === 'string' ? b.serviceType : '');
+        return stKey === 'ST001';
+      });
+
+      // Lọc theo tài xế nếu có truyền
+      const targetDriver = driver || driverUser;
+      if (targetDriver) {
+        allResults = allResults.filter(b => {
+          const dKey = b.driverUser?.mkey || b.driver?.mkey || '';
+          return dKey === targetDriver;
+        });
+      }
+
+      // Lọc theo phòng ban / BU nếu có truyền
+      if (department) {
+        allResults = allResults.filter(b => {
+          const deptKey = b.department?.mkey || '';
+          return deptKey === department;
+        });
+      }
+
+      // Sắp xếp tăng dần theo startDate và startTime
+      allResults.sort((a, b) => {
+        const dateA = `${a.startDate || ''} ${a.startTime || ''}`;
+        const dateB = `${b.startDate || ''} ${b.startTime || ''}`;
+        return dateA.localeCompare(dateB);
+      });
+
+      return allResults;
+    }
     default:
         return {};
   }

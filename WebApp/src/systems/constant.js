@@ -1,5 +1,5 @@
 export const API_ENDPOINT = window.location.origin.includes('localhost') ? process.env.REACT_APP_URL : `${window.location.origin}/datxe`;
-export const DEBUG_WITH_MOCK_DATA = true;
+export const DEBUG_WITH_MOCK_DATA = false;
 
 export const defaultFilters = {
     id: '',
@@ -67,6 +67,7 @@ export const routes = {
     reportUsageDemand: { component: 'reportUsageDemand', path: '/report-usage-demand', label: 'Nhu cầu sử dụng', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'] },
     reportManagerReview: { component: 'reportManagerReview', path: '/report-manager-review', label: 'Đánh giá người sử dụng', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'] },
     reportUserReview: { component: 'reportUserReview', path: '/report-user-review', label: 'Đánh giá đặt xe', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'] },
+    reportCarActivity: { component: 'reportCarActivity', path: '/report-car-activity', label: 'Lịch hoạt động xe', permissions: ['Permission [Car_Booking_Admin]', 'Permission [Car_Booking_Approval]', 'Permission [Car_Booking_Priority_Approval]', 'Permission [Car_Booking_Monitor]'] },
     carLineList: { component: 'carLineList', path: '/car-line-list', label: 'Dòng xe', permissions: ['Permission [Car_Booking_Admin]'] },
     carLineForm: { component: 'carLineForm', path: '/car-line-form', label: 'Dòng xe', permissions: ['Permission [Car_Booking_Admin]'] },
     driverList: { component: 'driverList', path: '/driver-list', label: 'Tài xế', permissions: ['Permission [Car_Booking_Admin]'] },

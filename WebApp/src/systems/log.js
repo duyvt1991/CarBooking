@@ -153,9 +153,9 @@ export const logMasterDataKeyMapping = (mtype, key) => {
         case "roomTypes":
             switch (key) {
                 case "mkey":
-                    return "Mã loại phòng";
+                    return "Mã loại xe";
                 case "mvalue":
-                    return "Tên loại phòng";
+                    return "Tên loại xe";
                 case "approvers":
                     return "Người phê duyệt";
                 case "equipments":
@@ -176,12 +176,12 @@ export const logMasterDataKeyMapping = (mtype, key) => {
         case "rooms":
             switch (key) {
                 case "mkey":
-                    return "Mã phòng";
+                    return "Mã xe";
                 case "mvalue":
-                    return "Tên phòng";
+                    return "Tên xe";
                 case "mParentKey":
                 case "roomType":
-                    return "Mã loại phòng";
+                    return "Mã loại xe";
                 case "building":
                     return "Chi nhánh";
                 case "approvers":
@@ -303,6 +303,78 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Tài xế xác nhận";
                 case "hotelNames":
                     return "Tên khách sạn";
+                case "bookingUser":
+                    return "Người đặt";
+                case "departureLocation":
+                    return "Điểm xuất phát";
+                case "destinationLocation":
+                    return "Điểm đến";
+                case "roomType":
+                    return "Loại xe";
+                case "room":
+                    return "Xe";
+                case "flightNumber":
+                    return "Số hiệu chuyến bay";
+                case "note":
+                    return "Ghi chú";
+                case "employeeList":
+                    return "Danh sách nhân viên tham gia";
+                case "cancelledDate":
+                    return "Ngày huỷ";
+                case "rejectedUsers":
+                    return "Người từ chối";
+                case "rejectedDate":
+                    return "Ngày từ chối";
+                case "approvedUsers":
+                    return "Người duyệt";
+                case "approvedDate":
+                    return "Ngày duyệt";
+                case "userReviewScore":
+                    return "Điểm đánh giá trải nghiệm";
+                case "userReviewExperience":
+                    return "Đánh giá trải nghiệm dịch vụ";
+                case "userReviewQcd":
+                    return "Đánh giá QCD (người dùng)";
+                case "userReviewCommentMost":
+                    return "Hài lòng nhất (người dùng)";
+                case "userReviewCommentBad":
+                    return "Cần cải thiện (người dùng)";
+                case "userWantsToContinue":
+                    return "Muốn tiếp tục đi cùng tài xế";
+                case "userReviewDate":
+                    return "Thời điểm đánh giá (người dùng)";
+                case "userReviewUser":
+                    return "Người đánh giá";
+                case "driverReviewPrep":
+                    return "Chuẩn bị xe & hình ảnh";
+                case "driverReviewQcd":
+                    return "Tự đánh giá QCD (tài xế)";
+                case "driverReviewCommentMost":
+                    return "Làm tốt (tài xế)";
+                case "driverReviewCommentBad":
+                    return "Cần cải tiến (tài xế)";
+                case "driverReviewCommentFeedback":
+                    return "Góp ý khách hàng (tài xế)";
+                case "driverReviewCommentRequest":
+                    return "Đề xuất hỗ trợ (tài xế)";
+                case "driverReviewDate":
+                    return "Thời điểm đánh giá (tài xế)";
+                case "driverReviewUser":
+                    return "Tài xế tự đánh giá";
+                case "driverReviewScore":
+                    return "Điểm tự đánh giá (tài xế)";
+                case "managerReviewScore":
+                    return "Điểm đánh giá (quản lý)";
+                case "managerReviewCommentMost":
+                    return "Điểm mạnh nổi bật (quản lý)";
+                case "managerReviewCommentBad":
+                    return "Cần cải thiện (quản lý)";
+                case "managerReviewCommentRequest":
+                    return "Đề xuất hỗ trợ (quản lý)";
+                case "managerReviewDate":
+                    return "Thời điểm đánh giá (quản lý)";
+                case "managerReviewUser":
+                    return "Quản lý đánh giá";
                 default:
                     return key.toUpperCase();
             }

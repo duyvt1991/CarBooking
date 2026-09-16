@@ -204,4 +204,146 @@ class Bookings {
 
         return $results;
     }
+
+    /**
+     * API lấy dữ liệu báo cáo lịch hoạt động xe (chỉ lấy chuyến đã hoàn thành isApproved = 4)
+     * Nhận đầy đủ các tham số lọc từ form báo cáo:
+     * - filterType: 'month' | 'date'
+     * - selectedMonth / month: 1 - 12
+     * - selectedYear / year: năm (vd: 2026)
+     * - fromDate: ngày bắt đầu ('Y-m-d' hoặc 'Y-m-d H:i:s')
+     * - toDate / endDate: ngày kết thúc ('Y-m-d' hoặc 'Y-m-d H:i:s')
+     * - room: xe
+     * - roomType: loại xe
+     * - driver / driverUser: tài xế
+     * - department: phòng ban / BU
+     */
+    public static function getReportCarActivity() {
+        $request = Context::getCurrent()->getRequest();
+        $params = $request->getPostList()->toArray();
+
+        $filterType = $params['filterType'] ?? 'month';
+        $selectedMonth = $params['selectedMonth'] ?? ($params['month'] ?? '');
+        $selectedYear = $params['selectedYear'] ?? ($params['year'] ?? '');
+        $fromDate = $params['fromDate'] ?? '';
+        $toDate = $params['toDate'] ?? ($params['endDate'] ?? '');
+        $roomType = $params['roomType'] ?? '';
+        $room = $params['room'] ?? '';
+        $driver = $params['driver'] ?? ($params['driverUser'] ?? '');
+        $department = $params['department'] ?? '';
+
+        // Xác định khoảng thời gian theo filterType và tham số truyền vào
+        if ($filterType === 'month' && !empty($selectedMonth) && !empty($selectedYear)) {
+            $monthNum = (int)$selectedMonth;
+            $yearNum = (int)$selectedYear;
+            $fromStr = sprintf('%04d-%02d-01 00:00:00', $yearNum, $monthNum);
+            $lastDay = date('t', strtotime($fromStr));
+            $toStr = sprintf('%04d-%02d-%02d 23:59:59', $yearNum, $monthNum, $lastDay);
+        } else {
+            $fromStr = !empty($fromDate) ? (explode(' ', trim($fromDate))[0] . ' 00:00:00') : '';
+            $toStr = !empty($toDate) ? (explode(' ', trim($toDate))[0] . ' 23:59:59') : '';
+        }
+
+        $query = \Booking\Query::getInstance("car_booking_requests", true);
+        $query->setSelect(['*']);
+        $queryFilters = [];
+
+        // Chỉ lấy các chuyến xe có isApproved = 4 (đã hoàn thành) và không bị hủy
+        $queryFilters = array_merge($queryFilters, ['@isApproved' => [4]]);
+        $queryFilters = array_merge($queryFilters, ['isCancelled' => 0]);
+
+        // // Chỉ lấy các booking mà loại dịch vụ là Xe nội bộ (serviceType = ST001)
+        // $queryFilters[] = [
+        //     'LOGIC' => 'OR',
+        //     ['%serviceType' => '"mkey":"ST001"'],
+        //     ['%serviceType' => 'ST001'],
+        //     ['=serviceType' => 'ST001']
+        // ];
+
+        if (!empty($fromStr) && !empty($toStr)) {
+            $startDateTime = new \Bitrix\Main\Type\DateTime(explode(' ', $fromStr)[0], "Y-m-d");
+            $endDateTime = new \Bitrix\Main\Type\DateTime(explode(' ', $toStr)[0], "Y-m-d");
+            $queryFilters[] = [
+                '<=startDate' => $endDateTime,
+                [
+                    'LOGIC' => 'OR',
+                    ['>=endDate' => $startDateTime],
+                    [
+                        'endDate' => null,
+                        '>=startDate' => $startDateTime
+                    ],
+                    [
+                        'endDate' => '',
+                        '>=startDate' => $startDateTime
+                    ]
+                ]
+            ];
+        }
+
+        // if (!empty($roomType)) {
+        //     $queryFilters = array_merge($queryFilters, ['%room' => '"roomType":"'.$roomType.'"']);
+        // }
+
+        // if (!empty($room)) {
+        //     $queryFilters = array_merge($queryFilters, ['%room' => '"mkey":"'.$room.'"']);
+        // }
+
+        // if (!empty($driver)) {
+        //     $queryFilters[] = [
+        //         'LOGIC' => 'OR',
+        //         ['%driverUser' => '"mkey":"'.$driver.'"'],
+        //         ['%driver' => '"mkey":"'.$driver.'"']
+        //     ];
+        // }
+
+        // if (!empty($department)) {
+        //     $queryFilters = array_merge($queryFilters, ['%department' => '"mkey":"'.$department.'"']);
+        // }
+
+        $query->setFilter($queryFilters);
+
+        $results = $query->exec()->fetchAll();
+
+        if (!empty($fromStr) && !empty($toStr)) {
+            $reqStart = strtotime($fromStr);
+            $reqEnd = strtotime($toStr);
+
+            $results = array_filter($results, function($b) use ($reqStart, $reqEnd) {
+                $bStartStr = is_object($b['startDate']) ? $b['startDate']->format('Y-m-d') : explode(' ', $b['startDate'] ?? '')[0];
+                $bEndStr = !empty($b['endDate']) ? (is_object($b['endDate']) ? $b['endDate']->format('Y-m-d') : explode(' ', $b['endDate'])[0]) : $bStartStr;
+                $bStartTimeStr = is_object($b['startTime']) ? $b['startTime']->format('H:i:s') : ($b['startTime'] ?? '00:00:00');
+                $bEndTimeStr = is_object($b['endTime']) ? $b['endTime']->format('H:i:s') : ($b['endTime'] ?? '23:59:59');
+
+                $bStart = strtotime($bStartStr . " " . $bStartTimeStr);
+                $bEnd = strtotime($bEndStr . " " . $bEndTimeStr);
+
+                return ($bStart <= $reqEnd && $bEnd >= $reqStart);
+            });
+        }
+
+        // $results = array_filter($results, function($b) {
+        //     $st = $b['serviceType'] ?? null;
+        //     $stKey = '';
+        //     if (is_array($st)) {
+        //         $stKey = $st['mkey'] ?? ($st['id'] ?? '');
+        //     } else if (is_string($st)) {
+        //         if (strpos($st, '{') !== false) {
+        //             $decoded = json_decode($st, true);
+        //             $stKey = $decoded['mkey'] ?? ($decoded['id'] ?? $st);
+        //         } else {
+        //             $stKey = $st;
+        //         }
+        //     }
+        //     return $stKey === 'ST001';
+        // });
+
+        // Sắp xếp tăng dần theo startDate và startTime
+        usort($results, function($a, $b) {
+            $aStart = (is_object($a['startDate']) ? $a['startDate']->format('Y-m-d') : explode(' ', $a['startDate'] ?? '')[0]) . ' ' . (is_object($a['startTime']) ? $a['startTime']->format('H:i:s') : ($a['startTime'] ?? ''));
+            $bStart = (is_object($b['startDate']) ? $b['startDate']->format('Y-m-d') : explode(' ', $b['startDate'] ?? '')[0]) . ' ' . (is_object($b['startTime']) ? $b['startTime']->format('H:i:s') : ($b['startTime'] ?? ''));
+            return strcmp($aStart, $bStart);
+        });
+
+        return array_values($results);
+    }
 }
