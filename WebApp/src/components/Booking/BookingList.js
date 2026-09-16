@@ -55,7 +55,7 @@ function BookingList({
           name: 'id', 
           label: 'ID', 
           additionalClass: 'sticky left-0 z-10 w-[60px] min-w-[60px]',
-          additionalClassHeader: 'sticky left-0 z-20 !bg-green-600 w-[60px] min-w-[60px]',
+          additionalClassHeader: 'sticky left-0 !z-40 !bg-green-600 w-[60px] min-w-[60px]',
           render: (field, request) => request[field] 
         },
         { 
@@ -63,12 +63,12 @@ function BookingList({
           align: 'center',  
           label: t('common.Trạng thái'), 
           additionalClass: 'sticky left-[60px] z-10 w-[140px] min-w-[140px]',
-          additionalClassHeader: 'sticky left-[60px] z-20 !bg-green-600 w-[140px] min-w-[140px]',
+          additionalClassHeader: 'sticky left-[60px] !z-40 !bg-green-600 w-[140px] min-w-[140px]',
           render: (field, request) => formatBookingStatus(request, masterData, setModal, t) 
         },
     { name: 'startDate', align: 'center', label: t('booking.Ngày bắt đầu'), render: (field, request) => `${formatDate(request.startDate)} ${formatTime(request.startTime).slice(0, 5)}` },
     { name: 'endDate', align: 'center', label: t('booking.Ngày kết thúc'), render: (field, request) => `${formatDate(request.endDate || request.startDate)} ${formatTime(request.endTime).slice(0, 5)}` },
-    { name: 'usagePurposeDetail', label: t('booking.Mục đích chuyến đi'), additionalClass: '!whitespace-pre-line !max-w-none !overflow-visible align-top min-w-[300px] w-[300px]', render: (field, request) => formatLongText(request[field], 50) },
+    { name: 'usagePurposeDetail', label: t('booking.Mục đích chuyến đi'), additionalClass: '!whitespace-pre-line !max-w-none !overflow-visible align-top min-w-[250px] w-[250px]', render: (field, request) => formatLongText(request[field], 50) },
     { name: 'detailedSchedule', label: t('booking.Lịch trình chi tiết'), additionalClass: '!whitespace-pre-line !max-w-none !overflow-visible align-top min-w-[380px] w-[380px]', render: (field, request) => formatLongText(request[field], 50) },
     { name: 'departureLocation', label: t('booking.Điểm xuất phát'), render: (field, request) => (request[field] || []).join(', ') || '-'},
     { name: 'createdDate', align: 'center',  label: t('booking.Thời điểm đặt'), render: (field, request) => formatDateTime(request[field]) },
@@ -117,7 +117,7 @@ function BookingList({
     }
 
     if (isBookingInProgress) {
-      return [{ component: <span className="inline-flex items-center justify-center gap-1"><FaRegHourglass className="text-yellow-500" /> {t('booking.Đang sử dụng')}</span> }];
+      return [{ component: <span className="inline-flex items-center justify-center gap-1"><FaRegHourglass className="text-yellow-500" /></span> }];
     }
 
     return [defaultButton];

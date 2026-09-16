@@ -56,6 +56,7 @@ import ReportCapacity from './components/Report/ReportCapacity.js';
 import ReportUsageDemand from './components/Report/ReportUsageDemand.js';
 import ReportManagerReview from './components/Report/ReportManagerReview.js';
 import ReportUserReview from './components/Report/ReportUserReview.js';
+import ReportCarActivity from './components/Report/ReportCarActivity.js';
 import BookingCalendar from './components/Booking/BookingCalendar.js';
 import CarLineList from './components/Category/CarLineList.js';
 import CarLineForm from './components/Category/CarLineForm.js';
@@ -190,6 +191,7 @@ const App = () => {
     { path: routes.reportUsageDemand.path, permissions: routes.reportUsageDemand.permissions, component: <ReportUsageDemand /> },
     { path: routes.reportManagerReview.path, permissions: routes.reportManagerReview.permissions, component: <ReportManagerReview /> },
     { path: routes.reportUserReview.path, permissions: routes.reportUserReview.permissions, component: <ReportUserReview /> },
+    { path: routes.reportCarActivity.path, permissions: routes.reportCarActivity.permissions, component: <ReportCarActivity /> },
     { path: `${routes.bookingCalendar.path}/:id`, permissions: routes.bookingCalendar.permissions, component: <BookingCalendar /> },
     { path: routes.carLineList.path, permissions: routes.carLineList.permissions, component: <CarLineList /> },
     { path: `${routes.carLineForm.path}/:id`, permissions: routes.carLineForm.permissions, component: <CarLineForm /> },

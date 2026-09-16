@@ -114,15 +114,156 @@ export const formatLogValue = (value, type) => {
     .map((item, index) => (<li key={index}>{`${item.displayKey}: '${item.displayValue}'`}</li>));
 }
 
-export const formatLogData = (value, type) => {
-  return Object.keys(value)
-    .map((key, index) => {
-      if (key === 'id' || key === 'mtype' || key === 'isDeleted' || key === 'isActive'|| (key === 'mParentKey' && type !== "equipments")) return null;
-      const displayKey = logMasterDataKeyMapping(type, key);
-      const displayValue = Array.isArray(value[key]) ? value[key].map(v => v?.mvalue || v).join(', ') : (value[key]?.mvalue || value[key]);
-      return {displayKey, displayValue};
+const formatReviewExperience = (val) => {
+  if (!val || typeof val !== 'object') return String(val || '-');
+  const labels = {
+    onTime: 'Đúng giờ',
+    polite: 'Lễ phép',
+    clean: 'Xe sạch',
+    safe: 'Lái xe an toàn',
+    support: 'Chủ động hỗ trợ',
+    privacy: 'Bảo mật',
+    response: 'Phản hồi nhanh',
+    overall: 'Tổng thể'
+  };
+  const parts = Object.entries(val)
+    .filter(([_, score]) => score !== undefined && score !== null && score !== '')
+    .map(([k, score]) => `${labels[k] || k}: ${score}/5`);
+  return parts.length > 0 ? parts.join('; ') : '-';
+};
+
+const formatReviewQcd = (val) => {
+  if (!val || typeof val !== 'object') return String(val || '-');
+  const labels = { q: 'Q (Chất lượng)', c: 'C (Hiệu quả)', d: 'D (Đúng giờ)' };
+  const parts = Object.entries(val)
+    .filter(([_, score]) => score !== undefined && score !== null && score !== '')
+    .map(([k, score]) => `${labels[k] || k.toUpperCase()}: ${score}/5`);
+  return parts.length > 0 ? parts.join('; ') : '-';
+};
+
+const formatDriverReviewPrepData = (val) => {
+  if (!val || typeof val !== 'object') return String(val || '-');
+  const labels = {
+    uniform: 'Đồng phục', shoes: 'Giày sạch', interior: 'Nội thất sạch',
+    aircon: 'Điều hòa', water: 'Nước/khăn', dashcam: 'Camera HT',
+    fuel: 'Nhiên liệu', odor: 'Không mùi'
+  };
+  const parts = Object.entries(val)
+    .map(([k, item]) => {
+      const label = labels[k] || k;
+      if (item && typeof item === 'object') {
+        return `${label}: ${item.value || '-'}${item.note ? ` (${item.note})` : ''}`;
+      }
+      return `${label}: ${item}`;
     });
-}
+  return parts.length > 0 ? parts.join('; ') : '-';
+};
+
+const formatDriverReviewQcdData = (val) => {
+  if (!val || typeof val !== 'object') return String(val || '-');
+  const labels = {
+    safety: 'An toàn', onTime: 'Đúng giờ', service: 'Tác phong',
+    support: 'Chủ động', privacy: 'Bảo mật', management: 'Quản lý xe', overtime: 'Sẵn sàng OT'
+  };
+  const parts = Object.entries(val)
+    .map(([k, item]) => {
+      const label = labels[k] || k;
+      if (item && typeof item === 'object') {
+        return `${label}: Q:${item.q || 0}/5, C:${item.c || 0}/5, D:${item.d || 0}/5${item.note ? ` (${item.note})` : ''}`;
+      }
+      return `${label}: ${item}`;
+    });
+  return parts.length > 0 ? parts.join('; ') : '-';
+};
+
+export const formatLogData = (value, type) => {
+  if (!value) return [];
+  let parsedValue = value;
+  if (typeof parsedValue === 'string') {
+    try {
+      parsedValue = JSON.parse(parsedValue);
+    } catch (e) {
+      return [];
+    }
+  }
+  if (!parsedValue || typeof parsedValue !== 'object') return [];
+
+  const ignoredKeys = [
+    'id', 'mtype', 'isDeleted', 'isActive', 'log',
+    'isNotification30MinSent', 'notificationCount', 'notificationDate',
+    'notificationDriverCount', 'notificationDriverDate'
+  ];
+
+  return Object.keys(parsedValue)
+    .filter(key => {
+      if (ignoredKeys.includes(key)) return false;
+      if (key === 'mParentKey' && type !== "equipments") return false;
+      return true;
+    })
+    .map(key => {
+      const displayKey = logMasterDataKeyMapping(type, key);
+      let rawVal = parsedValue[key];
+
+      if (typeof rawVal === 'string' && (rawVal.startsWith('{') || rawVal.startsWith('['))) {
+        try {
+          rawVal = JSON.parse(rawVal);
+        } catch (e) {}
+      }
+
+      let displayValue = '-';
+      if (rawVal === null || rawVal === undefined || rawVal === '') {
+        displayValue = '-';
+      } else if (typeof rawVal === 'boolean') {
+        displayValue = rawVal ? 'Có' : 'Không';
+      } else if (Array.isArray(rawVal)) {
+        displayValue = rawVal.length > 0
+          ? rawVal.map(v => (v && typeof v === 'object' ? (v.mvalue || v.name || JSON.stringify(v)) : String(v))).join(', ')
+          : '-';
+      } else if (typeof rawVal === 'object') {
+        if (rawVal.mvalue !== undefined) {
+          displayValue = rawVal.mvalue || '-';
+        } else if (key === 'userReviewExperience') {
+          displayValue = formatReviewExperience(rawVal);
+        } else if (key === 'userReviewQcd') {
+          displayValue = formatReviewQcd(rawVal);
+        } else if (key === 'driverReviewPrep') {
+          displayValue = formatDriverReviewPrepData(rawVal);
+        } else if (key === 'driverReviewQcd') {
+          displayValue = formatDriverReviewQcdData(rawVal);
+        } else {
+          try {
+            displayValue = Object.entries(rawVal)
+              .map(([k, v]) => `${k}: ${v && typeof v === 'object' ? JSON.stringify(v) : v}`)
+              .join(', ');
+          } catch (e) {
+            displayValue = JSON.stringify(rawVal);
+          }
+        }
+      } else if (key === 'isApproved') {
+        const statusMap = {
+          0: 'Chờ duyệt',
+          1: 'Chờ phân công',
+          2: 'Chờ tài xế xác nhận',
+          3: 'Tài xế đã xác nhận',
+          4: 'Hoàn thành',
+          '-1': 'Từ chối',
+          '-2': 'Tài xế từ chối'
+        };
+        displayValue = statusMap[String(rawVal)] || String(rawVal);
+      } else if (key === 'isCancelled') {
+        displayValue = rawVal ? 'Đã huỷ' : 'Không huỷ';
+      } else if (key === 'isPriority') {
+        displayValue = rawVal ? 'Ưu tiên' : 'Bình thường';
+      } else if (key === 'userWantsToContinue') {
+        displayValue = (rawVal === true || rawVal === 'true' || rawVal === 1 || rawVal === '1') ? 'Có' : 'Không';
+      } else {
+        displayValue = String(rawVal);
+      }
+
+      return { key, displayKey, displayValue };
+    })
+    .filter(Boolean);
+};
 
 export const formatLogOldValue = (log) => {
   if (log.logOldValue) {
@@ -414,9 +555,17 @@ export const getFieldsBookingDetail = (request, masterData, t) => {
   // ].filter(Boolean); // Tạm thởi bỏ để hiển  thị hết
 
   let fieldLogs = [];
-  if (request.log && Array.isArray(request.log)) {
-    fieldLogs = request.log.map((log, index) => ({
-      title: formatUser(log.logUser).split(" (")[0] + " - " + formatDateTime(log.logDate),
+  let logList = request.log;
+  if (typeof logList === 'string') {
+    try {
+      logList = JSON.parse(logList);
+    } catch (e) {
+      logList = [];
+    }
+  }
+  if (logList && Array.isArray(logList)) {
+    fieldLogs = logList.map((log, index) => ({
+      title: String(formatUser(log.logUser) || '').split(" (")[0] + " - " + formatDateTime(log.logDate),
       oldValues: formatLogData(log.logOldValue, "booking"),
       newValues: formatLogData(log.logNewValue, "booking")
     }));
@@ -430,7 +579,7 @@ export const formatIdDetail = (request, masterData, setModal, t) => {
   return (
     <span
       className={`flex items-center cursor-pointer justify-center gap-1 px-1 py-0 text-sm my-1.5 rounded ${bgColor}`}
-      onClick={() => setModal(<ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={Array.isArray(request.log) && request.log.length > 0 ? [
+      onClick={() => setModal(<ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={fieldLogs.length > 0 ? [
         { label: t('common.Thông tin'), isDetail: true },
         { label: t('common.Lịch sử'), isHistory: true },
       ] : []} />)}
@@ -494,7 +643,7 @@ const { fields, fieldLogs } = getFieldsBookingDetail(request, masterData, t);
   return (
     <span
       className={`inline-flex items-center cursor-pointer justify-center gap-1 px-2 py-0.5 text-xs my-1.5 rounded-full ${bgColor}`}
-      onClick={() => setModal(<ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={Array.isArray(request.log) && request.log.length > 0 ? [
+      onClick={() => setModal(<ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={fieldLogs.length > 0 ? [
         { label: t('common.Thông tin'), isDetail: true },
         { label: t('common.Lịch sử'), isHistory: true },
       ] : []} />)}

@@ -98,6 +98,10 @@ export function getBookings(component, data, options = {}) {
     return postFormData('getBookings', { ...data, component }, options);
 }
 
+export function getReportCarActivity(data, options = {}) {
+    return postFormData('getReportCarActivity', data, options);
+}
+
 export function getAvailableRooms(component, data, options = {}) {
     return postFormData('getAvailableRooms', { ...data, component }, options);
 }

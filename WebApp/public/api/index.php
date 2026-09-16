@@ -21,6 +21,8 @@ function handleResponse($action) {
             return \Booking\Page\MasterData::suggestionDepartureLocations();
         case 'getBookings':
             return \Booking\Page\Bookings::getBookings();
+        case 'getReportCarActivity':
+            return \Booking\Page\Bookings::getReportCarActivity();
         case 'getAvailableRooms':
             return \Booking\Page\Bookings::getAvailableRooms();
         case 'deleteItem':
@@ -64,6 +66,8 @@ function handleResponse($action) {
             }
         case 'confirmItem':
             return \Booking\Page\Item::confirmItem();
+        case 'endItem':
+            return \Booking\Page\Item::endItem();
         default:
             return [ 'status' => 'success' ];
     }

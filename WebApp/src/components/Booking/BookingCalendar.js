@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useContext, useEffect } from 'react';
-import { approveItem, getBookings } from '../../systems/api';
+import { approveItem, getBookings, endItem } from '../../systems/api';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '../../systems/constant';
 import { endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek } from 'date-fns';
@@ -8,7 +8,7 @@ import { RequestContext } from '../../App';
 import withRequestForm from '../../hoc/withRequestForm';
 import { initForm as initBookingForm } from './BookingForm';
 import HeaderTableLayout from '../../shared/HeaderTableLayout';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import LoopFormElement from '../../shared/LoopFormElement';
 import Calendar, { constrast } from '../../shared/Calendar';
 import ModalContent from '../../shared/ModalContent';
@@ -39,6 +39,27 @@ const BookingCalendar = ({ request, errors, handleChange, isHome = false }) => {
   const { setLoading, setRequest, masterData, setModal, showConfirmModal, setError } = useContext(RequestContext);
   const [filteredRooms, setFilteredRooms] = useState([]);
   const { t } = useTranslation();
+
+  const [isFilterCollapsed, setIsFilterCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('calendar_filter_collapsed') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const toggleFilterCollapse = () => {
+    setIsFilterCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('calendar_filter_collapsed', String(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const selectedRoomTypeLabel = request.roomType?.mvalue || (request.roomType?.label ? t(request.roomType.label) : '');
+  const selectedRoomLabel = request.room?.mvalue || '';
   
   const groupedRooms = filteredRooms.reduce((acc, room) => {
     const roomType = (masterData.roomTypes || []).find(type => type.mkey === room.roomType);
@@ -215,10 +236,24 @@ const handleRoomTypeChange = (field, value) => {
     setModal(null);
   };
 
-  const handleEndBooking = (request, editRoute) => {
-    setRequest({...request, isEndBooking: true});
-    navigate(`${editRoute}/${request.id}`);
-    setModal(null);
+  const handleEndBooking = (request) => {
+    showConfirmModal(t('common.Bạn có chắc chắn muốn kết thúc chuyến xe có ID = [id] không?', { id: request.id }), () => {
+      setLoading(true);
+      endItem(routes.approveBookingList.component, request.id)
+        .then((response) => {
+          if (response?.status === "error") {
+            setError(t(response.message ?? 'common.Lỗi khi gửi yêu cầu'));
+          } else {
+            refreshCalendar();
+            setModal(null);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to endBooking:', error);
+          setError(t('common.Lỗi khi gửi yêu cầu'));
+        })
+        .finally(() => setLoading(false));
+    });
   };
 
   const handleApprove = (request) => {
@@ -246,37 +281,44 @@ const handleRoomTypeChange = (field, value) => {
     
     const actionButtons = [];
     const currentTime = new Date();
-    const bookingStartTime = new Date(`${request?.startDate} ${request?.startTime}`);
+    const startTimeStr = `${request?.startDate} ${request?.startTime}`.replace(' ', 'T');
     const endDateStr = request?.endDate || request?.startDate;
-    const bookingEndTime = new Date(`${endDateStr} ${request?.endTime}`);
+    const endTimeStr = `${endDateStr} ${request?.endTime}`.replace(' ', 'T');
+    const bookingStartTime = new Date(startTimeStr);
+    const bookingEndTime = new Date(endTimeStr);
     const isBookingInProgress = currentTime >= bookingStartTime && currentTime <= bookingEndTime;
     const isPastBooking = currentTime > bookingEndTime;
 
-    if (routes.approveBookingList.permissions.some(permission => masterData.roles.includes(permission))) {
-      const canApprove = (masterData?.approvers || []).includes(masterData.userId);
+    const hasApproveRole = routes.approveBookingList.permissions.some(permission => masterData.roles.includes(permission));
+    const isApproverUser = (masterData?.approvers || []).some(a => 
+      (typeof a === 'object' ? (a.mkey === masterData.userId || a.id === masterData.userId) : a === masterData.userId)
+    );
+    const canApprove = hasApproveRole || isApproverUser;
+
+    if (canApprove) {
       if (request?.isCancelled) {
         // DO NOTHING
       } else if (request?.isApproved === -1) {
         // DO NOTHING
+      } else if (request?.isApproved === 4) {
+        // Đã hoàn thành - DO NOTHING
       } else if (isBookingInProgress) {
-           // DO NOTHING
+        actionButtons.push({
+          label: t('booking.Kết thúc'), className: 'bg-blue-500', action: (request) => handleEndBooking(request)
+        });
       } else if (isPastBooking) {
         // DO NOTHING
       } else if ([1, 2, 3, -2].includes(request?.isApproved)) { // Đã duyệt, chờ phân công, chờ tài xế...
-          if (canApprove) {
-            actionButtons.push({
-              label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
-            });
-          }
+        actionButtons.push({
+          label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
+        });
       } else {
-          if (canApprove) {
-              actionButtons.push({
-                label: t('booking.Duyệt'), className: 'bg-green-500', action: (request) => handleApprove(request)
-              });
-            actionButtons.push({
-              label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
-            });
-          }
+        actionButtons.push({
+          label: t('booking.Duyệt'), className: 'bg-green-500', action: (request) => handleApprove(request)
+        });
+        actionButtons.push({
+          label: t('booking.Từ chối'), className: 'bg-red-500', action: (request) => handleEdit(request, routes.rejectBookingForm.path)
+        });
       }
     }
 
@@ -303,7 +345,7 @@ const handleRoomTypeChange = (field, value) => {
 
     const { fields, fieldLogs } = getFieldsBookingDetail(request, masterData, t);
     setModal(<>
-        <ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={Array.isArray(request.log) && request.log.length > 0 ? [
+        <ModalContent title={t("common.Thông tin đặt xe")} fields={fields} fieldLogs={fieldLogs} tabs={fieldLogs.length > 0 ? [
             { label: t('common.Thông tin'), isDetail: true },
             { label: t('common.Lịch sử'), isHistory: true },
           ] : []} />
@@ -374,51 +416,89 @@ const handleRoomTypeChange = (field, value) => {
           hideAddNew={true}
           backToUrl={-1}
         />}
-      {Object.keys(initForm).filter(field => initForm[field].label).map(field => (
-        <div key={field} className="mb-4">
-          <LoopFormElement 
-            component={component} 
-            field={field} 
-            initForm={initForm} 
-            request={request} 
-            errors={errors} 
-            // handleChange={
-            //   field === 'building' ? handleBuildingChange : 
-            //   handleChange
-            // } 
-            handleChange={field === 'roomType' ? handleRoomTypeChange : handleChange}
-          />
+      {/* Khung thu gọn / mở rộng bộ lọc loại xe & danh sách xe */}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-4 overflow-hidden transition-all duration-200">
+        <div 
+          className="flex items-center justify-between p-3 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition"
+          onClick={toggleFilterCollapse}
+        >
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <FaFilter className="text-blue-600 text-sm" />
+            <span className="font-semibold text-sm text-gray-800">
+              {t('booking.Loại xe')}
+            </span>
+            {selectedRoomTypeLabel ? (
+              <span className="text-xs bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1">
+                <span>{selectedRoomTypeLabel}</span>
+                {selectedRoomLabel && <span className="font-bold">• {selectedRoomLabel}</span>}
+              </span>
+            ) : (
+              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">
+                {t('common.Tất cả') || 'Tất cả'}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 px-2 py-1 rounded hover:bg-gray-200 transition focus:outline-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFilterCollapse();
+            }}
+          >
+            {/* <span>{isFilterCollapsed ? (t('common.Mở rộng') || 'Mở rộng') : (t('common.Thu gọn') || 'Thu gọn')}</span> */}
+            {isFilterCollapsed ? <FaChevronDown size={12} /> : <FaChevronUp size={12} />}
+          </button>
         </div>
-      ))}
-      <div className="my-4 border border-gray-200 rounded-lg">
-        <table className="w-full divide-y divide-gray-200">
-          <tbody className="divide-y divide-gray-200">
-            {Object.keys(groupedRooms).map(roomType => (
-              <tr key={roomType}>
-                <td className="px-6 py-4 w-1/4 whitespace-nowrap text-sm font-medium text-gray-900"> {groupedRooms[roomType]?.[0]?.roomTypeMValue}</td>
-                <td className="px-6 py-4 text-sm text-gray-800">
-                  {groupedRooms[roomType].map(room => (
-                    <div 
-                      key={room.mkey} 
-                      className={`inline-block cursor-pointer text-xs px-2 py-0.5 rounded-full mr-1 mb-1 bg-gray-100 text-gray-800`}
-                      style={!request.room?.mkey ? {
-                        backgroundColor: room.color || room.roomTypeDetail.color, 
-                        color: constrast(room.color || room.roomTypeDetail.color)
-                      } : request.room?.mkey === room.mkey ? {
-                        backgroundColor: room.color || room.roomTypeDetail.color, 
-                        color: constrast(room.color || room.roomTypeDetail.color),
-                        fontWeight: "bold"
-                      } : {}}
-                      onClick={() => handleRoomChange('room', room)}
-                    >
-                      {room.mvalue}
-                    </div>
-                  ))}
-                </td>
-              </tr>
+
+        {!isFilterCollapsed && (
+          <div className="p-4 border-t border-gray-200 bg-white">
+            {Object.keys(initForm).filter(field => initForm[field].label).map(field => (
+              <div key={field} className="mb-4">
+                <LoopFormElement 
+                  component={component} 
+                  field={field} 
+                  initForm={initForm} 
+                  request={request} 
+                  errors={errors} 
+                  handleChange={field === 'roomType' ? handleRoomTypeChange : handleChange}
+                />
+              </div>
             ))}
-          </tbody>
-        </table>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <table className="w-full divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200">
+                  {Object.keys(groupedRooms).map(roomType => (
+                    <tr key={roomType}>
+                      <td className="px-4 py-3 w-1/4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-50">
+                        {groupedRooms[roomType]?.[0]?.roomTypeMValue}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-800">
+                        {groupedRooms[roomType].map(room => (
+                          <div 
+                            key={room.mkey} 
+                            className={`inline-block cursor-pointer text-xs px-2 py-0.5 rounded-full mr-1 mb-1 bg-gray-100 text-gray-800`}
+                            style={!request.room?.mkey ? {
+                              backgroundColor: room.color || room.roomTypeDetail.color, 
+                              color: constrast(room.color || room.roomTypeDetail.color)
+                            } : request.room?.mkey === room.mkey ? {
+                              backgroundColor: room.color || room.roomTypeDetail.color, 
+                              color: constrast(room.color || room.roomTypeDetail.color),
+                              fontWeight: "bold"
+                            } : {}}
+                            onClick={() => handleRoomChange('room', room)}
+                          >
+                            {room.mvalue}
+                          </div>
+                        ))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
       <Calendar 
         myCalendar={myCalendar} 

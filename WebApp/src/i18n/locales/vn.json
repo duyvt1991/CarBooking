@@ -111,8 +111,10 @@
     "Số điện thoại tài xế": "Số điện thoại tài xế",
     "Tài xế": "Tài xế",
     "Bạn có chắc chắn muốn xác nhận đặt xe có ID = [id] không?": "Bạn có chắc chắn muốn xác nhận đặt xe có ID = {{id}} không?",
-    "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = [id] không?": "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = {{id}} không?"
-
+    "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = [id] không?": "Bạn có chắc chắn muốn kết thúc chuyến xe có ID = {{id}} không?",
+    "Tất cả": "Tất cả",
+    "Mở rộng": "Mở rộng",
+    "Thu gọn": "Thu gọn"
   },
   "routes": {
     "Đặt phòng": "Đặt xe",
@@ -154,13 +156,16 @@
     "Tài xế": "Tài xế",
     "Duyệt và phân công": "Duyệt và phân công",
     "Tài xế tiếp nhận": "Tài xế tiếp nhận",
-    "Tài xế đánh giá": "Tài xế đánh giá"
+    "Tài xế đánh giá": "Tài xế đánh giá",
+    "Lịch hoạt động xe": "Lịch hoạt động xe"
   },
   "home": {
     "Hệ thống": "Hệ thống",
     "Danh mục": "Danh mục",
     "Nghiệp vụ": "Nghiệp vụ",
-    "Báo cáo thống kê": "Báo cáo thống kê"
+    "Báo cáo thống kê": "Báo cáo thống kê",
+    "Thu gọn": "Thu gọn",
+    "Mở rộng": "Mở rộng"
   },
   "admin": {
     "Tìm Esuhai User": "Tìm Esuhai User",
@@ -290,7 +295,6 @@
     "Tự động duyệt không được để trống": "Tự động duyệt không được để trống",
     "Có": "Có",
     "Không": "Không"
-    
   },
   "room": {
     "ID": "ID",
@@ -459,9 +463,9 @@
     "Hoàn thành": "Hoàn thành",
     "Loại dịch vụ không được để trống": "Loại dịch vụ không được để trống",
     "Tài xế không được để trống": "Tài xế không được để trống",
-    "Số điện thoại tài xế":"Số điện thoại tài xế",
+    "Số điện thoại tài xế": "Số điện thoại tài xế",
     "Biển số xe": "Biển số xe",
-    "Tài xế":"Tài xế",
+    "Tài xế": "Tài xế",
     "Điều hài lòng nhất": "Điều hài lòng nhất",
     "Điều cần cải thiện": "Điều cần cải thiện",
     "Người sử dụng đánh giá": "Người sử dụng đánh giá",
@@ -475,7 +479,7 @@
     "Quản lý - Điều phối dánh giá": "Quản lý - Điều phối đánh giá",
     "Điểm dịch vụ": "Điểm dịch vụ",
     "Điểm dịch vụ không được để trống": "Điểm dịch vụ không được để trống",
-    "Xác nhận":"Xác nhận",
+    "Xác nhận": "Xác nhận",
     "Số điện thoại tài xế không được để trống": "Số điện thoại tài xế không được để trống",
     "Biển số xe không được để trống": "Biển số xe không được để trống",
     "Đã duyệt": "Đã duyệt",
@@ -483,8 +487,11 @@
     "Số lượng người": "Số lượng người",
     "Tên khách sạn": "Tên khách sạn",
     "Phân công": "Phân công",
-    "Số lượng người tham gia phải lớn hơn 0": "Số lượng người tham gia phải lớn hơn 0"
-
+    "Số lượng người tham gia phải lớn hơn 0": "Số lượng người tham gia phải lớn hơn 0",
+    "Tên khách sạn không được để trống": "Tên khách sạn không được để trống",
+    "Danh sách xe": "Danh sách xe",
+    "Thu gọn": "Thu gọn",
+    "Mở rộng": "Mở rộng"
   },
   "report": {
     "Đánh giá vệ sinh": "Đánh giá vệ sinh",
@@ -517,7 +524,62 @@
     "Tổng chuyến": "Tổng chuyến",
     "Số lần": "Số lần",
     "lần": "lần",
-    "Phòng ban": "Phòng ban"
+    "Phòng ban": "Phòng ban",
+    "Mục đích sử dụng": "Mục đích sử dụng",
+    "Theo mục đích sử dụng": "Theo mục đích sử dụng",
+    "Tổng chuyến đi": "Tổng chuyến đi",
+    "Tổng thời gian": "Tổng thời gian",
+    "Phòng ban sử dụng": "Phòng ban sử dụng",
+    "Tài xế phục vụ": "Tài xế phục vụ",
+    "Lịch hoạt động": "Lịch hoạt động",
+    "Chi phí BU": "Chi phí BU",
+    "Tài xế": "Tài xế",
+    "Đang xuất Excel...": "Đang xuất Excel...",
+    "Theo Tháng": "Theo Tháng",
+    "Theo Ngày": "Theo Ngày",
+    "Báo cáo thời gian sử dụng xe, tổng hợp theo phòng ban và tài xế": "Báo cáo thời gian sử dụng xe, tổng hợp theo phòng ban và tài xế",
+    "Vui lòng nhấn Lọc để tải dữ liệu báo cáo": "Vui lòng nhấn Lọc để tải dữ liệu báo cáo",
+    "Không có chuyến xe nào trong khoảng thời gian này": "Không có chuyến xe nào trong khoảng thời gian này",
+    "Chưa có dữ liệu sử dụng theo phòng ban trong khoảng thời gian này": "Chưa có dữ liệu sử dụng theo phòng ban trong khoảng thời gian này",
+    "Chưa có dữ liệu tài xế trong khoảng thời gian này": "Chưa có dữ liệu tài xế trong khoảng thời gian này",
+    "Báo cáo chỉ lấy các chuyến dịch vụ là Xe nội bộ": "Báo cáo chỉ lấy các chuyến dịch vụ là Xe nội bộ",
+    "Cột Loại xe lấy theo Tên xe": "Cột Loại xe lấy theo Tên xe",
+    "Ô màu đỏ biểu thị chuyến xe đã được thông báo": "Ô màu đỏ biểu thị chuyến xe đã được thông báo",
+    "Các cột màu vàng khi xuất Excel sẽ để trống để tự nhập tay": "Các cột màu vàng khi xuất Excel sẽ để trống để tự nhập tay",
+    "BÁO CÁO CHI PHÍ BU": "BÁO CÁO CHI PHÍ BU",
+    "BÁO CÁO TÀI XẾ": "BÁO CÁO TÀI XẾ",
+    "TỔNG GIỜ": "TỔNG GIỜ",
+    "TÁCH GIỜ": "TÁCH GIỜ",
+    "PHÍ ĐẬU XE": "PHÍ ĐẬU XE",
+    "PHÍ NHÂN SỰ TT": "PHÍ NHÂN SỰ TT",
+    "TỔNG PHÍ": "TỔNG PHÍ",
+    "LƯU ĐÊM": "LƯU ĐÊM",
+    "ĐI SỚM (5H)": "ĐI SỚM (5H)",
+    "ĐI SỚM (6H)": "ĐI SỚM (6H)",
+    "QUA TRƯA": "QUA TRƯA",
+    "CHỦ NHẬT": "CHỦ NHẬT",
+    "NGÀY LỄ": "NGÀY LỄ",
+    "TĂNG CA": "TĂNG CA",
+    "Lịch hoạt động xe": "Lịch hoạt động xe",
+    "Ghi chú xe nội bộ": "* Báo cáo chỉ lấy các chuyến dịch vụ là Xe nội bộ. Cột Loại xe lấy theo Tên xe. Ô màu đỏ biểu thị chuyến xe đã được thông báo.",
+    "Ghi chú cột màu vàng": "Các cột màu vàng khi xuất Excel sẽ để trống để tự nhập tay",
+    "KM": "KM",
+    "XĂNG": "XĂNG",
+    "Thứ": "Thứ",
+    "Ngày": "Ngày",
+    "Bắt đầu": "Bắt đầu",
+    "Kết thúc": "Kết thúc",
+    "Số giờ": "Số giờ",
+    "Đi (KM)": "Đi (KM)",
+    "Về (KM)": "Về (KM)",
+    "Phí đậu xe": "Phí đậu xe",
+    "Xăng xe": "Xăng xe",
+    "Lưu đêm": "Lưu đêm",
+    "Đi sớm": "Đi sớm",
+    "NV sử dụng": "NV sử dụng",
+    "SL Người": "SL Người",
+    "Dịch vụ": "Dịch vụ",
+    "Ghi Chú/Lịch trình": "Ghi Chú/Lịch trình"
   },
   "carLine": {
     "ID": "ID",
@@ -534,7 +596,8 @@
     "Esuhai User ID không được để trống": "Esuhai User ID không được để trống",
     "Esuhai User Name không được để trống": "Esuhai User Name không được để trống",
     "Số điện thoại": "Số điện thoại",
-    "Số điện thoại không được để trống": "Số điện thoại không được để trống"
+    "Số điện thoại không được để trống": "Số điện thoại không được để trống",
+    "Số điện thoại chỉ được chứa số": "Số điện thoại chỉ được chứa số"
   },
   "review": {
     "A. ĐÁNH GIÁ TRẢI NGHIỆM DỊCH VỤ": "A. ĐÁNH GIÁ TRẢI NGHIỆM DỊCH VỤ",

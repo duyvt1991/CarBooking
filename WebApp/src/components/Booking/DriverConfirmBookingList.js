@@ -66,7 +66,7 @@ function DriverConfirmBookingList({
           name: 'id', 
           label: 'ID', 
           additionalClass: 'sticky left-0 z-10 w-[60px] min-w-[60px]',
-          additionalClassHeader: 'sticky left-0 z-20 !bg-green-600 w-[60px] min-w-[60px]',
+          additionalClassHeader: 'sticky left-0 !z-40 !bg-green-600 w-[60px] min-w-[60px]',
           render: (field, request) => request[field] 
         },
         { 
@@ -74,7 +74,7 @@ function DriverConfirmBookingList({
           align: 'center',  
           label: t('common.Trạng thái'), 
           additionalClass: 'sticky left-[60px] z-10 w-[140px] min-w-[140px]',
-          additionalClassHeader: 'sticky left-[60px] z-20 !bg-green-600 w-[140px] min-w-[140px]',
+          additionalClassHeader: 'sticky left-[60px] !z-40 !bg-green-600 w-[140px] min-w-[140px]',
           render: (field, request) => formatBookingStatus(request, masterData, setModal, t) 
         },
     ...(tempFilters?.tab === 'review' ? [
