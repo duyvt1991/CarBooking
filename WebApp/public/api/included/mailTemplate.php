@@ -8,26 +8,31 @@ class MailTemplate {
     public static $mailTemplates = [];
 
     public static function getBookingDetails($currentItem) {
-        $id = $currentItem['id'];
-        $bookingUser = $currentItem['bookingUser'];
-        $mainUser = $currentItem['mainUser'];
-        $department = $currentItem['department'];
-        $roomType = $currentItem['roomType'];
-        $room = $currentItem['room'];
-        $driverUser = $currentItem['driverUser'];
-        $driver = $currentItem['driver'];
-        $driverPhoneNumber = $currentItem['driverPhoneNumber'];
-        $licensePlateNumber = $currentItem['licensePlateNumber'];
-        $startDate = $currentItem['startDate'];
-        $endDate = $currentItem['endDate'];
-        $startTime = $currentItem['startTime'];
-        $endTime = $currentItem['endTime'];
-        $usagePurposeDetail = $currentItem['usagePurposeDetail'];
+        $id = $currentItem['id'] ?? '';
+        $bookingUser = $currentItem['bookingUser'] ?? [];
+        $mainUser = $currentItem['mainUser'] ?? [];
+        $department = $currentItem['department'] ?? [];
+        $roomType = $currentItem['roomType'] ?? [];
+        $room = $currentItem['room'] ?? [];
+        $driverUser = $currentItem['driverUser'] ?? [];
+        $driver = $currentItem['driver'] ?? [];
+        $driverPhoneNumber = $currentItem['driverPhoneNumber'] ?? '';
+        $licensePlateNumber = $currentItem['licensePlateNumber'] ?? '';
+        $startDate = $currentItem['startDate'] ?? '';
+        $endDate = $currentItem['endDate'] ?? '';
+        $startTime = $currentItem['startTime'] ?? '';
+        $endTime = $currentItem['endTime'] ?? '';
+        $usagePurposeDetail = $currentItem['usagePurposeDetail'] ?? '';
+        $usagePurposes = $currentItem['usagePurposes'] ?? ($currentItem['usagePurpose'] ?? null);
+        $flightNumber = $currentItem['flightNumber'] ?? null;
+        $employeeNumber = $currentItem['employeeNumber'] ?? null;
+        $employeeList = $currentItem['employeeList'] ?? [];
+        $detailedSchedule = $currentItem['detailedSchedule'] ?? null;
 
-        $startDateFormatted = implode("/", array_reverse(explode("-", $startDate)));
-        $endDateFormatted = implode("/", array_reverse(explode("-", $endDate)));
-        $startTimeFormatted = preg_replace('/:00$/', '', $startTime);
-        $endTimeFormatted = preg_replace('/:00$/', '', $endTime);
+        $startDateFormatted = !empty($startDate) ? implode("/", array_reverse(explode("-", $startDate))) : '';
+        $endDateFormatted = !empty($endDate) ? implode("/", array_reverse(explode("-", $endDate))) : '';
+        $startTimeFormatted = !empty($startTime) ? preg_replace('/:00$/', '', $startTime) : '';
+        $endTimeFormatted = !empty($endTime) ? preg_replace('/:00$/', '', $endTime) : '';
 
         $details = "<br/><b>Thông tin lịch trình đặt xe:</b><br/>";
         $details .= "- Mã chuyến xe: " . $id . "<br/>";
@@ -41,7 +46,9 @@ class MailTemplate {
         if (!empty($department['mvalue'])) {
             $details .= "- Bộ phận: " . $department['mvalue'] . "<br/>";
         }
-        $details .= "- Thời gian sử dụng: " . $startDateFormatted . " " . $startTimeFormatted . " - " . $endDateFormatted . " " . $endTimeFormatted . "<br/>";
+        if (!empty($startDateFormatted) || !empty($startTimeFormatted)) {
+            $details .= "- Thời gian sử dụng: " . trim($startDateFormatted . " " . $startTimeFormatted) . " - " . trim($endDateFormatted . " " . $endTimeFormatted) . "<br/>";
+        }
         if (!empty($usagePurposeDetail)) {
             $details .= "- Mục đích chuyến đi: " . $usagePurposeDetail . "<br/>";
         }
@@ -557,7 +564,15 @@ class MailTemplate {
             return ['subject' => '', 'content' => '', 'userIds' => [], 'approvers' => [], 'priorityApprovers' => [], 'driverUser' => [], 'assignmentUser' => [], 'employeeList' => []];
         }
         $query = \Booking\Query::getInstance("car_booking_requests", true);
-        $query->setSelect(['*']);
+        $query->setSelect([
+            'id',
+            'isPriority',
+            'bookingUser',
+            'mainUser',
+            'driverUser',
+            'assignmentUser',
+            'employeeList',
+        ]);
         $query->setFilter(['id' => $id]);
         $currentItem = $query->exec()->fetch();
         if (empty($currentItem)) {
