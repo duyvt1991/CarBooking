@@ -89,9 +89,9 @@ const mockMasterData = {
     { id: '3', mkey: 'CL003', mvalue: 'Car Line 3', isActive: false },
   ],
   drivers: [
-    { id: '1', mkey: '107', mvalue: 'Driver 7 (driver7@esuhai.com)', driverPhoneNumber: '0901234567' },
-    { id: '2', mkey: '108', mvalue: 'Driver 8 (driver8@esuhai.com)', driverPhoneNumber: '0901234568' },
-    { id: '3', mkey: '109', mvalue: 'Driver 9 (driver9@esuhai.com)', driverPhoneNumber: '0901234569' },
+    { id: '1', mkey: '107', mvalue: 'Driver 7 (driver7@esuhai.com)', driverPhoneNumber: '0901234567', isActive: true },
+    { id: '2', mkey: '108', mvalue: 'Driver 8 (driver8@esuhai.com)', driverPhoneNumber: '0901234568', isActive: true },
+    { id: '3', mkey: '109', mvalue: 'Driver 9 (driver9@esuhai.com)', driverPhoneNumber: '0901234569', isActive: false },
   ],
   departureLocations: [
     { mkey: 'Location 1', mvalue: 'Location 1' },
@@ -1555,8 +1555,19 @@ export const mockData = (action, data) => {
           return generateMockList(mockLogList, page, limit);
         case 'carLineList':
           return generateMockList(mockMasterData.carLines, page, limit);
-        case 'driverList':
-          return generateMockList(mockMasterData.drivers, page, limit);
+        case 'driverList': {
+          let drivers = [...mockMasterData.drivers];
+          try {
+            const filters = JSON.parse(data.filters);
+            if (filters.isActive !== undefined && filters.isActive !== '') {
+              drivers = drivers.filter(d => String(d.isActive ? 1 : 0) === String(filters.isActive));
+            }
+            if (filters.driverPhoneNumber) {
+              drivers = drivers.filter(d => (d.driverPhoneNumber || '').includes(filters.driverPhoneNumber));
+            }
+          } catch(e) {}
+          return generateMockList(drivers, page, limit);
+        }
         case 'driverConfirmBookingList':
           return generateMockList(normalizedBookings.filter(booking => {
             let tab = "";

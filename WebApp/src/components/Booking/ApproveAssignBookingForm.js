@@ -12,6 +12,11 @@ const getVal = (val) => {
   return String(val);
 };
 
+const isItemActive = (item) => {
+  if (!item) return false;
+  return item.isActive !== false && item.isActive !== 0 && item.isActive !== '0';
+};
+
 const initForm = {
   id: { value: '' },
   serviceType: {
@@ -77,10 +82,16 @@ const component = routes.approveAssignBookingForm.component;
 
 function ApproveAssignBookingForm({ request, errors, handleChange }) {
   useTranslation();
-  const { masterData } = useContext(RequestContext);
+  const { masterData, refreshMasterData } = useContext(RequestContext);
   const [initFormState, setInitFormState] = useState(initForm);
   const [availableRooms, setAvailableRooms] = useState(null);
   const [availableDrivers, setAvailableDrivers] = useState(null);
+
+  useEffect(() => {
+    if (refreshMasterData) {
+      refreshMasterData();
+    }
+  }, [refreshMasterData]);
 
   const startDateStr = typeof request?.startDate === 'object' && request?.startDate.toISOString 
     ? request.startDate.toISOString().split('T')[0] 
@@ -154,15 +165,15 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
       const busyRoomKeys = overlappingBookings.map(b => safeParseKey(b.room)).filter(Boolean);
       const busyDriverKeys = overlappingBookings.map(b => safeParseKey(b.driverUser)).filter(Boolean);
       
-      const freeRooms = (masterData.rooms || []).filter(r => !busyRoomKeys.includes(r.mkey));
-      const freeDrivers = (masterData.drivers || []).filter(d => !busyDriverKeys.includes(d.mkey));
+      const freeRooms = (masterData.rooms || []).filter(r => isItemActive(r) && !busyRoomKeys.includes(r.mkey));
+      const freeDrivers = (masterData.drivers || []).filter(d => isItemActive(d) && !busyDriverKeys.includes(d.mkey));
       
       setAvailableRooms(freeRooms);
       setAvailableDrivers(freeDrivers);
     }).catch(err => {
       if (isMounted) {
-        setAvailableRooms(masterData.rooms || []);
-        setAvailableDrivers(masterData.drivers || []);
+        setAvailableRooms((masterData.rooms || []).filter(isItemActive));
+        setAvailableDrivers((masterData.drivers || []).filter(isItemActive));
       }
     });
 
@@ -170,7 +181,8 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
   }, [startDateStr, endDateStr, reqStartTimeStr, reqEndTimeStr, request?.id, masterData.rooms?.length, masterData.drivers?.length]);
 
   const getRoomOptions = () => {
-    const rooms = availableRooms !== null ? availableRooms : (masterData.rooms || []);
+    const rawRooms = availableRooms !== null ? availableRooms : (masterData.rooms || []);
+    const rooms = rawRooms.filter(isItemActive);
     const st = getVal(request?.serviceType);
     const currentRoomKey = getVal(request?.room);
 
@@ -183,7 +195,7 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
 
     if (currentRoomKey) {
       const currentRoom = (masterData.rooms || []).find(r => r.mkey === currentRoomKey);
-      if (currentRoom && !filteredRooms.some(r => r.mkey === currentRoomKey)) {
+      if (currentRoom && isItemActive(currentRoom) && !filteredRooms.some(r => r.mkey === currentRoomKey)) {
         filteredRooms.push(currentRoom);
       }
     }
@@ -192,13 +204,14 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
   };
 
   const getDriverOptions = () => {
-    const drivers = availableDrivers !== null ? availableDrivers : (masterData.drivers || []);
+    const rawDrivers = availableDrivers !== null ? availableDrivers : (masterData.drivers || []);
+    const drivers = rawDrivers.filter(isItemActive);
     const currentDriverKey = getVal(request?.driverUser);
 
     let filteredDrivers = [...drivers];
     if (currentDriverKey) {
       const currentDriver = (masterData.drivers || []).find(d => d.mkey === currentDriverKey);
-      if (currentDriver && !filteredDrivers.some(d => d.mkey === currentDriverKey)) {
+      if (currentDriver && isItemActive(currentDriver) && !filteredDrivers.some(d => d.mkey === currentDriverKey)) {
         filteredDrivers.push(currentDriver);
       }
     }

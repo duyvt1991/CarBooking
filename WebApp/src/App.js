@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import {
   HashRouter as Router,
   Routes,
@@ -119,16 +119,20 @@ const App = () => {
     setConfirmModal({ show: false, message: '', onConfirm: null });
   };
 
+  const refreshMasterData = useCallback(() => {
+    return getMasterData()
+      .then(data => {
+        setMasterData(data);
+        return data;
+      })
+      .catch(error => console.error('Error fetching masterData:', error));
+  }, []);
+
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language') || 'vn';
     i18n.changeLanguage(savedLanguage);
 
-    getMasterData()
-      .then(data => {
-        setMasterData(data);
-      })
-      .catch(error => console.error('Error fetching user list:', error))
-      .finally(() => setLoading(false));
+    refreshMasterData().finally(() => setLoading(false));
   }, [masterDataVersion]);
 
   useEffect(() => {
@@ -209,7 +213,7 @@ const App = () => {
   };
 
   return (
-    <RequestContext.Provider value={{ masterData, setModal, error, setError, request, setRequest, loading, setLoading, showConfirmModal, hideConfirmModal }}>
+    <RequestContext.Provider value={{ masterData, refreshMasterData, setModal, error, setError, request, setRequest, loading, setLoading, showConfirmModal, hideConfirmModal }}>
       {loading &&  <Loading />}
       {confirmModal.show && (
         <div className="fixed w-full h-full inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-[2000]" onClick={hideConfirmModal}>

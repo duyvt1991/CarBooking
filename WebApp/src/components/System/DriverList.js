@@ -7,7 +7,6 @@ import FilterTableLayout from '../../shared/FilterTableLayout';
 import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
-import { type } from '@testing-library/user-event/dist/type';
 
 function DriverList({
   handleAction, handleEdit, currentPage, setCurrentPage, requestsPerPage, setRequestsPerPage, requests, totalPages, totalItems, setFilters, loading, tempFilters, setTempFilters
@@ -38,18 +37,28 @@ function DriverList({
     { name: 'id', placeholder: t('driver.ID') },
     { name: 'mkey', placeholder: t('driver.Esuhai User ID') },
     { name: 'mvalue', placeholder: t('driver.Esuhai User Name') },
-    { name: 'driverPhoneNumber', type: 'text', placeholder: t('driver.Số điện thoại') }
+    { name: 'driverPhoneNumber', type: 'text', placeholder: t('driver.Số điện thoại') },
+    { name: 'isActive', placeholder: t('driver.Trạng thái'), type: 'select', options: [
+      { value: '1', label: t('driver.Hoạt động') },
+      { value: '0', label: t('driver.Tạm khoá') }
+    ]}
   ];
 
   const requestFields = [
     { name: 'id', label: t('driver.ID'), render: (field, request) => request[field] },
     { name: 'mkey', label: t('driver.Esuhai User ID'), render: (field, request) => request[field] },
     { name: 'mvalue', label: t('driver.Esuhai User Name'), render: (field, request) => request[field] },
-    { name: 'driverPhoneNumber', label: t('driver.Số điện thoại'), render: (field, request) => request[field] }
+    { name: 'driverPhoneNumber', label: t('driver.Số điện thoại'), render: (field, request) => request[field] },
+    { name: 'isActive', align: 'center', label: t('driver.Trạng thái'), render: (field, request) => request[field] ? t('driver.Hoạt động') : t('driver.Tạm khoá') }
   ];
 
-  const actionButtons = () => ([
-    { label: t('common.Sửa'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverForm.path) },
+  const actionButtons = (request) => ([
+    request?.isActive ? 
+      { label: t('common.Sửa'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverForm.path) } : 
+      null,
+    request?.isActive ? 
+      { label: t('common.Tạm khoá'), className: 'bg-gray-500', action: (id) => handleAction(id, 'deactivate') } : 
+      { label: t('common.Mở khoá'), className: 'bg-green-500', action: (id) => handleAction(id, 'activate') },
     { label: t('common.Xoá'), className: 'bg-red-500', action: (id) => handleAction(id, 'delete') }
   ]);
 

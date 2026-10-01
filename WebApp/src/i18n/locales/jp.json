@@ -598,7 +598,10 @@
     "Esuhai User Name không được để trống": "Esuhaiユーザー名は必須です",
     "Số điện thoại": "電話番号",
     "Số điện thoại không được để trống": "電話番号は必須です",
-    "Số điện thoại chỉ được chứa số": "電話番号は数字のみ入力してください"
+    "Số điện thoại chỉ được chứa số": "電話番号は数字のみ入力してください",
+    "Trạng thái": "ステータス",
+    "Hoạt động": "アクティブ",
+    "Tạm khoá": "一時停止"
   },
   "review": {
     "A. ĐÁNH GIÁ TRẢI NGHIỆM DỊCH VỤ": "A. サービス体験評価",

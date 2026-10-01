@@ -397,6 +397,8 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Esuhai User Name";
                 case "driverPhoneNumber":
                     return "Số điện thoại";
+                case "isActive":
+                    return "Đang mở khoá";
                 case "isDeleted":
                     return "Đã xoá";
                 default:

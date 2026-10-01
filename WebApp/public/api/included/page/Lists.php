@@ -403,6 +403,10 @@ class Lists {
                     // Lọc tìm kiếm số điện thoại tương đối trong options
                     $queryFilters = array_merge($queryFilters, ['%options' => '"driverPhoneNumber":"' . $driverPhoneNumber]);
                 }
+                $isActive = $filters['isActive'] ?? '';
+                if ($isActive !== "") {
+                    $queryFilters = array_merge($queryFilters, ['isActive' => $isActive]);
+                }
                 break;
         }
 
