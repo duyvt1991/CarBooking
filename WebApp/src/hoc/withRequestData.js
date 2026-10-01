@@ -25,7 +25,7 @@ const withRequestData = (WrappedComponent, component) => {
     });
     const [loading, setLoading] = useState(false);
     const [tempFilters, setTempFilters] = useState(filters);
-    const { setRequest, setError, showConfirmModal } = useContext(RequestContext);
+    const { setRequest, setError, showConfirmModal, refreshMasterData } = useContext(RequestContext);
 
     useEffect(() => {
       const params = new URLSearchParams(location.search);
@@ -105,6 +105,7 @@ const withRequestData = (WrappedComponent, component) => {
             if (response?.status === "error") {
               setError(t(response.message ?? 'common.Lỗi khi gửi yêu cầu'));
             } else {
+              if (refreshMasterData) refreshMasterData();
               setFilters({ ...tempFilters, forceReload: tempFilters.forceReload + 1 });
             }
           })
