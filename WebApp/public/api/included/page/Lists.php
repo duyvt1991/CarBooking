@@ -404,8 +404,12 @@ class Lists {
                     $queryFilters = array_merge($queryFilters, ['%options' => '"driverPhoneNumber":"' . $driverPhoneNumber]);
                 }
                 $isActive = $filters['isActive'] ?? '';
-                if ($isActive !== "") {
-                    $queryFilters = array_merge($queryFilters, ['isActive' => $isActive]);
+                if ($isActive === '0') {
+                    // Tạm khóa: có lockStartDate trong options
+                    $queryFilters = array_merge($queryFilters, ['!%options' => '"lockStartDate":""']);
+                } else if ($isActive === '1') {
+                    // Hoạt động: lockStartDate rỗng trong options
+                    $queryFilters = array_merge($queryFilters, ['%options' => '"lockStartDate":""']);
                 }
                 break;
         }

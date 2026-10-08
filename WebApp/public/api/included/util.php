@@ -52,6 +52,8 @@ class Util {
                 break;
             case "drivers":
                 $object["driverPhoneNumber"] = $options["driverPhoneNumber"] ?? "";
+                $object["lockStartDate"] = $options["lockStartDate"] ?? "";
+                $object["lockEndDate"] = $options["lockEndDate"] ?? "";
                 $object["isSync"] = $options["isSync"] ?? 0;
                 break;
         }

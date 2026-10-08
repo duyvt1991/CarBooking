@@ -89,9 +89,9 @@ const mockMasterData = {
     { id: '3', mkey: 'CL003', mvalue: 'Car Line 3', isActive: false },
   ],
   drivers: [
-    { id: '1', mkey: '107', mvalue: 'Driver 7 (driver7@esuhai.com)', driverPhoneNumber: '0901234567', isActive: true },
-    { id: '2', mkey: '108', mvalue: 'Driver 8 (driver8@esuhai.com)', driverPhoneNumber: '0901234568', isActive: true },
-    { id: '3', mkey: '109', mvalue: 'Driver 9 (driver9@esuhai.com)', driverPhoneNumber: '0901234569', isActive: false },
+    { id: '1', mkey: '107', mvalue: 'Driver 7 (driver7@esuhai.com)', driverPhoneNumber: '0901234567', lockStartDate: '', lockEndDate: '', isActive: true },
+    { id: '2', mkey: '108', mvalue: 'Driver 8 (driver8@esuhai.com)', driverPhoneNumber: '0901234568', lockStartDate: '', lockEndDate: '', isActive: true },
+    { id: '3', mkey: '109', mvalue: 'Driver 9 (driver9@esuhai.com)', driverPhoneNumber: '0901234569', lockStartDate: '2026-06-01 08:00:00', lockEndDate: '2026-06-10 17:00:00', isActive: false },
   ],
   departureLocations: [
     { mkey: 'Location 1', mvalue: 'Location 1' },
@@ -1130,6 +1130,7 @@ const normalizeBookingByAssignmentStatus = (booking) => {
       driverReviewPrep: "",
       driverReviewQcd: "",
       driverReviewCommentFeedback: "",
+      driverReviewNote: "",
       userReviewExperience: "",
       userReviewQcd: "",
       userWantsToContinue: null,
@@ -1180,6 +1181,7 @@ const normalizeBookingByAssignmentStatus = (booking) => {
         overtime: { q: 5, c: 5, d: 5, note: "" }
       }),
       driverReviewCommentFeedback: "Khách hàng đi xe lịch sự, đúng giờ.",
+      driverReviewNote: "Chuyến đi an toàn, thuận lợi.",
       userReviewExperience: JSON.stringify({
         onTime: 5,
         polite: 5,
@@ -1560,7 +1562,11 @@ export const mockData = (action, data) => {
           try {
             const filters = JSON.parse(data.filters);
             if (filters.isActive !== undefined && filters.isActive !== '') {
-              drivers = drivers.filter(d => String(d.isActive ? 1 : 0) === String(filters.isActive));
+              if (filters.isActive === '0') {
+                drivers = drivers.filter(d => d.lockStartDate && d.lockEndDate);
+              } else if (filters.isActive === '1') {
+                drivers = drivers.filter(d => !d.lockStartDate || !d.lockEndDate);
+              }
             }
             if (filters.driverPhoneNumber) {
               drivers = drivers.filter(d => (d.driverPhoneNumber || '').includes(filters.driverPhoneNumber));

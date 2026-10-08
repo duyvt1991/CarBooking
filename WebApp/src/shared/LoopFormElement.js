@@ -19,7 +19,7 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
     const colorValue = /^#[0-9A-F]{6}$/i.test(request[field] ?? '') ? request[field] : '#000000';
     const isRequired = typeof initForm[field].required === 'function'
         ? initForm[field].required(request)
-        : !!initForm[field].validate;
+        : (typeof initForm[field].required === 'boolean' ? initForm[field].required : !!initForm[field].validate);
 
     useEffect(() => {
         if (initForm[field].type === 'select' && initForm[field].selectMappingField) {
@@ -217,7 +217,9 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
                         disabled={initForm[field].disabled?.(request)}
                         selected={(() => {
                             try {
-                            const date = parseISO(request[field]);
+                            if (!request[field]) return null;
+                            const str = String(request[field]).replace(' ', 'T');
+                            const date = parseISO(str);
                             return !isNaN(date) ? date : null;
                             } catch (error) {
                             return null;
@@ -236,8 +238,44 @@ function LoopFormElement({ component, labelWidth = "w-[200px]", field, initForm,
                                 ? initForm[field].minDate(request)
                                 : (initForm[field].minDate ?? (initForm[field].disabledPast ? new Date() : null))
                         }
+                        isClearable={initForm[field].isClearable ?? true}
+                        placeholderText={initForm[field].placeholder ? t(initForm[field].placeholder) : ''}
                         className={`block w-full px-3 py-2 border rounded-lg placeholder-gray-400 ${errors[field] ? 'border-red-500' : ''}`}
-                        required
+                        required={isRequired}
+                        />
+                ) : initForm[field].type === 'datetimepicker' ? (
+                    <DatePicker 
+                        disabled={initForm[field].disabled?.(request)}
+                        selected={(() => {
+                            try {
+                            if (!request[field]) return null;
+                            const str = String(request[field]).replace(' ', 'T');
+                            const date = parseISO(str);
+                            return !isNaN(date) ? date : null;
+                            } catch (error) {
+                            return null;
+                            }
+                        })()}
+                        onChange={(date) => {
+                            try {
+                            handleChange(field, date ? format(date, 'yyyy-MM-dd HH:mm:ss') : '');
+                            } catch (error) {
+                            handleChange(field, '');
+                            }
+                        }}
+                        showTimeSelect={true}
+                        timeFormat="HH:mm"
+                        timeIntervals={initForm[field].timeIntervals ?? 30}
+                        dateFormat="dd/MM/yyyy HH:mm"
+                        minDate={
+                            typeof initForm[field].minDate === 'function'
+                                ? initForm[field].minDate(request)
+                                : (initForm[field].minDate ?? (initForm[field].disabledPast ? new Date() : null))
+                        }
+                        isClearable={initForm[field].isClearable ?? true}
+                        placeholderText={initForm[field].placeholder ? t(initForm[field].placeholder) : ''}
+                        className={`block w-full px-3 py-2 border rounded-lg placeholder-gray-400 ${errors[field] ? 'border-red-500' : ''}`}
+                        required={isRequired}
                         />
                 ) : initForm[field].type === 'reviewScore' ? (
                     <div className="inline-flex space-x-1 px-3 py-2 border rounded-lg">

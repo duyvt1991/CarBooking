@@ -17,6 +17,34 @@ const isItemActive = (item) => {
   return item.isActive !== false && item.isActive !== 0 && item.isActive !== '0';
 };
 
+const isDriverLocked = (driver, tripStartDate, tripStartTime, tripEndDate, tripEndTime) => {
+  if (!driver || !driver.lockStartDate || !driver.lockEndDate) return false;
+
+  const sDate = String(tripStartDate || '').split(' ')[0];
+  const eDate = String(tripEndDate || tripStartDate || '').split(' ')[0];
+  const sTime = (tripStartTime ? String(tripStartTime).split(' ').pop() : '00:00:00') || '00:00:00';
+  const eTime = (tripEndTime ? String(tripEndTime).split(' ').pop() : '23:59:59') || '23:59:59';
+
+  if (!sDate) return false;
+
+  const tripStartStr = `${sDate} ${sTime}`.trim();
+  const tripEndStr = `${eDate} ${eTime}`.trim();
+
+  let lockStartStr = String(driver.lockStartDate).trim();
+  if (lockStartStr.length <= 10) lockStartStr += ' 00:00:00';
+  let lockEndStr = String(driver.lockEndDate).trim();
+  if (lockEndStr.length <= 10) lockEndStr += ' 23:59:59';
+
+  const tripStartTs = new Date(tripStartStr.replace(' ', 'T')).getTime();
+  const tripEndTs = new Date(tripEndStr.replace(' ', 'T')).getTime();
+  const lockStartTs = new Date(lockStartStr.replace(' ', 'T')).getTime();
+  const lockEndTs = new Date(lockEndStr.replace(' ', 'T')).getTime();
+
+  if (isNaN(tripStartTs) || isNaN(tripEndTs) || isNaN(lockStartTs) || isNaN(lockEndTs)) return false;
+
+  return tripStartTs < lockEndTs && tripEndTs > lockStartTs;
+};
+
 const initForm = {
   id: { value: '' },
   serviceType: {
@@ -166,14 +194,14 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
       const busyDriverKeys = overlappingBookings.map(b => safeParseKey(b.driverUser)).filter(Boolean);
       
       const freeRooms = (masterData.rooms || []).filter(r => isItemActive(r) && !busyRoomKeys.includes(r.mkey));
-      const freeDrivers = (masterData.drivers || []).filter(d => isItemActive(d) && !busyDriverKeys.includes(d.mkey));
+      const freeDrivers = (masterData.drivers || []).filter(d => isItemActive(d) && !isDriverLocked(d, startDateStr, reqStartTimeStr, endDateStr, reqEndTimeStr) && !busyDriverKeys.includes(d.mkey));
       
       setAvailableRooms(freeRooms);
       setAvailableDrivers(freeDrivers);
     }).catch(err => {
       if (isMounted) {
         setAvailableRooms((masterData.rooms || []).filter(isItemActive));
-        setAvailableDrivers((masterData.drivers || []).filter(isItemActive));
+        setAvailableDrivers((masterData.drivers || []).filter(d => isItemActive(d) && !isDriverLocked(d, startDateStr, reqStartTimeStr, endDateStr, reqEndTimeStr)));
       }
     });
 
@@ -205,13 +233,13 @@ function ApproveAssignBookingForm({ request, errors, handleChange }) {
 
   const getDriverOptions = () => {
     const rawDrivers = availableDrivers !== null ? availableDrivers : (masterData.drivers || []);
-    const drivers = rawDrivers.filter(isItemActive);
+    const drivers = rawDrivers.filter(d => isItemActive(d) && !isDriverLocked(d, startDateStr, reqStartTimeStr, endDateStr, reqEndTimeStr));
     const currentDriverKey = getVal(request?.driverUser);
 
     let filteredDrivers = [...drivers];
     if (currentDriverKey) {
       const currentDriver = (masterData.drivers || []).find(d => d.mkey === currentDriverKey);
-      if (currentDriver && isItemActive(currentDriver) && !filteredDrivers.some(d => d.mkey === currentDriverKey)) {
+      if (currentDriver && isItemActive(currentDriver) && !isDriverLocked(currentDriver, startDateStr, reqStartTimeStr, endDateStr, reqEndTimeStr) && !filteredDrivers.some(d => d.mkey === currentDriverKey)) {
         filteredDrivers.push(currentDriver);
       }
     }

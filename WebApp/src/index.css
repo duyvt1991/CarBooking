@@ -11,6 +11,10 @@
     @apply hidden;
 }
 
+.react-datepicker-popper, .react-datepicker-portal {
+    z-index: 9999 !important;
+}
+
 #workarea-content, #workarea {
     overflow: visible !important;
 }

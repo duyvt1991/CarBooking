@@ -24,6 +24,11 @@ const initForm = {
     label: 'review.4. Đề xuất hỗ trợ từ quản lý', 
     type: 'textarea',
   },
+  driverReviewNote: {
+    value: '', 
+    label: 'review.5. Ghi chú', 
+    type: 'textarea',
+  },
   driverReviewPrep: {
     value: '',
   },
@@ -320,6 +325,18 @@ function DriverReviewForm({ request, errors, handleChange }) {
               rows={1}
               value={request.driverReviewCommentRequest || ''}
               onChange={(e) => handleChange('driverReviewCommentRequest', e.target.value)}
+              className="w-full border border-gray-300 rounded px-3 py-1.5 text-base focus:ring-blue-500 focus:border-blue-500"
+              placeholder="..."
+            />
+          </div>
+          <div>
+            <label className="block font-medium text-gray-700 mb-1">
+              {t('review.5. Ghi chú')}:
+            </label>
+            <textarea
+              rows={1}
+              value={request.driverReviewNote || ''}
+              onChange={(e) => handleChange('driverReviewNote', e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-1.5 text-base focus:ring-blue-500 focus:border-blue-500"
               placeholder="..."
             />
