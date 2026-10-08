@@ -305,30 +305,8 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Tên khách sạn";
                 case "bookingUser":
                     return "Người đặt";
-                case "departureLocation":
-                    return "Điểm xuất phát";
                 case "destinationLocation":
                     return "Điểm đến";
-                case "roomType":
-                    return "Loại xe";
-                case "room":
-                    return "Xe";
-                case "flightNumber":
-                    return "Số hiệu chuyến bay";
-                case "note":
-                    return "Ghi chú";
-                case "employeeList":
-                    return "Danh sách nhân viên tham gia";
-                case "cancelledDate":
-                    return "Ngày huỷ";
-                case "rejectedUsers":
-                    return "Người từ chối";
-                case "rejectedDate":
-                    return "Ngày từ chối";
-                case "approvedUsers":
-                    return "Người duyệt";
-                case "approvedDate":
-                    return "Ngày duyệt";
                 case "userReviewScore":
                     return "Điểm đánh giá trải nghiệm";
                 case "userReviewExperience":
@@ -357,6 +335,8 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Góp ý khách hàng (tài xế)";
                 case "driverReviewCommentRequest":
                     return "Đề xuất hỗ trợ (tài xế)";
+                case "driverReviewNote":
+                    return "Ghi chú (tài xế)";
                 case "driverReviewDate":
                     return "Thời điểm đánh giá (tài xế)";
                 case "driverReviewUser":
@@ -397,6 +377,10 @@ export const logMasterDataKeyMapping = (mtype, key) => {
                     return "Esuhai User Name";
                 case "driverPhoneNumber":
                     return "Số điện thoại";
+                case "lockStartDate":
+                    return "Khóa từ lúc";
+                case "lockEndDate":
+                    return "Khóa đến lúc";
                 case "isActive":
                     return "Đang mở khoá";
                 case "isDeleted":

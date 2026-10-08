@@ -7,7 +7,7 @@ function FilterTableLayout({ filterFields, totalItems, handleFilterChange, tempF
   const { t } = useTranslation();
 
   return (
-    <div className="flex justify-between items-start gap-4">
+    <div className="flex justify-between items-start gap-4 relative z-30">
       <div className="flex items-center text-sm text-nowrap h-[34px]">{t('common.Tổng')}:<span className="badge bg-red-600">{totalItems}</span></div>
       <div className="flex flex-wrap gap-2 justify-end">
         {filterFields.map(field => (
@@ -33,6 +33,8 @@ function FilterTableLayout({ filterFields, totalItems, handleFilterChange, tempF
               placeholderText={field.placeholder}
               showTimeSelect={true}
               timeFormat="HH:mm:ss"
+              portalId="root"
+              popperClassName="!z-[9999]"
               selected={(() => {
                   try {
                   const date = parseISO(tempFilters[field.name] ?? "");
@@ -59,6 +61,8 @@ function FilterTableLayout({ filterFields, totalItems, handleFilterChange, tempF
               id={field.name}
               name={field.name}
               placeholderText={field.placeholder}
+              portalId="root"
+              popperClassName="!z-[9999]"
               selected={(() => {
                   try {
                   const date = parseISO(tempFilters[field.name] ?? "");

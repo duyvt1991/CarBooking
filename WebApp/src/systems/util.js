@@ -33,7 +33,8 @@ export const formatDateTime = (dateString) => {
   if (!dateString) return '-';
   const [datePart, timePart] = dateString.split(' ');
   const [year, month, day] = datePart.split('-');
-  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year} ${timePart || ''}`;
+  const formattedTime = timePart ? (timePart.length > 5 ? timePart.slice(0, 5) : timePart) : '';
+  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}${formattedTime ? ' ' + formattedTime : ''}`.trim();
 };
 
 export const formatTime = (dateString) => {
@@ -521,6 +522,7 @@ export const getFieldsBookingDetail = (request, masterData, t) => {
     { label: t('common.Người đặt'), value: <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{request.bookingUser?.mvalue}</span> },
     { label: t('common.Người phụ trách'), value: <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1 mb-1">{request.mainUser?.mvalue}</span> },
     { label: t('common.Phòng ban'), value: request.department?.mvalue},
+    { label: t('booking.Số lượng người'), value: formatPersons(request.employeeNumber, null, t) },
     { label: t('common.Phân loại khách'), value: request.usagePurpose?.mvalue},
     request.clients > 0 && { label: t('common.Số lượng khách'), value: formatPersons(request.clients, null, t) },
     safeClientNames.length > 0 && {
@@ -767,7 +769,8 @@ export const formatDriverReviewScore = (request, setModal, t) => {
     { label: t('review.1. Việc làm tốt trong chuyến đi'), value: request.driverReviewCommentMost || '-' },
     { label: t('review.2. Việc chưa tốt cần cải tiến'), value: request.driverReviewCommentBad || '-' },
     { label: t('review.3. Góp ý/đánh giá dành cho nhân viên/khách hàng tham gia chuyến đi'), value: request.driverReviewCommentFeedback || '-' },
-    { label: t('review.4. Đề xuất hỗ trợ từ quản lý'), value: request.driverReviewCommentRequest || '-' }
+    { label: t('review.4. Đề xuất hỗ trợ từ quản lý'), value: request.driverReviewCommentRequest || '-' },
+    { label: t('review.5. Ghi chú'), value: request.driverReviewNote || '-' }
   ];
 
   const hasPrepData = Object.values(prepData).some(item => item && item.value);
@@ -778,7 +781,8 @@ export const formatDriverReviewScore = (request, setModal, t) => {
     !!request.driverReviewCommentMost ||
     !!request.driverReviewCommentBad ||
     !!request.driverReviewCommentFeedback ||
-    !!request.driverReviewCommentRequest;
+    !!request.driverReviewCommentRequest ||
+    !!request.driverReviewNote;
 
   return hasReview ? (
     <span

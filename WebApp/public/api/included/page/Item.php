@@ -735,7 +735,62 @@ class Item {
                 $bookingDriverGroupId = $queryMasterData->exec()->fetch();
                 $groupId = $bookingDriverGroupId['mvalue'] ?? 28;
                 $bitrixId = str_replace( "BitrixID-", "", $mkey ?? "");
-                $options = ['driverPhoneNumber' => $driverPhoneNumber ?? ""];
+
+                $lockStartDateVal = $lockStartDate ?? "";
+                $lockEndDateVal = $lockEndDate ?? "";
+
+                if ((!empty($lockStartDateVal) && empty($lockEndDateVal)) || (empty($lockStartDateVal) && !empty($lockEndDateVal))) {
+                    return ['status' => 'error', 'message' => 'Vui lòng chọn đầy đủ thời gian bắt đầu và thời gian kết thúc khóa'];
+                }
+
+                if (!empty($lockStartDateVal) && !empty($lockEndDateVal)) {
+                    $lockStartTs = strtotime($lockStartDateVal);
+                    $lockEndTs = strlen($lockEndDateVal) <= 10 ? strtotime($lockEndDateVal . ' 23:59:59') : strtotime($lockEndDateVal);
+
+                    if ($lockEndTs <= $lockStartTs) {
+                        return ['status' => 'error', 'message' => 'Thời gian kết thúc khóa phải lớn hơn thời gian bắt đầu khóa'];
+                    }
+
+                    // Kiểm tra xem tài xế đã có chuyến xe nào được phân công trong khoảng thời gian khóa này chưa
+                    $driverKey = $mkey ?? ($currentItem['mkey'] ?? '');
+                    if (!empty($driverKey)) {
+                        $queryBooking = \Booking\Query::getInstance("car_booking_requests", true);
+                        $queryBooking->setSelect(['id', 'startDate', 'endDate', 'startTime', 'endTime', 'driverUser', 'isApproved', 'isCancelled']);
+                        $queryBooking->setFilter([
+                            'isCancelled' => 0,
+                            '@isApproved' => [2, 3],
+                            '%driverUser' => '"mkey":"' . $driverKey . '"'
+                        ]);
+                        $allDriverBookings = $queryBooking->exec()->fetchAll();
+                        $conflictBookings = [];
+                        foreach ($allDriverBookings as $b) {
+                            $bStartDateStr = is_object($b['startDate']) ? $b['startDate']->format('Y-m-d') : explode(' ', $b['startDate'] ?? '')[0];
+                            $bEndDateStr = !empty($b['endDate']) ? (is_object($b['endDate']) ? $b['endDate']->format('Y-m-d') : explode(' ', $b['endDate'])[0]) : $bStartDateStr;
+                            $bStartTimeStr = is_object($b['startTime']) ? $b['startTime']->format('H:i:s') : ($b['startTime'] ?? '00:00:00');
+                            $bEndTimeStr = is_object($b['endTime']) ? $b['endTime']->format('H:i:s') : ($b['endTime'] ?? '23:59:59');
+
+                            $bStartTs = strtotime($bStartDateStr . ' ' . $bStartTimeStr);
+                            $bEndTs = strtotime($bEndDateStr . ' ' . $bEndTimeStr);
+
+                            // Giao nhau giữa [bStartTs, bEndTs] và [lockStartTs, lockEndTs]
+                            if ($bStartTs < $lockEndTs && $bEndTs > $lockStartTs) {
+                                $conflictBookings[] = $b['id'];
+                            }
+                        }
+                        if (!empty($conflictBookings)) {
+                            return [
+                                'status' => 'error',
+                                'message' => 'Tài xế đã có chuyến xe được phân công trong thời gian khóa này (ID chuyến: ' . implode(', ', $conflictBookings) . '). Không thể khóa tài xế.'
+                            ];
+                        }
+                    }
+                }
+
+                $options = [
+                    'driverPhoneNumber' => $driverPhoneNumber ?? "",
+                    'lockStartDate' => $lockStartDateVal,
+                    'lockEndDate' => $lockEndDateVal
+                ];
                 $connection = Application::getConnection();
                 if ($id != "") {
                     $currentBitrixId = str_replace( "BitrixID-", "", $currentItem['mkey'] ?? "");
@@ -951,10 +1006,13 @@ class Item {
                 $queryMasterData->setFilter(['mkey' => 'maxDayToBooking']);
                 $maxDayToBooking = $queryMasterData->exec()->fetch();
 
-                $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $startTime, "Y-m-d H:i:s");
-                $startTimeCondition = $startDateCondition->format('H:i:s');
-                $endDateCondition = new \Bitrix\Main\Type\DateTime($endDate . " " . $endTime, "Y-m-d H:i:s");
-                $endTimeCondition = $endDateCondition->format('H:i:s');
+                $sTime = (strlen($startTime) === 5) ? $startTime . ':00' : $startTime;
+                $eTime = (strlen($endTime) === 5) ? $endTime . ':00' : $endTime;
+
+                $startDateCondition = new \Bitrix\Main\Type\DateTime($startDate . " " . $sTime, "Y-m-d H:i:s");
+                $startTimeCondition = $sTime;
+                $endDateCondition = new \Bitrix\Main\Type\DateTime($endDate . " " . $eTime, "Y-m-d H:i:s");
+                $endTimeCondition = $eTime;
 
                 // Check booking date range
                 $currentDate = new \Bitrix\Main\Type\DateTime();
@@ -993,8 +1051,8 @@ class Item {
                              "roomType" => Json::encode(Json::decode($roomType)),
                             "startDate" => new \Bitrix\Main\Type\DateTime($startDate, "Y-m-d"),
                             "endDate" => new \Bitrix\Main\Type\DateTime($endDate, "Y-m-d"),
-                            "startTime" => new \Bitrix\Main\Type\DateTime($startTime, "H:i:s"),
-                            "endTime" => new \Bitrix\Main\Type\DateTime($endTime, "H:i:s"),
+                            "startTime" => $sTime,
+                            "endTime" => $eTime,
                             "employeeList" => Json::encode(Json::decode($employeeList)),	
                             "flightNumber" => $flightNumber ?? "",
                             "usagePurposeDetail" => $usagePurposeDetail ?? "",	
@@ -1076,7 +1134,7 @@ class Item {
                         $data = [
                             "isApproved" => 4,
                             "endDate" => new \Bitrix\Main\Type\DateTime($nowDateStr, "Y-m-d"),
-                            "endTime" => new \Bitrix\Main\Type\DateTime($nowTimeStr, "H:i:s"),
+                            "endTime" => $nowTimeStr,
                         ];
                     } catch (\Throwable $th) {
                         return ['status' => 'error', 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'];
@@ -1196,12 +1254,23 @@ class Item {
                         'driverReviewCommentBad' => $driverReviewCommentBad ?? "",
                         'driverReviewCommentRequest' => $driverReviewCommentRequest ?? "",
                         'driverReviewCommentFeedback' => $driverReviewCommentFeedback ?? "",
+                        'driverReviewNote' => $driverReviewNote ?? "",
                         'driverReviewPrep' => isset($driverReviewPrep) && $driverReviewPrep ? Json::encode(Json::decode($driverReviewPrep)) : null,
                         'driverReviewQcd' => isset($driverReviewQcd) && $driverReviewQcd ? Json::encode(Json::decode($driverReviewQcd)) : null,
                         'driverReviewUser' => Json::encode($driverReviewUser),
                         'driverReviewDate' => new \Bitrix\Main\Type\DateTime()
                     ];
-                    \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"'], $updateData);
+                    try {
+                        \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"'], $updateData);
+                    } catch (\Throwable $th) {
+                        if (strpos($th->getMessage(), "driverReviewNote") !== false) {
+                            $connection = Application::getConnection("car_booking_connection");
+                            $connection->queryExecute("ALTER TABLE car_booking_requests ADD COLUMN driverReviewNote TEXT NULL");
+                            \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id, '%driverUser' => '"mkey":"BitrixID-'.$userId.'"'], $updateData);
+                        } else {
+                            throw $th;
+                        }
+                    }
                 }
                 break;
             
@@ -1349,6 +1418,24 @@ class Item {
                         $driverItem = $queryMasterData->exec()->fetch();
                         if ($driverItem) {
                             $driverItem = $decodeOptions($driverItem, 'drivers');
+                            if (!empty($driverItem['lockStartDate']) && !empty($driverItem['lockEndDate'])) {
+                                $lockStartStr = $driverItem['lockStartDate'];
+                                $lockEndStr = $driverItem['lockEndDate'];
+                                $lockStartTs = strtotime($lockStartStr);
+                                $lockEndTs = strlen($lockEndStr) <= 10 ? strtotime($lockEndStr . ' 23:59:59') : strtotime($lockEndStr);
+
+                                $tripStartDate = is_object($currentItem['startDate']) ? $currentItem['startDate']->format('Y-m-d') : explode(' ', $currentItem['startDate'] ?? '')[0];
+                                $tripEndDate = !empty($currentItem['endDate']) ? (is_object($currentItem['endDate']) ? $currentItem['endDate']->format('Y-m-d') : explode(' ', $currentItem['endDate'])[0]) : $tripStartDate;
+                                $tripStartTime = is_object($currentItem['startTime']) ? $currentItem['startTime']->format('H:i:s') : ($currentItem['startTime'] ?? '00:00:00');
+                                $tripEndTime = is_object($currentItem['endTime']) ? $currentItem['endTime']->format('H:i:s') : ($currentItem['endTime'] ?? '23:59:59');
+
+                                $tripStartTs = strtotime($tripStartDate . ' ' . $tripStartTime);
+                                $tripEndTs = strtotime($tripEndDate . ' ' . $tripEndTime);
+
+                                if ($tripStartTs < $lockEndTs && $tripEndTs > $lockStartTs) {
+                                    return ['status' => 'error', 'message' => "Tài xế {$driverItem['mvalue']} đang bị khóa trong khoảng thời gian từ {$lockStartStr} đến {$lockEndStr}"];
+                                }
+                            }
                         }
                         else {
                             return ['status' => 'error', 'message' => 'Tài xế không hợp lệ'];
@@ -1602,7 +1689,7 @@ class Item {
                 $updateData = [
                     'isApproved' => 4,
                     'endDate' => new \Bitrix\Main\Type\DateTime($nowDateStr, "Y-m-d"),
-                    'endTime' => new \Bitrix\Main\Type\DateTime($nowTimeStr, "H:i:s"),
+                    'endTime' => $nowTimeStr,
                 ];
                 \Booking\Query::updateRecordsWithConditions('car_booking_requests', ['id' => $id], $updateData);
                 self::logBooking($id, $currentItem, $userId);

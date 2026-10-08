@@ -109,6 +109,7 @@ class Install {
                 driverReviewCommentBad TEXT NULL,
                 driverReviewCommentRequest TEXT NULL,
                 driverReviewCommentFeedback TEXT NULL,
+                driverReviewNote TEXT NULL,
                 driverReviewPrep TEXT NULL,
                 driverReviewQcd TEXT NULL,
                 driverReviewDate DATETIME,
@@ -125,14 +126,18 @@ class Install {
                 isNotification30MinSent BOOLEAN DEFAULT 0,
                 employeeNumber INT DEFAULT 0,
                 employeeList TEXT NULL,
-                hotelNames TEXT NULL
+                hotelNames TEXT NULL,
+                driverReviewNote TEXT NULL
 
             )
         ";
         $connection->queryExecute($sql);
 
-        $columns = $connection->query("SHOW COLUMNS FROM car_booking_requests")->fetchAll();
-        $existingColumns = array_column($columns, 'Field');
+        // $columns = $connection->query("SHOW COLUMNS FROM car_booking_requests")->fetchAll();
+        // $existingColumns = array_column($columns, 'Field');
+        // if (!in_array('driverReviewNote', $existingColumns)) {
+        //     $connection->queryExecute("ALTER TABLE car_booking_requests ADD COLUMN driverReviewNote TEXT NULL");
+        // }
 
         if ($request->getPost("dropTable") && $RESET_DATA) { // TODO: Add false to prevent accidental insertion dummy data
             $masterData = [

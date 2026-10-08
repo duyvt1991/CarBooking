@@ -639,6 +639,9 @@ class booking_requestsTable extends DataManager {
             new TextField('driverReviewCommentFeedback', [
                 'default_value' => ''
             ]),
+            new TextField('driverReviewNote', [
+                'default_value' => ''
+            ]),
              new TextField('driverReviewPrep', [
                 'default_value' => [],
                 'fetch_data_modification' => function() {

@@ -1,4 +1,3 @@
-import { type } from '@testing-library/user-event/dist/type';
 import withRequestForm from '../../hoc/withRequestForm';
 import LoopFormElement from '../../shared/LoopFormElement';
 import { suggestionUsers } from '../../systems/api';
@@ -29,9 +28,43 @@ const initForm = {
   driverPhoneNumber: { 
     value: '', 
     label: 'driver.Số điện thoại', 
-    // type: 'number',
-    // validate: (value, t) => !value ? t('driver.Số điện thoại không được để trống') : '' ,
     validate: (value, t) => !value ? t('driver.Số điện thoại không được để trống') : !/^\d+$/.test(value) ? t('driver.Số điện thoại chỉ được chứa số') : ''
+  },
+  lockStartDate: {
+    value: '',
+    label: 'driver.Khóa từ lúc',
+    type: 'datetimepicker',
+    timeIntervals: 30,
+    placeholder: 'driver.Chọn ngày giờ bắt đầu khóa',
+    required: (request) => !!request?.lockEndDate,
+    validate: (value, t, request) => {
+      if (request?.lockEndDate && !value) {
+        return t('driver.Vui lòng chọn ngày giờ bắt đầu khóa');
+      }
+      return '';
+    }
+  },
+  lockEndDate: {
+    value: '',
+    label: 'driver.Khóa đến lúc',
+    type: 'datetimepicker',
+    timeIntervals: 30,
+    placeholder: 'driver.Chọn ngày giờ kết thúc khóa',
+    minDate: (request) => request?.lockStartDate ? new Date(request.lockStartDate.replace(' ', 'T')) : null,
+    required: (request) => !!request?.lockStartDate,
+    validate: (value, t, request) => {
+      if (request?.lockStartDate && !value) {
+        return t('driver.Vui lòng chọn ngày giờ kết thúc khóa');
+      }
+      if (request?.lockStartDate && value) {
+        const startTs = new Date(request.lockStartDate.replace(' ', 'T')).getTime();
+        const endTs = new Date(value.replace(' ', 'T')).getTime();
+        if (endTs <= startTs) {
+          return t('driver.Thời gian kết thúc khóa phải lớn hơn thời gian bắt đầu khóa');
+        }
+      }
+      return '';
+    }
   },
   isSync: {
     value: 0,

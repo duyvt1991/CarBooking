@@ -8,6 +8,8 @@ import Loading from '../../shared/Loading';
 import PaginationTableLayout from '../../shared/PaginationTableLayout';
 import TableLayout from '../../shared/TableLayout';
 
+import { formatDateTime } from '../../systems/util';
+
 function DriverList({
   handleAction, handleEdit, currentPage, setCurrentPage, requestsPerPage, setRequestsPerPage, requests, totalPages, totalItems, setFilters, loading, tempFilters, setTempFilters
 }) {
@@ -49,16 +51,20 @@ function DriverList({
     { name: 'mkey', label: t('driver.Esuhai User ID'), render: (field, request) => request[field] },
     { name: 'mvalue', label: t('driver.Esuhai User Name'), render: (field, request) => request[field] },
     { name: 'driverPhoneNumber', label: t('driver.Số điện thoại'), render: (field, request) => request[field] },
-    { name: 'isActive', align: 'center', label: t('driver.Trạng thái'), render: (field, request) => request[field] ? t('driver.Hoạt động') : t('driver.Tạm khoá') }
+    { name: 'lockStartDate', align: 'center', label: t('driver.Khóa từ lúc'), render: (field, request) => formatDateTime(request[field]) },
+    { name: 'lockEndDate', align: 'center', label: t('driver.Khóa đến lúc'), render: (field, request) => formatDateTime(request[field]) },
+    { 
+      name: 'status', 
+      align: 'center', 
+      label: t('driver.Trạng thái'), 
+      render: (field, request) => (request.lockStartDate && request.lockEndDate) 
+        ? <span className="text-red-500 font-semibold">{t('driver.Tạm khoá')}</span> 
+        : <span className="text-green-600 font-medium">{t('driver.Hoạt động')}</span> 
+    }
   ];
 
-  const actionButtons = (request) => ([
-    request?.isActive ? 
-      { label: t('common.Sửa'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverForm.path) } : 
-      null,
-    request?.isActive ? 
-      { label: t('common.Tạm khoá'), className: 'bg-gray-500', action: (id) => handleAction(id, 'deactivate') } : 
-      { label: t('common.Mở khoá'), className: 'bg-green-500', action: (id) => handleAction(id, 'activate') },
+  const actionButtons = () => ([
+    { label: t('common.Sửa'), className: 'bg-blue-500', action: (id) => handleEdit(id, routes.driverForm.path) },
     { label: t('common.Xoá'), className: 'bg-red-500', action: (id) => handleAction(id, 'delete') }
   ]);
 
